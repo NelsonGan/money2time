@@ -40,9 +40,9 @@ Know what you own, and know why you own it.`,
 
 读完《你的钱还是你的命》之后，我突然明白了一件事。对我们这些靠工资生活的人来说，钱不只是钱，它是我们的生命能量。我们花出去的每一分钱，都代表着我们用时间、精力、生命换来的东西。
 
-于是我做了这个应用。它帮你用一种不同的方式看待消费：不只是金额，而是你生命中的时间。因为有时候"¥100"感觉没什么，但"这花掉了我2个小时的人生"就不一样了。目标很简单——帮你更清醒地看到你的钱（或者说，时间）都去了哪里，让你真正掌控它。
+于是我做了这个应用。它帮你用一种不同的方式看待消费：不只是金额，而是你生命中的时间。因为有时候“¥100”感觉没什么，但“这花掉了我 2 个小时的人生”就不一样了。目标很简单：帮你更清醒地看到你的钱（或者说，时间）都去了哪里，让你真正掌控它。
 
-所有数据都保存在你的设备上，无需登录，不上传云端。你的数据就是你的。如果需要，你也可以将数据导出为 JSON 文件。免费版已经提供了上手所需的全部功能。专业版解锁更多额外功能，如无限账户、无限分类、多个小时费率等。
+所有数据都保存在你的设备上，无需登录，不上传云端。你的数据就是你的。如果需要，你也可以将数据导出为 JSON 文件。免费版已经提供了上手所需的全部功能。Pro 版解锁更多额外功能，如无限账户、分类和时薪记录等。
 
 希望你永远都能掌控自己的钱，也掌控自己的人生。
 
@@ -61,13 +61,13 @@ Know what you own, and know why you own it.`,
   de: {
     description: `Money2Time ist ein Ausgaben-Tracker, der Preise in Arbeitsstunden umrechnet. Beleg scannen oder eintippen, und du siehst die Stunden dahinter.
 
-Nachdem ich „Your Money or Your Life" gelesen hatte, hat es bei mir Klick gemacht. Für die meisten von uns, die für ein Gehalt arbeiten, ist Geld nicht einfach nur Geld – es ist unsere Lebensenergie. Jeder Euro, den wir ausgeben, steht für Stunden unserer Zeit, unserer Mühe, unseres Lebens, das wir hergegeben haben.
+Nachdem ich „Your Money or Your Life“ gelesen hatte, hat es bei mir Klick gemacht. Für die meisten von uns, die für ein Gehalt arbeiten, ist Geld nicht einfach nur Geld, es ist unsere Lebensenergie. Jeder Euro, den wir ausgeben, steht für Stunden unserer Zeit, unserer Mühe, unseres Lebens, das wir hergegeben haben.
 
-Also habe ich diese App entwickelt. Sie hilft dir, deine Ausgaben auf eine andere Art zu betrachten: nicht nur in Geldbeträgen, sondern in Stunden deines Lebens. Denn manchmal fühlen sich „20 €" nach nicht viel an – „2 Stunden meines Lebens" hingegen schon. Das Ziel ist einfach: dir bewusster zu machen, wohin dein Geld (oder eigentlich deine Zeit) fließt, damit du wieder die Kontrolle darüber übernehmen kannst.
+Also habe ich diese App entwickelt. Sie hilft dir, deine Ausgaben auf eine andere Art zu betrachten: nicht nur in Geldbeträgen, sondern in Stunden deines Lebens. Denn manchmal fühlen sich „20 €“ nach nicht viel an, „2 Stunden meines Lebens“ hingegen schon. Das Ziel ist einfach: dir bewusster zu machen, wohin dein Geld (oder eigentlich deine Zeit) fließt, damit du wieder die Kontrolle darüber übernehmen kannst.
 
-Alles bleibt auf deinem Gerät – keine Anmeldung, keine Cloud-Synchronisation. Deine Daten gehören dir. Du kannst sie bei Bedarf auch als einfache JSON-Datei exportieren. Die kostenlose Version bietet alles, was du für den Einstieg brauchst. Die Pro-Version schaltet zusätzliche Funktionen frei, wie unbegrenzte Konten, Kategorien, Stundensätze und mehr.
+Alles bleibt auf deinem Gerät: keine Anmeldung, keine Cloud-Synchronisation. Deine Daten gehören dir. Du kannst sie bei Bedarf auch als einfache JSON-Datei exportieren. Die kostenlose Version bietet alles, was du für den Einstieg brauchst. Die Pro-Version schaltet zusätzliche Funktionen frei, wie unbegrenzte Konten, Kategorien, Stundensätze und mehr.
 
-Ich hoffe, du hast immer die Kontrolle über dein Geld – und dein Leben.
+Ich hoffe, du hast immer die Kontrolle über dein Geld und dein Leben.
 
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
@@ -82,9 +82,9 @@ Wisse, was du besitzt, und warum du es besitzt.`,
   },
 
   fr: {
-    description: `Money2Time est un suivi de dépenses qui convertit les prix en heures de travail. Scannez un reçu ou saisissez-le, et vous voyez les heures derrière.
+    description: `Money2Time est un suivi de dépenses qui convertit les prix en heures de travail. Scannez un reçu ou saisissez-le, et voyez les heures qu'il représente.
 
-Après avoir lu « Your Money or Your Life », quelque chose s'est mis en place. Pour la plupart d'entre nous qui travaillons pour un salaire, l'argent n'est pas que de l'argent — c'est notre énergie vitale. Chaque euro dépensé représente des heures de notre temps, de nos efforts, de notre vie sacrifiée.
+Après avoir lu « Your Money or Your Life », j'ai eu un déclic. Pour la plupart d'entre nous qui travaillons pour un salaire, l'argent n'est pas que de l'argent : c'est notre énergie vitale. Chaque euro dépensé représente des heures de notre temps, de nos efforts, de notre vie sacrifiée.
 
 C'est pourquoi j'ai créé cette application. Elle vous aide à voir vos dépenses sous un autre angle : pas seulement en termes de montant, mais en heures de votre vie. Parce que parfois « 20 € » ne semble pas grand-chose, mais « 2 heures de ma vie », si. L'objectif est simple : vous aider à prendre conscience de l'endroit où va votre argent (ou plutôt, votre temps), pour que vous puissiez en reprendre le contrôle.
 
@@ -95,7 +95,7 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout du choix de vos comptes lors de l'accueil
+    whatsNew: `- Ajout du choix de vos comptes lors de la configuration initiale
 - Ajout du marquage de lieu pour les dépenses enregistrées automatiquement
 - Réduction des délais de Cloud Sync et des albums partagés
 - Correction des alertes de paiement interrompues sur certains téléphones
@@ -107,7 +107,7 @@ Sachez ce que vous possédez, et pourquoi vous le possédez.`,
   es: {
     description: `Money2Time es un control de gastos que convierte los precios en horas de trabajo. Escanea un recibo o escríbelo, y verás las horas que hay detrás.
 
-Tras leer «Tu dinero o tu vida», algo hizo clic en mí. Para la mayoría de quienes vivimos de un sueldo, el dinero no es solo dinero: es nuestra energía vital. Cada euro que gastamos representa horas de nuestro tiempo, nuestro esfuerzo, nuestra vida que cedemos a cambio.
+Tras leer «Tu dinero o tu vida», algo cambió en mí. Para la mayoría de quienes vivimos de un sueldo, el dinero no es solo dinero: es nuestra energía vital. Cada euro que gastamos representa horas de nuestro tiempo, nuestro esfuerzo, nuestra vida que cedemos a cambio.
 
 Por eso creé esta app. Te ayuda a ver tus gastos de otra manera: no solo en dinero, sino en horas de tu vida. Porque a veces «20 €» no parece gran cosa, pero «2 horas de mi vida» sí. El objetivo es sencillo: ayudarte a ser más consciente de adónde va tu dinero (o más bien, tu tiempo), para que puedas retomar el control.
 
@@ -124,13 +124,13 @@ Contacto: https://www.money2time.com/contact`,
 - Se corrigieron las alertas de pago que dejaban de llegar en algunos teléfonos
 - Se corrigió el escaneo de recibos en China continental
 
-Sabe lo que tienes y por qué lo tienes.`,
+Conoce lo que tienes y por qué lo tienes.`,
   },
 
   pt: {
     description: `Money2Time é um controle de gastos que transforma preços em horas de trabalho. Escaneie um recibo ou digite, e veja as horas por trás dele.
 
-Depois de ler "Sua Vida ou Seu Dinheiro", algo fez sentido pra mim. Para a maioria de nós que vivemos de salário, dinheiro não é só dinheiro — é nossa energia de vida. Cada real que gastamos representa horas do nosso tempo, do nosso esforço, da nossa vida trocada por ele.
+Depois de ler "Sua Vida ou Seu Dinheiro", algo fez sentido pra mim. Para a maioria de nós que vivemos de salário, dinheiro não é só dinheiro, é nossa energia de vida. Cada real que gastamos representa horas do nosso tempo, do nosso esforço, da nossa vida trocada por ele.
 
 Foi por isso que criei esse app. Ele te ajuda a enxergar seus gastos de uma forma diferente: não só em valores, mas em horas da sua vida. Porque às vezes "R$20" não parece muito, mas "2 horas da minha vida" pesa diferente. O objetivo é simples: te ajudar a ter mais consciência de para onde seu dinheiro (ou melhor, seu tempo) está indo, para que você possa retomar o controle.
 
@@ -142,24 +142,24 @@ Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
     whatsNew: `- Adicionada a escolha das suas contas no início
-- Adicionada marcação de local em despesas registadas automaticamente
-- Reduzidos os atrasos do Cloud Sync e dos álbuns partilhados
-- Corrigidos os alertas de pagamento que paravam em alguns telemóveis
+- Adicionada marcação de local em despesas registradas automaticamente
+- Reduzidos os atrasos do Cloud Sync e dos álbuns compartilhados
+- Corrigidos os alertas de pagamento que paravam em alguns celulares
 - Corrigida a digitalização de recibos na China continental
 
-Saiba o que tem e porque o tem.`,
+Saiba o que você tem e por que tem.`,
   },
 
   it: {
     description: `Money2Time è un'app per le spese che converte i prezzi in ore di lavoro. Scansiona uno scontrino o scrivilo, e vedi le ore che ci stanno dietro.
 
-Dopo aver letto "Il tuo denaro o la tua vita", qualcosa ha fatto scattare qualcosa in me. Per la maggior parte di noi che lavoriamo per uno stipendio, il denaro non è solo denaro: è la nostra energia vitale. Ogni euro che spendiamo rappresenta ore del nostro tempo, del nostro impegno, della nostra vita ceduta via.
+Dopo aver letto "Il tuo denaro o la tua vita", qualcosa è scattato in me. Per la maggior parte di noi che lavoriamo per uno stipendio, il denaro non è solo denaro: è la nostra energia vitale. Ogni euro che spendiamo rappresenta ore del nostro tempo, del nostro impegno, della nostra vita data in cambio.
 
 Così ho creato questa app. Ti aiuta a vedere le tue spese in modo diverso: non solo in termini di valuta, ma in ore della tua vita. Perché a volte "20 €" non sembra poi molto, ma "2 ore della mia vita" sì. L'obiettivo è semplice: aiutarti a diventare più consapevole di dove va il tuo denaro (o meglio, il tuo tempo), così da poterne riprendere il controllo.
 
-Tutto rimane sul tuo dispositivo, senza accessi o sincronizzazioni cloud. I tuoi dati sono tuoi. Puoi anche esportarli come semplice file JSON se ne hai bisogno. La versione gratuita ti offre tutto il necessario per iniziare. La versione Pro sblocca funzionalità aggiuntive come account, categorie e tariffe orarie illimitati, e altro ancora.
+Tutto rimane sul tuo dispositivo, senza accessi o sincronizzazioni cloud. I tuoi dati sono tuoi. Puoi anche esportarli come semplice file JSON se ne hai bisogno. La versione gratuita ti offre tutto il necessario per iniziare. La versione Pro sblocca funzionalità aggiuntive come conti, categorie e tariffe orarie illimitati, e altro ancora.
 
-Speriamo che tu possa sempre avere il controllo del tuo denaro e della tua vita.
+Spero che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
@@ -176,11 +176,11 @@ Sappi cosa possiedi e perché lo possiedi.`,
   nl: {
     description: `Money2Time is een uitgaven-tracker die prijzen omrekent naar werkuren. Scan een bon of typ hem in, en je ziet de uren erachter.
 
-Na het lezen van "Your Money or Your Life" viel er iets op zijn plek. Voor de meesten van ons die een loon verdienen, is geld niet zomaar geld — het is onze levensenergie. Elke euro die we uitgeven, vertegenwoordigt uren van onze tijd, onze inspanning, een stukje van ons leven dat we inruilen.
+Na het lezen van "Your Money or Your Life" viel er iets op zijn plek. Voor de meesten van ons die een loon verdienen, is geld niet zomaar geld, het is onze levensenergie. Elke euro die we uitgeven, vertegenwoordigt uren van onze tijd, onze inspanning, een stukje van ons leven dat we inruilen.
 
 Daarom bouwde ik deze app. Het helpt je je uitgaven op een andere manier te bekijken: niet alleen in euro's, maar in uren van je leven. Want soms voelt "€20" niet als veel, maar "2 uur van mijn leven" wel. Het doel is eenvoudig: je bewuster maken van waar je geld (of eigenlijk, je tijd) naartoe gaat, zodat je er weer controle over kunt nemen.
 
-Alles blijft op je apparaat staan, zonder inloggen of cloudsynchronisatie. Jouw gegevens zijn van jou. Je kunt de gegevens ook exporteren als een eenvoudig JSON-bestand als dat nodig is. De gratis versie geeft je alles wat je nodig hebt om te beginnen. Pro ontgrendelt extra functies zoals onbeperkte accounts, categorieën, uurtarieven, enzovoort.
+Alles blijft op je apparaat staan, zonder inloggen of cloudsynchronisatie. Jouw gegevens zijn van jou. Je kunt de gegevens ook exporteren als een eenvoudig JSON-bestand als dat nodig is. De gratis versie geeft je alles wat je nodig hebt om te beginnen. Pro ontgrendelt extra functies zoals onbeperkte rekeningen, categorieën, uurtarieven, enzovoort.
 
 Hopelijk heb je altijd de controle over je geld en je leven.
 
@@ -197,13 +197,13 @@ Weet wat je bezit, en waarom je het bezit.`,
   },
 
   ru: {
-    description: `Money2Time — это учёт расходов, который переводит цены в часы работы. Отсканируйте чек или введите вручную, и увидите часы за этой суммой.
+    description: `Money2Time: учёт расходов, который переводит цены в часы работы. Отсканируйте чек или введите вручную, и увидите часы за этой суммой.
 
-После прочтения книги «Ваши деньги или ваша жизнь» что-то щёлкнуло у меня внутри. Для большинства из нас, кто работает за зарплату, деньги — это не просто деньги, это наша жизненная энергия. Каждый рубль, который мы тратим, — это часы нашего времени, наших усилий, частичка нашей жизни, отданная в обмен.
+После прочтения книги «Ваши деньги или ваша жизнь» что-то щёлкнуло у меня внутри. Для большинства из нас, кто работает за зарплату, деньги не просто деньги, а наша жизненная энергия. Каждый потраченный рубль означает часы нашего времени, наших усилий, частичка нашей жизни, отданная в обмен.
 
-Так я и создал это приложение. Оно помогает взглянуть на траты по-другому: не просто в рублях, а в часах вашей жизни. Потому что иногда «500 ₽» кажутся мелочью, а вот «2 часа моей жизни» — уже нет. Цель простая: помочь вам лучше понять, куда уходят ваши деньги (а значит, и время), чтобы вы могли взять это под контроль.
+Так я и создал это приложение. Оно помогает взглянуть на траты по-другому: не просто в рублях, а в часах вашей жизни. Потому что иногда «500 ₽» кажутся мелочью, а вот «2 часа моей жизни» уже нет. Цель простая: помочь вам лучше понять, куда уходят ваши деньги (а значит, и время), чтобы вы могли взять это под контроль.
 
-Все данные хранятся только на вашем устройстве — никаких аккаунтов и облачной синхронизации. Ваши данные принадлежат вам. При необходимости их можно экспортировать в виде простого JSON-файла. Бесплатная версия содержит всё необходимое для начала. Pro открывает дополнительные возможности: неограниченное количество счетов, категорий, почасовых ставок и многое другое.
+Все данные хранятся только на вашем устройстве: никаких аккаунтов и облачной синхронизации. Ваши данные принадлежат вам. При необходимости их можно экспортировать в виде простого JSON-файла. Бесплатная версия содержит всё необходимое для начала. Pro открывает дополнительные возможности: неограниченное количество счетов, категорий, почасовых ставок и многое другое.
 
 Надеюсь, вы всегда будете контролировать и свои деньги, и свою жизнь.
 
@@ -216,7 +216,7 @@ Weet wat je bezit, en waarom je het bezit.`,
 - Исправлена пропажа уведомлений о платежах на некоторых телефонах
 - Исправлено сканирование чеков в материковом Китае
 
-Знай, чем владеешь, и знай, зачем.`,
+Знайте, чем владеете, и зачем.`,
   },
 
   ja: {
@@ -224,9 +224,9 @@ Weet wat je bezit, en waarom je het bezit.`,
 
 「Your Money or Your Life」を読んで、何かが腑に落ちました。給与で生活している私たちにとって、お金はただのお金ではなく、自分の生命エネルギーそのものです。使うお金の一円一円が、自分の時間、努力、人生の一部と引き換えに得たものです。
 
-だから、このアプリを作りました。支出をただの金額としてではなく、自分の人生の「時間」として見られるようにするためです。「500円」と言われてもピンとこなくても、「自分の人生の2時間分」と聞けば、重みが変わることがあります。目的はシンプルで、お金（つまり、時間）がどこへ流れているかを意識できるようにして、自分の人生をコントロールし直すことです。
+だから、このアプリを作りました。支出をただの金額としてではなく、自分の人生の「時間」として見られるようにするためです。「2,000円」と言われてもピンとこなくても、「自分の人生の2時間分」と聞けば、重みが変わることがあります。目的はシンプルで、お金（つまり、時間）がどこへ流れているかを意識できるようにして、自分の人生をコントロールし直すことです。
 
-すべてのデータはデバイス上に保存され、ログインもクラウド同期も不要です。あなたのデータは、あなただけのものです。必要であれば、JSONファイルとして書き出すこともできます。無料版でも、はじめるのに必要なものはすべて揃っています。プロ版では、アカウント・カテゴリー・時給の無制限設定など、追加機能が使えるようになります。
+すべてのデータはデバイス上に保存され、ログインもクラウド同期も不要です。あなたのデータは、あなただけのものです。必要であれば、JSONファイルとして書き出すこともできます。無料版でも、はじめるのに必要なものはすべて揃っています。Proでは、口座・カテゴリ・時給記録の無制限など、追加機能が使えるようになります。
 
 お金も、人生も、いつでも自分でコントロールできていますように。
 
@@ -239,7 +239,7 @@ Weet wat je bezit, en waarom je het bezit.`,
 - 一部の端末で支払い通知が届かなくなる問題を修正しました
 - 中国本土でのレシートスキャンの問題を修正しました
 
-自分が何を持ち、なぜ持つのかを知れ。`,
+自分が何を持ち、なぜ持つのかを知ろう。`,
   },
 
   ko: {
@@ -249,7 +249,7 @@ Weet wat je bezit, en waarom je het bezit.`,
 
 그래서 이 앱을 만들었습니다. 소비를 다른 시각으로 볼 수 있게 도와줍니다. 단순히 금액이 아니라, 내 삶의 시간으로요. ₩20,000이 별것 아닌 것처럼 느껴질 수 있지만, "내 삶의 2시간"이라고 생각하면 달라집니다. 목표는 단순합니다. 내 돈이, 아니 정확히는 내 시간이 어디로 흘러가는지 인식하게 도와줌으로써, 스스로 그것을 되찾을 수 있게 하는 것입니다.
 
-모든 데이터는 기기에만 저장됩니다. 로그인도, 클라우드 동기화도 없습니다. 데이터는 온전히 내 것입니다. 필요하다면 JSON 파일로 내보낼 수도 있습니다. 무료 버전만으로도 시작하기에 충분합니다. Pro로 업그레이드하면 무제한 계정/카테고리/시급 설정 등 추가 기능을 사용할 수 있습니다.
+모든 데이터는 기기에만 저장됩니다. 로그인도, 클라우드 동기화도 없습니다. 데이터는 온전히 내 것입니다. 필요하다면 JSON 파일로 내보낼 수도 있습니다. 무료 버전만으로도 시작하기에 충분합니다. Pro로 업그레이드하면 무제한 계좌/카테고리/시급 설정 등 추가 기능을 사용할 수 있습니다.
 
 언제나 내 돈과 내 삶을 스스로 통제할 수 있기를 바랍니다.
 
@@ -262,17 +262,17 @@ Weet wat je bezit, en waarom je het bezit.`,
 - 일부 휴대폰에서 결제 알림이 끊기는 문제를 수정했습니다
 - 중국 본토의 영수증 스캔 문제를 수정했습니다
 
-무엇을 가졌는지, 왜 가졌는지 알아라.`,
+무엇을 가졌는지, 왜 가졌는지 알아 두세요.`,
   },
 
   hi: {
     description: `Money2Time एक खर्च ट्रैकर है जो कीमतों को काम के घंटों में बदल देता है। रसीद स्कैन करें या खुद लिखें, और उसके पीछे के घंटे देखें।
 
-"Your Money or Your Life" पढ़ने के बाद, कुछ बात मेरे दिल को छू गई। हम में से ज़्यादातर लोग जो मेहनत करके कमाते हैं, उनके लिए पैसा सिर्फ पैसा नहीं है — यह हमारी ज़िंदगी की ऊर्जा है। हम जो भी खर्च करते हैं, वह हमारे समय का, हमारी मेहनत का, हमारी ज़िंदगी का एक हिस्सा है जो हम दे देते हैं।
+"Your Money or Your Life" पढ़ने के बाद, कुछ बात मेरे दिल को छू गई। हम में से ज़्यादातर लोग जो मेहनत करके कमाते हैं, उनके लिए पैसा सिर्फ पैसा नहीं है, यह हमारी ज़िंदगी की ऊर्जा है। हम जो भी खर्च करते हैं, वह हमारे समय का, हमारी मेहनत का, हमारी ज़िंदगी का एक हिस्सा है जो हम दे देते हैं।
 
-इसीलिए मैंने यह ऐप बनाया। यह आपको अपने खर्च को एक अलग नज़रिए से देखने में मदद करता है — सिर्फ रुपयों में नहीं, बल्कि आपकी ज़िंदगी के घंटों में। क्योंकि कभी-कभी "₹500" ज़्यादा नहीं लगते, लेकिन "मेरी ज़िंदगी के 2 घंटे" — वो ज़रूर महसूस होते हैं। मकसद सीधा है: आपको यह समझने में मदद करना कि आपका पैसा (यानी असल में आपका समय) कहाँ जा रहा है, ताकि आप उस पर फिर से काबू पा सकें।
+इसीलिए मैंने यह ऐप बनाया। यह आपको अपने खर्च को एक अलग नज़रिए से देखने में मदद करता है: सिर्फ रुपयों में नहीं, बल्कि आपकी ज़िंदगी के घंटों में। क्योंकि कभी-कभी "₹500" ज़्यादा नहीं लगते, लेकिन "मेरी ज़िंदगी के 2 घंटे" ज़रूर महसूस होते हैं। मकसद सीधा है: आपको यह समझने में मदद करना कि आपका पैसा (यानी असल में आपका समय) कहाँ जा रहा है, ताकि आप उस पर फिर से काबू पा सकें।
 
-सब कुछ आपके डिवाइस पर ही रहता है — कोई लॉगिन नहीं, कोई क्लाउड सिंक नहीं। आपका डेटा सिर्फ आपका है। ज़रूरत पड़े तो आप डेटा को एक सादे JSON फ़ाइल के रूप में एक्सपोर्ट भी कर सकते हैं। फ्री वर्ज़न में वो सब कुछ है जो आपको शुरुआत के लिए चाहिए। Pro वर्ज़न में कुछ अतिरिक्त सुविधाएँ मिलती हैं जैसे असीमित अकाउंट, कैटेगरी, प्रति घंटे की दर, वगैरह।
+सब कुछ आपके डिवाइस पर ही रहता है, कोई लॉगिन नहीं, कोई क्लाउड सिंक नहीं। आपका डेटा सिर्फ आपका है। ज़रूरत पड़े तो आप डेटा को एक सादे JSON फ़ाइल के रूप में एक्सपोर्ट भी कर सकते हैं। फ्री वर्ज़न में वो सब कुछ है जो आपको शुरुआत के लिए चाहिए। Pro वर्ज़न में कुछ अतिरिक्त सुविधाएँ मिलती हैं जैसे असीमित खाते, श्रेणियाँ, प्रति घंटे की दरें, वगैरह।
 
 उम्मीद है कि आप हमेशा अपने पैसे और अपनी ज़िंदगी पर काबू रखेंगे।
 
@@ -291,9 +291,9 @@ Weet wat je bezit, en waarom je het bezit.`,
   id: {
     description: `Money2Time adalah pelacak pengeluaran yang mengubah harga menjadi jam kerja. Pindai struk atau ketik sendiri, dan lihat jam di baliknya.
 
-Setelah membaca "Your Money or Your Life", ada sesuatu yang terasa klik di benak saya. Bagi kebanyakan dari kita yang bekerja dengan upah, uang bukan sekadar uang — melainkan energi hidup kita. Setiap rupiah yang kita belanjakan mewakili jam-jam waktu kita, usaha kita, potongan hidup yang kita pertukarkan.
+Setelah membaca "Your Money or Your Life", ada sesuatu yang membuat saya tersadar. Bagi kebanyakan dari kita yang bekerja dengan upah, uang bukan sekadar uang, melainkan energi hidup kita. Setiap rupiah yang kita belanjakan mewakili jam-jam waktu kita, usaha kita, potongan hidup yang kita pertukarkan.
 
-Maka saya membangun aplikasi ini. Aplikasi ini membantu Anda melihat pengeluaran dari sudut pandang yang berbeda: bukan hanya dalam mata uang, tapi dalam jam hidup Anda. Karena kadang "Rp50.000" terasa tidak seberapa, tapi "2 jam hidup saya" terasa berbeda. Tujuannya sederhana — membantu Anda lebih sadar ke mana uang Anda (atau lebih tepatnya, waktu Anda) pergi, sehingga Anda bisa mengambil kendali kembali.
+Maka saya membangun aplikasi ini. Aplikasi ini membantu Anda melihat pengeluaran dari sudut pandang yang berbeda: bukan hanya dalam mata uang, tapi dalam jam hidup Anda. Karena kadang "Rp50.000" terasa tidak seberapa, tapi "2 jam hidup saya" terasa berbeda. Tujuannya sederhana: membantu Anda lebih sadar ke mana uang Anda (atau lebih tepatnya, waktu Anda) pergi, sehingga Anda bisa mengambil kendali kembali.
 
 Semua data tersimpan di perangkat Anda sendiri, tanpa perlu login atau sinkronisasi cloud. Data Anda adalah milik Anda sepenuhnya. Anda juga bisa mengekspor data sebagai file JSON sederhana jika diperlukan. Versi gratis sudah mencakup semua yang Anda butuhkan untuk memulai. Versi Pro membuka fitur tambahan seperti akun, kategori, dan tarif per jam yang tidak terbatas, dan lainnya.
 
@@ -306,9 +306,9 @@ Kontak: https://www.money2time.com/contact`,
 - Menambahkan tag lokasi untuk pengeluaran yang dicatat otomatis
 - Mengurangi jeda Cloud Sync dan album bersama
 - Memperbaiki notifikasi pembayaran yang berhenti di beberapa ponsel
-- Memperbaiki pindai struk di Tiongkok daratan
+- Memperbaiki pemindaian struk di Tiongkok daratan
 
-Ketahuilah apa yang kamu miliki dan mengapa kamu memilikinya.`,
+Ketahuilah apa yang Anda miliki dan mengapa Anda memilikinya.`,
   },
 
   tr: {
@@ -325,21 +325,21 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- Başlangıçta kendi hesaplarını seçme özelliği eklendi
+    whatsNew: `- Kurulum sırasında hesaplarınızı seçme özelliği eklendi
 - Otomatik kaydedilen harcamalara konum etiketi eklendi
 - Cloud Sync ve paylaşılan albümlerdeki gecikmeler azaltıldı
 - Bazı telefonlarda kesilen ödeme bildirimleri düzeltildi
 - Çin anakarasında fiş taraması düzeltildi
 
-Neye sahip olduğunu ve neden sahip olduğunu bil.`,
+Neye sahip olduğunuzu ve neden sahip olduğunuzu bilin.`,
   },
 
   vi: {
     description: `Money2Time là ứng dụng theo dõi chi tiêu, đổi giá tiền thành số giờ làm việc. Quét hóa đơn hoặc tự nhập, rồi xem số giờ đằng sau nó.
 
-Sau khi đọc cuốn "Your Money or Your Life", tôi nhận ra một điều. Với hầu hết những người đi làm kiếm lương như chúng ta, tiền không chỉ đơn thuần là tiền — đó là năng lượng sống của chúng ta. Mỗi đồng tiền bỏ ra là một phần thời gian, công sức, một phần cuộc đời chúng ta đã đánh đổi.
+Sau khi đọc cuốn "Your Money or Your Life", tôi nhận ra một điều. Với hầu hết những người đi làm kiếm lương như chúng ta, tiền không chỉ đơn thuần là tiền, đó là năng lượng sống của chúng ta. Mỗi đồng tiền bỏ ra là một phần thời gian, công sức, một phần cuộc đời chúng ta đã đánh đổi.
 
-Vì vậy tôi đã xây dựng ứng dụng này. Nó giúp bạn nhìn nhận chi tiêu theo một cách khác: không chỉ bằng tiền, mà bằng giờ sống của bạn. Bởi vì đôi khi "200.000 đ" không có cảm giác nhiều, nhưng "2 tiếng đồng hồ cuộc đời mình" thì lại khác. Mục tiêu rất đơn giản — giúp bạn ý thức hơn về việc tiền bạc (hay thực ra là thời gian) của mình đang đi đâu, để bạn có thể lấy lại quyền kiểm soát.
+Vì vậy tôi đã xây dựng ứng dụng này. Nó giúp bạn nhìn nhận chi tiêu theo một cách khác: không chỉ bằng tiền, mà bằng giờ sống của bạn. Bởi vì đôi khi "200.000 đ" không có cảm giác nhiều, nhưng "2 tiếng đồng hồ cuộc đời mình" thì lại khác. Mục tiêu rất đơn giản: giúp bạn ý thức hơn về việc tiền bạc (hay thực ra là thời gian) của mình đang đi đâu, để bạn có thể lấy lại quyền kiểm soát.
 
 Mọi dữ liệu đều ở trên thiết bị của bạn, không cần đăng nhập hay đồng bộ đám mây. Dữ liệu là của bạn. Bạn cũng có thể xuất dữ liệu dưới dạng file JSON nếu cần. Phiên bản miễn phí cung cấp đầy đủ những gì bạn cần để bắt đầu. Phiên bản Pro mở khóa thêm một số tính năng như tài khoản, danh mục, mức lương theo giờ không giới hạn, v.v.
 
@@ -348,9 +348,9 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Thêm lựa chọn tài khoản của bạn khi thiết lập ban đầu
+    whatsNew: `- Giờ bạn có thể chọn tài khoản ngay khi thiết lập ban đầu
 - Thêm gắn vị trí cho các khoản chi được ghi tự động
-- Giảm độ trễ của Cloud Sync và album chia sẻ
+- Giảm độ trễ của Cloud Sync và album chung
 - Khắc phục lỗi thông báo thanh toán bị ngừng trên một số điện thoại
 - Khắc phục lỗi quét hóa đơn tại Trung Quốc đại lục
 
@@ -360,18 +360,18 @@ Hãy biết mình sở hữu gì và vì sao mình sở hữu nó.`,
   th: {
     description: `Money2Time คือแอปบันทึกรายจ่ายที่แปลงราคาเป็นชั่วโมงทำงาน สแกนใบเสร็จหรือพิมพ์เอง แล้วดูจำนวนชั่วโมงที่อยู่เบื้องหลัง
 
-หลังจากที่ได้อ่านหนังสือ "Your Money or Your Life" บางอย่างก็เปลี่ยนไปในมุมมองของฉัน สำหรับพวกเราที่ทำงานหาเงินเดือน เงินไม่ใช่แค่เงิน — มันคือพลังงานชีวิตของเรา ทุกบาทที่เราใช้จ่ายออกไปแทนด้วยชั่วโมง แรงกาย และชีวิตที่เราแลกมา
+หลังจากที่ได้อ่านหนังสือ "Your Money or Your Life" บางอย่างก็เปลี่ยนไปในมุมมองของฉัน สำหรับพวกเราที่ทำงานหาเงินเดือน เงินไม่ใช่แค่เงิน แต่คือพลังชีวิตของเรา ทุกบาทที่เราใช้จ่ายออกไปแทนด้วยชั่วโมง แรงกาย และชีวิตที่เราแลกมา
 
 ฉันจึงสร้างแอปนี้ขึ้นมา เพื่อช่วยให้คุณมองการใช้จ่ายในมุมที่แตกต่างออกไป ไม่ใช่แค่ตัวเลขเงิน แต่คือชั่วโมงชีวิตของคุณ เพราะบางครั้ง "200 บาท" อาจดูไม่มาก แต่พอคิดว่า "2 ชั่วโมงของชีวิตฉัน" มันรู้สึกต่างกันทันที เป้าหมายเรียบง่าย คือช่วยให้คุณตระหนักมากขึ้นว่าเงิน (หรือที่จริงคือเวลา) ของคุณไหลไปที่ไหน เพื่อให้คุณกลับมาควบคุมมันได้
 
-ข้อมูลทั้งหมดเก็บอยู่บนอุปกรณ์ของคุณเท่านั้น ไม่ต้องสมัครสมาชิก ไม่มีการซิงค์ข้อมูลขึ้นคลาวด์ ข้อมูลเป็นของคุณอย่างแท้จริง คุณยังสามารถส่งออกข้อมูลเป็นไฟล์ JSON ได้หากต้องการ เวอร์ชันฟรีมีทุกอย่างที่คุณต้องการสำหรับการเริ่มต้น ส่วน Pro จะปลดล็อกฟีเจอร์เพิ่มเติม เช่น บัญชี หมวดหมู่ และอัตราค่าแรงไม่จำกัด และอื่น ๆ อีกมากมาย
+ข้อมูลทั้งหมดเก็บอยู่บนอุปกรณ์ของคุณเท่านั้น ไม่ต้องล็อกอิน ไม่มีการซิงค์ข้อมูลขึ้นคลาวด์ ข้อมูลเป็นของคุณอย่างแท้จริง คุณยังสามารถส่งออกข้อมูลเป็นไฟล์ JSON ได้หากต้องการ เวอร์ชันฟรีมีทุกอย่างที่คุณต้องการสำหรับการเริ่มต้น ส่วน Pro จะปลดล็อกฟีเจอร์เพิ่มเติม เช่น บัญชี หมวดหมู่ และอัตราค่าแรงไม่จำกัด และอื่น ๆ อีกมากมาย
 
 หวังว่าคุณจะมีอิสระในการควบคุมทั้งเงินและชีวิตของตัวเองเสมอ
 
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มการเลือกบัญชีของคุณเองในหน้าเริ่มต้น
+    whatsNew: `- เพิ่มการเลือกบัญชีของคุณเองระหว่างเริ่มต้นใช้งาน
 - เพิ่มแท็กตำแหน่งให้รายจ่ายที่บันทึกอัตโนมัติ
 - ลดความล่าช้าของ Cloud Sync และอัลบั้มที่แชร์
 - แก้ไขปัญหาการแจ้งเตือนการชำระเงินหยุดทำงานในบางเครื่อง
@@ -383,11 +383,11 @@ Hãy biết mình sở hữu gì và vì sao mình sở hữu nó.`,
   pl: {
     description: `Money2Time to aplikacja do wydatków, która przelicza ceny na godziny pracy. Zeskanuj paragon albo wpisz ręcznie, i zobacz godziny, które za tym stoją.
 
-Po przeczytaniu książki „Twoje pieniądze albo twoje życie" coś we mnie zaskoczyło. Dla większości z nas zarabiających na życie, pieniądze to nie tylko pieniądze — to nasza energia życiowa. Każda złotówka, którą wydajemy, reprezentuje godziny naszego czasu, nasze wysiłki, kawałek naszego życia, który oddajemy.
+Po przeczytaniu książki „Twoje pieniądze albo twoje życie” coś we mnie zaskoczyło. Dla większości z nas zarabiających na życie, pieniądze to nie tylko pieniądze, to nasza energia życiowa. Każda złotówka, którą wydajemy, reprezentuje godziny naszego czasu, nasze wysiłki, kawałek naszego życia, który oddajemy.
 
-Dlatego stworzyłem tę aplikację. Pomaga spojrzeć na wydatki inaczej: nie tylko jako kwotę w portfelu, ale jako godziny życia. Bo czasem „50 zł" nie robi wrażenia, ale „2 godziny mojego życia" — już tak. Cel jest prosty — pomóc Ci lepiej rozumieć, dokąd trafiają Twoje pieniądze (a właściwie Twój czas), żebyś mógł odzyskać nad nimi kontrolę.
+Dlatego stworzyłem tę aplikację. Pomaga spojrzeć na wydatki inaczej: nie tylko jako kwotę w portfelu, ale jako godziny życia. Bo czasem „50 zł” nie robi wrażenia, ale „2 godziny mojego życia” już tak. Cel jest prosty: pomóc Ci lepiej rozumieć, dokąd trafiają Twoje pieniądze (a właściwie Twój czas), żebyś mógł odzyskać nad nimi kontrolę.
 
-Wszystko zostaje na Twoim urządzeniu — bez logowania, bez synchronizacji z chmurą. Twoje dane należą do Ciebie. Możesz też wyeksportować je jako plik JSON, jeśli zajdzie taka potrzeba. Darmowa wersja daje wszystko, czego potrzebujesz na start. Wersja Pro odblokowuje dodatkowe funkcje, takie jak nieograniczona liczba kont, kategorii, stawek godzinowych i inne.
+Wszystko zostaje na Twoim urządzeniu, bez logowania, bez synchronizacji z chmurą. Twoje dane należą do Ciebie. Możesz też wyeksportować je jako plik JSON, jeśli zajdzie taka potrzeba. Darmowa wersja daje wszystko, czego potrzebujesz na start. Wersja Pro odblokowuje dodatkowe funkcje, takie jak nieograniczona liczba kont, kategorii, stawek godzinowych i inne.
 
 Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swoim życiem.
 
@@ -404,13 +404,13 @@ Wiedz, co posiadasz i dlaczego to posiadasz.`,
   },
 
   uk: {
-    description: `Money2Time — це облік витрат, який переводить ціни в години роботи. Відскануй чек або введи вручну, і побачиш години за цією сумою.
+    description: `Money2Time допомагає вести облік витрат і переводить ціни в години роботи. Відскануй чек або введи вручну, і побачиш години за цією сумою.
 
-Після прочитання книги «Your Money or Your Life» щось усередині мені відкрилось. Для більшості з нас, хто заробляє на зарплату, гроші — це не просто гроші, це наша життєва енергія. Кожна гривня, яку ми витрачаємо, — це години нашого часу, наших зусилів, частина нашого життя, віддана в обмін.
+Після прочитання книги «Your Money or Your Life» у мене ніби щось клацнуло. Для більшості з нас, хто заробляє на зарплату, гроші не просто гроші, а наша життєва енергія. Кожна гривня, яку ми витрачаємо, означає години нашого часу, наших зусиль, частину нашого життя, віддану в обмін.
 
-Тому я створив цей застосунок. Він допомагає подивитись на витрати інакше: не просто в грошах, а в годинах твого життя. Бо іноді «200 ₴» не здаються чимось значним, але «2 години мого життя» — вже зовсім інша справа. Мета проста — допомогти тобі краще усвідомити, куди йдуть твої гроші (а насправді — твій час), щоб ти міг знову взяти це під контроль.
+Тому я створив цей застосунок. Він допомагає подивитись на витрати інакше: не просто в грошах, а в годинах твого життя. Бо іноді «200 ₴» не здаються чимось значним, але «2 години мого життя» звучить уже зовсім інакше. Мета проста: допомогти тобі краще усвідомити, куди йдуть твої гроші (а насправді твій час), щоб ти міг знову взяти це під контроль.
 
-Усі дані зберігаються лише на твоєму пристрої — жодних реєстрацій чи хмарної синхронізації. Твої дані належать тільки тобі. За потреби їх можна експортувати у форматі JSON. Безкоштовна версія містить усе необхідне для початку. Версія Pro відкриває додаткові можливості: необмежена кількість рахунків, категорій, погодинних ставок тощо.
+Усі дані зберігаються лише на твоєму пристрої: жодних реєстрацій чи хмарної синхронізації. Твої дані належать тільки тобі. За потреби їх можна експортувати у форматі JSON. Безкоштовна версія містить усе необхідне для початку. Версія Pro відкриває додаткові можливості: необмежена кількість рахунків, категорій, погодинних ставок тощо.
 
 Сподіваюсь, ти завжди матимеш контроль над своїми грошима і своїм життям.
 
@@ -420,7 +420,7 @@ Wiedz, co posiadasz i dlaczego to posiadasz.`,
     whatsNew: `- Додано вибір власних рахунків під час першого запуску
 - Додано позначки місць для автоматично записаних витрат
 - Зменшено затримки Cloud Sync і спільних альбомів
-- Виправлено зникнення сповіщень про платежі на деяких телефонах
+- Виправлено зупинку сповіщень про платежі на деяких телефонах
 - Виправлено сканування чеків у материковому Китаї
 
 Знай, чим володієш, і знай, навіщо.`,
@@ -429,9 +429,9 @@ Wiedz, co posiadasz i dlaczego to posiadasz.`,
   sv: {
     description: `Money2Time är en utgiftsapp som räknar om priser till arbetstimmar. Skanna ett kvitto eller skriv in det, och se timmarna bakom.
 
-Efter att ha läst "Your Money or Your Life" föll något på plats för mig. För de flesta av oss som jobbar för en lön är pengar inte bara pengar – de är vår livsenergi. Varje krona vi spenderar representerar timmar av vår tid, vår ansträngning, vårt liv som vi byter bort.
+Efter att ha läst "Your Money or Your Life" föll något på plats för mig. För de flesta av oss som jobbar för en lön är pengar inte bara pengar, de är vår livsenergi. Varje krona vi spenderar representerar timmar av vår tid, vår ansträngning, vårt liv som vi byter bort.
 
-Så jag byggde den här appen. Den hjälper dig att se dina utgifter på ett annat sätt: inte bara i kronor, utan i timmar av ditt liv. För ibland känns inte "200 kr" som särskilt mycket, men "2 timmar av mitt liv" gör det. Målet är enkelt – att hjälpa dig bli mer medveten om vart dina pengar (eller egentligen din tid) tar vägen, så att du kan återta kontrollen över dem.
+Så jag byggde den här appen. Den hjälper dig att se dina utgifter på ett annat sätt: inte bara i kronor, utan i timmar av ditt liv. För ibland känns inte "200 kr" som särskilt mycket, men "2 timmar av mitt liv" gör det. Målet är enkelt: att hjälpa dig bli mer medveten om vart dina pengar (eller egentligen din tid) tar vägen, så att du kan återta kontrollen över dem.
 
 Allt stannar på din enhet, inga inloggningar eller molnsynkronisering. Din data är din. Du kan också exportera datan som en enkel JSON-fil om du behöver. Gratisversionen ger dig allt du behöver för att komma igång. Pro låser upp extra funktioner som obegränsat antal konton, kategorier och timlöner, med mera.
 
@@ -452,13 +452,13 @@ Vet vad du äger och varför du äger det.`,
   nb: {
     description: `Money2Time er en utgiftsapp som regner om priser til arbeidstimer. Skann en kvittering eller skriv den inn, og se timene bak.
 
-Etter å ha lest «Your Money or Your Life» skjedde det noe med meg. For de fleste av oss som jobber for lønn, er penger ikke bare penger – det er livsenergien vår. Hver krone vi bruker, representerer timer av vår tid, vår innsats, vårt liv som vi bytter bort.
+Etter å ha lest «Your Money or Your Life» skjedde det noe med meg. For de fleste av oss som jobber for lønn, er penger ikke bare penger, det er livsenergien vår. Hver krone vi bruker, representerer timer av vår tid, vår innsats, vårt liv som vi bytter bort.
 
-Så jeg bygde denne appen. Den hjelper deg å se forbruket ditt på en annen måte: ikke bare i kroner og øre, men i timer av livet ditt. Fordi «200 kr» av og til ikke føles som mye, men «2 timer av livet mitt» gjør det. Målet er enkelt – å hjelpe deg å bli mer bevisst på hvor pengene dine (eller egentlig, tiden din) tar veien, slik at du kan ta tilbake kontrollen.
+Så jeg bygde denne appen. Den hjelper deg å se forbruket ditt på en annen måte: ikke bare i kroner og øre, men i timer av livet ditt. Fordi «200 kr» av og til ikke føles som mye, men «2 timer av livet mitt» gjør det. Målet er enkelt: å hjelpe deg å bli mer bevisst på hvor pengene dine (eller egentlig, tiden din) tar veien, slik at du kan ta tilbake kontrollen.
 
-Alt forblir på enheten din – ingen pålogging eller skysynkronisering. Dataene dine er dine. Du kan også eksportere dataene som en enkel JSON-fil om du trenger det. Gratisversjonen gir deg alt du trenger for å komme i gang. Pro låser opp noen ekstra funksjoner som ubegrenset antall kontoer, kategorier og timesatser osv.
+Alt forblir på enheten din, uten pålogging eller skysynkronisering. Dataene dine er dine. Du kan også eksportere dataene som en enkel JSON-fil om du trenger det. Gratisversjonen gir deg alt du trenger for å komme i gang. Pro låser opp noen ekstra funksjoner som ubegrenset antall kontoer, kategorier og timesatser osv.
 
-Forhåpentligvis vil du alltid ha kontroll over pengene dine – og livet ditt.
+Forhåpentligvis vil du alltid ha kontroll over pengene dine og livet ditt.
 
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
@@ -475,11 +475,11 @@ Vit hva du eier, og hvorfor du eier det.`,
   da: {
     description: `Money2Time er en udgiftsapp, der omregner priser til arbejdstimer. Scan en kvittering eller skriv den ind, og se timerne bag.
 
-Efter at have læst "Your Money or Your Life" gik det op for mig. For de fleste af os, der lever af en løn, er penge ikke bare penge – det er vores livsenergi. Hver krone vi bruger, repræsenterer timer af vores tid, vores indsats, vores liv.
+Efter at have læst "Your Money or Your Life" gik det op for mig. For de fleste af os, der lever af en løn, er penge ikke bare penge, men vores livsenergi. Hver krone vi bruger, repræsenterer timer af vores tid, vores indsats, vores liv.
 
-Så jeg byggede denne app. Den hjælper dig med at se dit forbrug på en anden måde: ikke bare i kroner og øre, men i timer af dit liv. For nogle gange føles "150 kr" ikke som meget, men "2 timer af mit liv" gør det. Målet er enkelt – at hjælpe dig med at blive mere bevidst om, hvor dine penge (eller egentlig din tid) ender, så du kan tage kontrollen tilbage.
+Så jeg byggede denne app. Den hjælper dig med at se dit forbrug på en anden måde: ikke bare i kroner og øre, men i timer af dit liv. For nogle gange føles "150 kr" ikke som meget, men "2 timer af mit liv" gør det. Målet er enkelt: at hjælpe dig med at blive mere bevidst om, hvor dine penge (eller egentlig din tid) ender, så du kan tage kontrollen tilbage.
 
-Alt forbliver på din enhed – ingen logins eller synkronisering til skyen. Dine data er dine. Du kan også eksportere data som en simpel JSON-fil, hvis du har brug for det. Gratisversionen giver dig alt, hvad du skal bruge for at komme i gang. Pro låser op for ekstra funktioner som ubegrænsede konti/kategorier/timesatser osv.
+Alt forbliver på din enhed: ingen logins eller synkronisering til skyen. Dine data er dine. Du kan også eksportere data som en simpel JSON-fil, hvis du har brug for det. Gratisversionen giver dig alt, hvad du skal bruge for at komme i gang. Pro låser op for ekstra funktioner som ubegrænsede konti/kategorier/timesatser osv.
 
 Forhåbentlig har du altid kontrol over dine penge og dit liv.
 
@@ -489,7 +489,7 @@ Kontakt: https://www.money2time.com/contact`,
     whatsNew: `- Tilføjede valg af egne konti i opstarten
 - Tilføjede stedsmærkning til automatisk registrerede udgifter
 - Reducerede forsinkelser i Cloud Sync og delte album
-- Rettede betalingsnotifikationer der stoppede på nogle telefoner
+- Rettede betalingsnotifikationer, der stoppede på nogle telefoner
 - Rettede kvitteringsscanning i Fastlandskina
 
 Vid, hvad du ejer, og hvorfor du ejer det.`,
@@ -498,9 +498,9 @@ Vid, hvad du ejer, og hvorfor du ejer det.`,
   ms: {
     description: `Money2Time ialah penjejak perbelanjaan yang menukar harga kepada jam kerja. Imbas resit atau taip sendiri, dan lihat jam di sebaliknya.
 
-Setelah membaca "Your Money or Your Life", sesuatu terbuka dalam diri saya. Bagi kebanyakan kita yang makan gaji, wang bukan sekadar wang — ia adalah tenaga hidup kita. Setiap ringgit yang kita belanjakan mewakili jam-jam masa kita, usaha kita, sebahagian hidup kita yang kita tukarkan.
+Setelah membaca "Your Money or Your Life", saya tersedar akan sesuatu. Bagi kebanyakan kita yang makan gaji, wang bukan sekadar wang, ia adalah tenaga hidup kita. Setiap ringgit yang kita belanjakan mewakili jam-jam masa kita, usaha kita, sebahagian hidup kita yang kita tukarkan.
 
-Jadi saya bina aplikasi ini. Ia membantu anda melihat perbelanjaan anda dengan cara yang berbeza: bukan sekadar dalam mata wang, tetapi dalam jam kehidupan anda. Kerana kadang-kadang "RM20" tidak terasa banyak, tetapi "2 jam hidup saya" terasa lain. Matlamatnya mudah — untuk membantu anda lebih sedar ke mana wang anda (atau sebenarnya, masa anda) pergi, supaya anda boleh mengambil semula kawalan ke atasnya.
+Jadi saya bina aplikasi ini. Ia membantu anda melihat perbelanjaan anda dengan cara yang berbeza: bukan sekadar dalam mata wang, tetapi dalam jam kehidupan anda. Kerana kadang-kadang "RM20" tidak terasa banyak, tetapi "2 jam hidup saya" terasa lain. Matlamatnya mudah: untuk membantu anda lebih sedar ke mana wang anda (atau sebenarnya, masa anda) pergi, supaya anda boleh mengambil semula kawalan ke atasnya.
 
 Semua data kekal di peranti anda, tiada log masuk atau penyegerakan awan. Data anda adalah milik anda. Anda juga boleh mengeksport data sebagai fail JSON mudah jika diperlukan. Versi percuma memberi anda semua yang diperlukan untuk bermula. Pro membuka beberapa ciri tambahan seperti akaun/kategori/kadar jam tanpa had, dan sebagainya.
 
@@ -509,8 +509,8 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah pilihan akaun sendiri dalam panduan awal
-- Menambah tag lokasi untuk perbelanjaan yang direkod secara automatik
+    whatsNew: `- Menambah pilihan untuk memilih akaun anda semasa persediaan awal
+- Menambah tag lokasi pada perbelanjaan yang direkod secara automatik
 - Mengurangkan kelewatan Cloud Sync dan album kongsi
 - Membaiki pemberitahuan pembayaran yang terhenti pada sesetengah telefon
 - Membaiki imbasan resit di tanah besar China
@@ -519,11 +519,13 @@ Ketahui apa yang anda miliki dan mengapa anda memilikinya.`,
   },
 
   fil: {
-    description: `Matapos basahin ang "Your Money or Your Life", may nag-click sa akin. Para sa karamihan sa atin na kumikita ng sahod, ang pera ay hindi lang pera — ito ay ang ating buhay mismo. Bawat pisong ginagastos natin ay kumakatawan sa mga oras ng ating buhay, ng ating pagsisikap, ng ating buhay na ibinigay.
+    description: `Ang Money2Time ay expense tracker na ginagawang oras ng trabaho ang mga presyo. I-scan ang resibo o i-type ito, at makikita mo ang mga oras sa likod nito.
 
-Kaya itinayo ko ang app na ito. Tinutulungan ka nitong makita ang iyong mga gastos sa ibang paraan: hindi lang sa pera, kundi sa mga oras ng iyong buhay. Dahil minsan, hindi gaanong nararamdaman ang "₱20", pero nararamdaman ang "2 oras ng aking buhay". Simple ang layunin — tulungan kang maging mas mulat sa kung saan napupunta ang iyong pera (o sa totoo lang, ang iyong oras), para mabawi mo ang kontrol nito.
+Matapos basahin ang "Your Money or Your Life", may nag-click sa akin. Para sa karamihan sa atin na kumikita ng sahod, ang pera ay hindi lang pera, ito ang ating lakas ng buhay. Bawat pisong ginagastos natin ay kumakatawan sa mga oras ng ating buhay, ng ating pagsisikap, ng ating buhay na ibinigay.
 
-Lahat ay nananatili sa iyong device — walang login o cloud sync. Ang iyong data ay para sa iyo. Maaari mo ring i-export ang data bilang simpleng JSON file kung kailangan. Ang libreng bersyon ay nagbibigay sa iyo ng lahat ng kailangan mo para makapagsimula. Ang Pro ay nagbubukas ng ilang karagdagang features tulad ng walang limitasyong accounts, categories, hourly rates, atbp.
+Kaya ginawa ko ang app na ito. Tinutulungan ka nitong makita ang iyong mga gastos sa ibang paraan: hindi lang sa pera, kundi sa mga oras ng iyong buhay. Dahil minsan, hindi gaanong nararamdaman ang "₱20", pero nararamdaman ang "2 oras ng aking buhay". Simple ang layunin: tulungan kang maging mas mulat sa kung saan napupunta ang iyong pera (o sa totoo lang, ang iyong oras), para mabawi mo ang kontrol nito.
+
+Lahat ay nananatili sa iyong device, walang login o cloud sync. Ang iyong data ay para sa iyo. Maaari mo ring i-export ang data bilang simpleng JSON file kung kailangan. Ang libreng bersyon ay nagbibigay sa iyo ng lahat ng kailangan mo para makapagsimula. Ang Pro ay nagbubukas ng ilang karagdagang feature tulad ng walang limitasyong account, kategorya, hourly rate, atbp.
 
 Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 

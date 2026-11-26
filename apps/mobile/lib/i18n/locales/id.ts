@@ -1,22 +1,21 @@
 const id = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Pulihkan cadangan',
+    export_description: 'Data pribadi dan buku bersama milikmu.',
+    import_description: 'Pilih yang ingin dipulihkan dari cadangan.',
+    personal: 'Buku pribadi',
+    personal_note: 'Mengganti buku dan pengaturan di perangkat yang tersinkron.',
+    personal_local_note: 'Mengganti buku dan pengaturan.',
+    shared_ledgers: 'Buku bersama',
+    owned: 'Buku ini milikmu',
+    unavailable: 'Perlu akses pemilik',
+    restore_action: 'Pulihkan yang dipilih',
+    confirm_title: 'Pulihkan untuk semua orang?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
-    photos_unavailable:
-      'Tidak dapat mengunduh foto cadangan ini. Periksa koneksi Anda dan coba lagi.',
+      '{{names}}\n\nGanti dengan cadangan {{date}}. Perubahan setelahnya akan hilang. Anggota dan undangan tidak berubah.',
+    sync_pending: 'Sudah dipulihkan di sini. Tetap masuk agar sinkronisasi selesai.',
+    failed: 'Tidak dapat memulihkan. Periksa koneksi, akses pemilik, dan ruang penyimpanan.',
+    photos_unavailable: 'Tidak dapat mengunduh foto cadangan ini. Periksa koneksi lalu coba lagi.',
     photos_missing: '{{count}} foto dari cadangan ini tidak ditemukan, jadi tidak dipulihkan.',
   },
   common: {
@@ -178,10 +177,10 @@ const id = {
   },
   news: {
     free_scans_locations: {
-      title: 'Lebih banyak pindai gratis dan lokasi',
+      title: 'Lebih banyak pemindaian gratis dan lokasi',
       freeScans: {
-        title: '%{count} pindai struk gratis per bulan',
-        body: 'Pengguna paket gratis kini mendapat %{count} pindai struk setiap bulan, yang diperbarui tiap bulan. Ambil foto atau pilih struk dari album lewat Pindai struk, lalu Money2Time mengisi toko, nominal, tanggal, dan kategori untuk Anda. Pro tetap tanpa batas.',
+        title: '%{count} pemindaian struk gratis per bulan',
+        body: 'Pengguna paket gratis kini mendapat %{count} pemindaian struk setiap bulan, yang diperbarui tiap bulan. Ambil foto atau pilih struk dari album lewat Pindai struk, lalu Money2Time mengisi toko, nominal, tanggal, dan kategori untuk Anda. Pro tetap tanpa batas.',
       },
       locations: {
         title: 'Tandai transaksi dengan lokasi',
@@ -215,7 +214,7 @@ const id = {
       },
       partPayments: {
         title: 'Pembayaran kembali bertahap',
-        body: 'Teman kini bisa membayar Anda kembali sedikit demi sedikit. Di Siapa yang berutang padamu, ketuk Tandai sudah bayar dan ketik jumlah yang mereka bayar. Sisanya tetap tercatat sebagai utang, dengan bilah progres dan daftar setiap pembayaran, dan setiap pembayaran dihitung di akun Anda saat diterima.',
+        body: 'Teman kini bisa membayar Anda kembali sedikit demi sedikit. Di Siapa yang berutang kepada Anda, ketuk Tandai sudah bayar dan ketik jumlah yang mereka bayar. Sisanya tetap tercatat sebagai utang, dengan bilah progres dan daftar setiap pembayaran, dan setiap pembayaran dihitung di akun Anda saat diterima.',
       },
       batchScan: {
         title: 'Pindai banyak struk sekaligus',
@@ -348,7 +347,7 @@ const id = {
       },
       liveEarnings: {
         title: 'Lihat upah Anda terus naik',
-        body: 'Pasang kartu langsung di Layar Kunci dan lihat berapa yang sudah Anda hasilkan hari ini, naik terus sesuai nilai per jam Anda yang sebenarnya. Mulai sendiri, atau atur sif Anda dan biarkan mulai otomatis.',
+        body: 'Pasang kartu langsung di Layar Terkunci dan lihat berapa yang sudah Anda hasilkan hari ini, naik terus sesuai nilai per jam Anda yang sebenarnya. Mulai sendiri, atau atur sif Anda dan biarkan mulai otomatis.',
       },
       appIcon: {
         title: 'Ikon lama kembali',
@@ -437,14 +436,14 @@ const id = {
       title: 'Otomatisasi',
       auto: {
         title: 'Pengeluaranmu tercatat sendiri',
-        body: 'Tiga otomatisasi baru untuk iOS: tempelkan kartu dan pembayaran Apple Pay tercatat sendiri, Log Screenshot mengubah tangkapan layar pembayaran menjadi transaksi terpindai, dan Back Tap membuka entri cepat dengan mengetuk bagian belakang ponsel. Atur di halaman Otomatisasi.',
+        body: 'Tiga otomatisasi baru untuk iOS: tempelkan kartu dan pembayaran Apple Pay tercatat sendiri, Log Screenshot mengubah tangkapan layar pembayaran menjadi transaksi terpindai, dan Ketuk Belakang membuka entri cepat dengan mengetuk bagian belakang ponsel. Atur di halaman Otomatisasi.',
       },
     },
     receipt_split_update: {
       title: 'Bagi per item',
       split: {
         title: 'Pindai struk, bagi item demi item',
-        body: 'Foto tagihan dan tetapkan tiap baris ke orang yang memesannya — bagi hidangan bersama per porsi, dan pajak serta biaya layanan terbagi adil dengan sendirinya. Semua orang masuk ke “Siapa yang berutang padamu” dengan jumlah yang pasti.',
+        body: 'Foto tagihan dan tetapkan tiap baris ke orang yang memesannya. Bagi hidangan bersama per porsi, dan pajak serta biaya layanan terbagi adil dengan sendirinya. Semua orang masuk ke Utang piutang dengan jumlah yang pasti.',
       },
       selector: {
         title: 'Cara menambah yang lebih cepat',
@@ -504,7 +503,7 @@ const id = {
       },
     },
     cta: {
-      open_accounts: 'Buka akun',
+      open_accounts: 'Kelola akun',
       open_hourly_value_settings: 'Atur jam kerja',
       open_add_transaction: 'Tambah transaksi',
       open_recurring: 'Buka Berulang',
@@ -532,7 +531,7 @@ const id = {
       open_review: 'Buka Tinjau Pengeluaran',
     },
     showcase: {
-      synced_devices: 'Semua ponsel Anda sudah terbaru',
+      synced_devices: 'Semua ponselmu sudah terbaru',
       ledger_personal: 'Pribadi',
       ledger_work: 'Kerja',
       ledger_travel: 'Liburan ke Jepang',
@@ -573,7 +572,7 @@ const id = {
       voice_logged: 'Dicatat lewat suara',
       voice_example: 'taksi 30',
       album_trip: 'Perjalanan Tokyo',
-      album_trip_meta: '4 Mar – 11 Mar',
+      album_trip_meta: '4 Mar - 11 Mar',
       album_celebration: 'Ulang Tahun Ibu',
       album_celebration_meta: '8 transaksi',
       month_starts_on_payday: 'Bulanmu dimulai saat gajian',
@@ -601,7 +600,7 @@ const id = {
       },
       savings: {
         title: 'Berapa yang Anda sisihkan',
-        body: 'Tingkat tabungan Anda bulan ini sekilas — yang Anda sisihkan dibanding yang Anda belanjakan, dalam uang dan jam kerja.',
+        body: 'Tingkat tabungan Anda bulan ini sekilas: yang Anda sisihkan dibanding yang Anda belanjakan, dalam uang dan jam kerja.',
       },
       trend: {
         title: 'Tren tabungan Anda',
@@ -618,7 +617,7 @@ const id = {
   },
   widgets: {
     saved: 'Ditabung',
-    overspent: 'Boros',
+    overspent: 'Defisit',
     spent: 'Dibelanjakan',
     of_income_saved: 'dari pemasukan ditabung',
     add_income_hint: 'Tambahkan pemasukan untuk melihat tingkat Anda',
@@ -747,8 +746,8 @@ const id = {
       title: 'Biar tercatat otomatis',
       subtitle: 'Atur kapan saja di Pengaturan.',
       screenshot_title: 'Tangkapan layar',
-      screenshot_subtitle_ios: 'Screenshot struk atau pembayaran.',
-      screenshot_subtitle_android: 'Bagikan screenshot struk atau pembayaran.',
+      screenshot_subtitle_ios: 'Tangkap layar struk atau pembayaran.',
+      screenshot_subtitle_android: 'Bagikan tangkapan layar struk atau pembayaran.',
       apple_pay_title: 'Apple Pay',
       apple_pay_subtitle: 'Setiap tap tercatat sendiri.',
       alerts_title: 'Notifikasi pembayaran',
@@ -758,7 +757,7 @@ const id = {
       add_transaction: 'Tambah Transaksi',
     },
     notifications: {
-      title: 'Tetap on track',
+      title: 'Tetap terkendali',
       subtitle: 'Beberapa pengingat yang berguna, itu saja.',
       enable: 'Aktifkan Notifikasi',
       not_now: 'Nanti Saja',
@@ -770,7 +769,7 @@ const id = {
       weekly_subtitle: '7 hari terakhirmu sekilas.',
     },
     backup: {
-      title: 'Cadangkan data Anda',
+      title: 'Cadangkan datamu',
       subtitle: 'Datamu hanya ada di ponsel ini.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
@@ -785,12 +784,12 @@ const id = {
       not_now: 'Nanti saja',
       confirm_title: 'Lewati pencadangan?',
       confirm_message:
-        'Money2Time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
+        'Money2Time menyimpan semuanya hanya di perangkat ini. Jika kamu kehilangan atau mengganti ponsel, semua datamu akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
       confirm_enable: 'Aktifkan pencadangan',
       confirm_skip: 'Tetap lewati',
       icloud_pending_title: 'Pencadangan diaktifkan',
       icloud_pending_message:
-        'Masuk ke iCloud dan aktifkan iCloud Drive di Pengaturan — pencadangan Anda akan dimulai otomatis begitu tersedia.',
+        'Masuk ke iCloud dan aktifkan iCloud Drive di Pengaturan. Pencadanganmu akan dimulai otomatis begitu tersedia.',
     },
     source: {
       title: 'Dari mana kamu tahu kami?',
@@ -814,7 +813,7 @@ const id = {
       discard_message: 'Item dan penetapanmu akan hilang.',
       discard_confirm: 'Buang',
       keep_editing: 'Lanjut mengedit',
-      low_confidence_banner: 'Beberapa baris sulit dibaca — periksa kembali.',
+      low_confidence_banner: 'Beberapa baris sulit dibaca. Periksa kembali.',
       items_empty_title: 'Belum ada item',
       items_empty_message: 'Tambahkan setiap baris dari struk untuk membaginya item per item.',
       item_name_placeholder: 'Nama item',
@@ -882,8 +881,8 @@ const id = {
       share_receipt: 'Kirim struk',
       receipt_qr_note: 'Pindai QR yang aku lampirkan untuk membayarku kembali.',
       receipt_scan_short: 'Pindai untuk bayar',
-      settings_title: 'Pengaturan Settle Up',
-      settings_action: 'Pengaturan Settle Up',
+      settings_title: 'Pengaturan pelunasan',
+      settings_action: 'Pengaturan pelunasan',
       qr_prompt_title: 'Tambahkan QR pembayaranmu?',
       qr_prompt_message:
         'Atur QR pembayaranmu agar teman bisa memindainya dan membayarmu langsung dari struk.',
@@ -1134,7 +1133,7 @@ const id = {
         sum_left: '{{diff}} tersisa',
         sum_mismatch: '{{diff}} belum tercakup',
         sum_over: 'Lebih {{diff}}',
-        negative_self: 'Teman-teman berhutang lebih dari total',
+        negative_self: 'Teman-teman berutang lebih dari total',
         mark_paid: 'Tandai sudah bayar',
         paid_label: 'Dibayar {{date}}',
         undo_paid: 'Batalkan',
@@ -1249,7 +1248,7 @@ const id = {
       'Pilih kategori dan pantau tren pengeluarannya dari waktu ke waktu.',
     expense_sentiment: 'Sentimen pengeluaran',
     expense_sentiment_description:
-      'Lihat mood di balik pengeluaranmu — senang, biasa, atau menyesal — hari demi hari.',
+      'Lihat mood di balik pengeluaranmu: senang, biasa, atau menyesal, hari demi hari.',
     asset_history: 'Tren Aset',
     asset_history_description: 'Lacak total asetmu sepanjang tahun dan tinjau tren saldo bulanan.',
     income_rate_history: 'Riwayat tarif pemasukan',
@@ -1481,32 +1480,32 @@ const id = {
       new_transaction_step_1:
         'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       new_transaction_step_2:
-        'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
-      new_transaction_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih New Transaction.',
+        'Buka Pengaturan → Aksesibilitas → Sentuh → Ketuk Belakang, lalu ketuk Ketuk Dua Kali (atau Ketuk Tiga Kali).',
+      new_transaction_step_3: 'Gulir ke bawah ke bagian Pintasan dan pilih New Transaction.',
       new_transaction_step_4:
         'Selesai. Ketuk dua kali bagian belakang iPhone Anda untuk langsung membuka transaksi baru.',
       log_screenshot_hint:
-        'Gunakan Back Tap di layar pembayaran atau struk mana pun. Money2Time menangkapnya dan membaca jumlah, merchant, dan akun secara otomatis.',
+        'Gunakan Ketuk Belakang di layar pembayaran atau struk mana pun. Money2Time menangkapnya dan membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:
         'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       log_screenshot_step_2:
-        'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
-      log_screenshot_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih Log Screenshot.',
+        'Buka Pengaturan → Aksesibilitas → Sentuh → Ketuk Belakang, lalu ketuk Ketuk Dua Kali (atau Ketuk Tiga Kali).',
+      log_screenshot_step_3: 'Gulir ke bawah ke bagian Pintasan dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Di layar pembayaran atau struk mana pun, ketuk dua kali bagian belakang iPhone Anda. Ia mengambil tangkapan layar secara otomatis untuk Anda.',
+        'Di layar pembayaran atau struk mana pun, ketuk dua kali bagian belakang iPhone Anda. Pintasan akan mengambil tangkapan layar secara otomatis.',
       log_screenshot_step_5:
         'Saat pertama kali berjalan, ketuk Always Allow agar bisa membaca tangkapan layar Anda.',
       log_screenshot_step_6:
         'Money2Time membaca jumlah dan merchant lalu mencatat transaksinya secara otomatis.',
       share_screenshot_title: 'Bagikan ke Money2Time',
       share_screenshot_hint:
-        'Bagikan screenshot pembayaran atau foto struk ke Money2Time dari aplikasi apa pun. Money2Time membaca jumlah, merchant, dan akun lalu mencatat transaksinya secara otomatis.',
+        'Bagikan tangkapan layar pembayaran atau foto struk ke Money2Time dari aplikasi apa pun. Money2Time membaca jumlah, merchant, dan akun lalu mencatat transaksinya secara otomatis.',
       share_screenshot_step_1:
-        'Ambil screenshot layar pembayaran atau struk, lalu ketuk Bagikan di pratinjau.',
+        'Ambil tangkapan layar dari layar pembayaran atau struk, lalu ketuk Bagikan di pratinjau.',
       share_screenshot_step_2:
         'Pilih Money2Time di menu berbagi. Tips: tekan lama untuk menyematkannya di depan.',
       share_screenshot_step_3:
-        'Money2Time terbuka dan membaca screenshot di latar belakang. Foto di galeri juga bisa: buka salah satunya, ketuk Bagikan, lalu pilih Money2Time.',
+        'Money2Time terbuka dan membaca tangkapan layar di latar belakang. Foto di galeri juga bisa: buka salah satunya, ketuk Bagikan, lalu pilih Money2Time.',
       share_screenshot_step_4:
         'Transaksi tercatat secara otomatis. Bagikan beberapa gambar sekaligus untuk mencatat semuanya.',
       defaults_title: 'Konfigurasi',
@@ -1541,7 +1540,7 @@ const id = {
       payment_alerts_ios_step_7:
         'Ketuk kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau dompet. Untuk meninjau notifikasi baru, bahkan saat offline, ketuk ikon riwayat di samping Notifikasi di Money2Time.',
       payment_alerts_android_disclosure:
-        'Baca cara akses notifikasi digunakan, lalu ketuk Continue.',
+        'Baca cara akses notifikasi digunakan, lalu ketuk Lanjutkan.',
       payment_alerts_ios_app:
         'Ketuk App dan pilih aplikasi bank atau dompet digital. Tangkapan layar ini menggunakan Wallet sebagai contoh.',
       payment_alerts_ios_run:
@@ -1661,7 +1660,7 @@ const id = {
     stat_days: 'Hari melacak',
     stat_transactions: 'Tercatat',
     stat_this_month: 'Bulan ini',
-    news: 'Berita',
+    news: 'Yang Baru',
     quick_entry: {
       title: 'Entri Cepat',
       section_expense: 'Pengeluaran',
@@ -1673,7 +1672,7 @@ const id = {
       default_currency_label: 'Mata uang default',
       default_currency_auto: 'Samakan dengan mata uang akun',
       default_row: 'Default',
-      no_default: 'Otomatis · fallback ke Lainnya',
+      no_default: 'Otomatis · jika tidak cocok, Lainnya',
       unmapped: 'Tidak dipetakan',
       custom_badge: 'Kustom',
       bucket_labels: {
@@ -1738,7 +1737,7 @@ const id = {
     hourly_value: 'Nilai per jam',
     notifications: 'Notifikasi',
     manage_formulas:
-      'Tambahkan entri hanya saat pemasukanmu berubah — tidak perlu memperbarui setiap bulan.',
+      'Tambahkan entri hanya saat pemasukanmu berubah. Tidak perlu memperbarui setiap bulan.',
     accounts: 'Akun',
     categories: 'Kategori',
     recurring: 'Transaksi berulang',
@@ -1779,7 +1778,7 @@ const id = {
       'Hapus tarif untuk {{month}}? Bulan yang bergantung padanya akan kembali ke bulan sebelumnya yang tersedia.',
     hourly_add_title: 'Tambah tarif pemasukan',
     hourly_month_exists_title: '{{month}} sudah ada',
-    hourly_month_exists_message: 'Ganti tarif penghasilannya dengan yang ini?',
+    hourly_month_exists_message: 'Ganti tarif pemasukannya dengan yang ini?',
     hourly_replace: 'Ganti',
     account_settings: 'Personalisasi',
     haptics: 'Haptics',
@@ -1833,9 +1832,12 @@ const id = {
       '- category: cocokkan terbaik dari kategori saya di bawah menggunakan format "Induk > Subkategori" jika subkategori sesuai, hanya nama induk jika tidak, "Other" jika tidak yakin\n' +
       '- account: nama akun spesifik seperti tercetak di rekening koran (misalnya "BCA Tahapan", "Mandiri Kartu Kredit"), bukan label generik\n\n' +
       'Lewati hanya: baris saldo, total rekening koran, pengungkapan, header/footer.\n\n' +
-      '## Akun Saya\n{{accounts}}\n\n' +
-      '## Kategori Pengeluaran Saya\n{{expenses}}\n\n' +
-      '## Kategori Pemasukan Saya\n{{incomes}}\n\n' +
+      '## Akun Saya\n' +
+      '{{accounts}}\n\n' +
+      '## Kategori Pengeluaran Saya\n' +
+      '{{expenses}}\n\n' +
+      '## Kategori Pemasukan Saya\n' +
+      '{{incomes}}\n\n' +
       'Balas HANYA dengan blok kode json, tanpa teks lain:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1850,13 +1852,13 @@ const id = {
       '}\n' +
       '```\n\n' +
       '## Aturan\n' +
-      '- Cantumkan mata uang rekening koran sebagai kode ISO 4217 (misalnya "MYR", "SGD", "USD"). Salin setiap jumlah persis seperti tercetak dan JANGAN pernah mengonversinya ke mata uang lain.\\n' +
+      '- Cantumkan mata uang rekening koran sebagai kode ISO 4217 (misalnya "MYR", "SGD", "USD"). Salin setiap jumlah persis seperti tercetak dan JANGAN pernah mengonversinya ke mata uang lain.\n' +
       '- JANGAN PERNAH membuat atau mengarang transaksi. Hanya keluarkan apa yang ada dalam dokumen.\n' +
       '- JANGAN PERNAH melewati, memotong, atau menghilangkan transaksi. Baca setiap halaman setiap file dari awal hingga akhir. Keluarkan setiap baris transaksi.\n' +
       '- Jika beberapa file diunggah, proses setiap file secara lengkap lalu gabungkan semua transaksi ke dalam satu array "transactions".\n' +
       '- Jika rekening koran mencakup batas tahun dan hanya menampilkan bulan/hari, simpulkan tahunnya dari periode rekening koran.\n' +
       '- Jangan ajukan pertanyaan, jangan menolak, jangan tawarkan untuk membagi menjadi beberapa respons.\n' +
-      "- Jika outputmu terpotong, berhenti di tengah JSON dan saya akan membalas 'lanjutkan' agar kamu bisa menyelesaikannya. Jangan berhenti lebih awal untuk menghindari pemotongan — teruslah berjalan.",
+      "- Jika outputmu terpotong, berhenti di tengah JSON dan saya akan membalas 'lanjutkan' agar kamu bisa menyelesaikannya. Jangan berhenti lebih awal untuk menghindari pemotongan, teruskan saja.",
   },
   data_management: {
     section_export: 'Ekspor',
@@ -1864,7 +1866,7 @@ const id = {
     section_others: 'Lainnya',
     export_excel_title: 'Ekspor ke Excel',
     export_excel_description:
-      'Simpan transaksi, akun, dan kategori Anda sebagai spreadsheet .xlsx yang bisa dibuka di Excel, Numbers, atau Google Sheets.',
+      'Simpan transaksi, akun, dan kategorimu sebagai spreadsheet .xlsx yang bisa dibuka di Excel, Numbers, atau Google Sheets.',
     exporting_excel: 'Membuat spreadsheet...',
     export_excel_error_title: 'Ekspor Excel gagal',
     export_excel_error_message: 'Spreadsheet tidak dapat dibuat. Silakan coba lagi.',
@@ -1891,12 +1893,12 @@ const id = {
       column_name: 'Nama',
       column_group: 'Grup',
       column_starting_balance: 'Saldo awal',
-      column_include_in_totals: 'Masukkan ke total',
+      column_include_in_totals: 'Termasuk dalam total',
       column_parent: 'Kategori induk',
       column_icon: 'Ikon',
       column_pattern: 'Pola',
       column_interval: 'Interval',
-      column_next_run: 'Jalan berikutnya',
+      column_next_run: 'Jadwal berikutnya',
       column_end_date: 'Tanggal berakhir',
       column_active: 'Aktif',
       value_yes: 'Ya',
@@ -2082,7 +2084,7 @@ const id = {
     clear: 'Hapus ikon',
     pack_label: 'Paket ikon',
     pack_pro_banner: 'Ikon ini bagian dari Pro. Tingkatkan untuk memakainya.',
-    pack_default: 'Tanah liat',
+    pack_default: 'Clay',
     pack_lowpoly: 'Low poly',
     pack_line: 'Garis',
     pack_pixel: 'Piksel',
@@ -2221,7 +2223,7 @@ const id = {
         'Suku bunga efektif {{rate}}%. Itulah biaya bunga flat ini pada saldo menurun.',
       rate_change_title: 'Mulai kapan bunga baru berlaku?',
       rate_change_message:
-        'Bunga berubah dari {{from}}% menjadi {{to}}%. Terapkan mulai hari ini agar bunga yang sudah dikenakan tetap, atau dari awal jika kamu memperbaiki kesalahan.',
+        'Bunga berubah dari {{from}}% menjadi {{to}}%. Terapkan mulai hari ini agar bunga yang sudah dikenakan tetap, atau dari awal jika Anda memperbaiki kesalahan.',
       rate_change_from_today: 'Mulai hari ini',
       rate_change_from_start: 'Dari awal',
       interest_saved_label: 'Bunga dihemat',
@@ -2239,10 +2241,10 @@ const id = {
       paid_periods_error: 'Harus lebih sedikit dari tenor.',
       start_date_label: 'Tanggal mulai',
       start_date_info:
-        'Kapan pinjaman diambil. Angsuran pertama jatuh sebulan kemudian, dan tanggalnya menjadi tanggal bayarmu.',
+        'Kapan pinjaman diambil. Angsuran pertama jatuh sebulan kemudian, dan tanggalnya menjadi tanggal bayar Anda.',
       collect_account_label: 'Debit dari',
       collect_account_info:
-        'Akun yang didebit tiap bulan. Pilih satu dan angsuran tercatat otomatis; kosongkan dan kamu mencatat sendiri tiap pembayaran.',
+        'Akun yang didebit tiap bulan. Pilih satu dan angsuran tercatat otomatis; kosongkan dan Anda mencatat sendiri tiap pembayaran.',
       collect_account_manual: 'Saya catat sendiri',
       collect_account_external: 'Pembayaran ini diatur di Berulang. Ubah di sana.',
       count_as_expense_label: 'Hitung cicilan sebagai pengeluaran',
@@ -2273,7 +2275,7 @@ const id = {
       balance_owed_hint:
         'Rekening koran Anda mungkin menampilkan {{amount}}, yang sudah menambahkan bunga yang belum jatuh tempo.',
       paid_so_far_label: 'Sudah dibayar',
-      left_to_pay_label: 'Sisa bayaran',
+      left_to_pay_label: 'Sisa pembayaran',
       awaiting_contract: 'Isi kolom di atas',
       paid_off_badge: 'Lunas',
       paid_off_message: 'Pinjaman ini sudah lunas',
@@ -2285,7 +2287,7 @@ const id = {
       due_amount: 'Jumlah tagihan',
       archive_action: 'Arsipkan pinjaman',
       celebration_title: 'Pinjaman lunas',
-      celebration_message: '{{name}} sudah lunas. Utang itu kini di belakangmu.',
+      celebration_message: '{{name}} sudah lunas. Utang itu kini sudah berlalu.',
       celebration_message_with_amount: '{{name}} sudah lunas, seluruh {{amount}}.',
       celebration_archive_cta: 'Arsipkan',
       celebration_keep_cta: 'Biarkan tampil',
@@ -2390,7 +2392,7 @@ const id = {
     limit_receipt_scans:
       'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk pemindaian tanpa batas.',
     limit_autolog:
-      'Anda sudah memakai semua {{count}} otomatisasi Apple Pay gratis, jadi pembayaran terakhir Anda tidak tercatat. Tingkatkan ke Pro untuk tanpa batas.',
+      'Kamu sudah memakai semua {{count}} otomatisasi Apple Pay gratis, jadi pembayaran terakhirmu tidak tercatat. Tingkatkan ke Pro untuk tanpa batas.',
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
@@ -2407,23 +2409,23 @@ const id = {
     limit_custom_item_images:
       'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_custom_category_icons:
-      'Mengunggah ikon sendiri adalah fitur Pro. Tingkatkan untuk memakai gambar apa pun pada kategori, tujuan, dan anggaran.',
+      'Mengunggah ikon sendiri adalah fitur Pro. Tingkatkan untuk memakai gambar apa pun pada kategori, target, dan anggaran.',
     limit_app_icon:
-      'Ikon aplikasi tambahan adalah fitur Pro. Tingkatkan untuk memberi Money2Time tampilan baru di layar utama Anda.',
+      'Ikon aplikasi tambahan adalah fitur Pro. Tingkatkan untuk memberi Money2Time tampilan baru di layar utamamu.',
     limit_custom_card_designs:
       'Desain kartu sendiri adalah fitur Pro. Upgrade untuk memasang foto atau karya seni apa pun di kartumu.',
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
     limit_live_earnings_auto_start:
-      'Memulai jam sesuai jadwal adalah fitur Pro. Tingkatkan dan shift Anda dimulai sendiri. Memulai secara manual selalu gratis.',
+      'Memulai jam sesuai jadwal adalah fitur Pro. Tingkatkan dan sifmu dimulai sendiri. Memulai secara manual selalu gratis.',
     limit_album_categories:
       'Mengubah kategori album bersama adalah fitur Pro. Upgrade untuk mengganti nama, menambah, atau menghapusnya bagi semua orang di album.',
     limit_reimbursements:
       'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',
     limit_subcurrencies:
-      'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
+      'Kamu bisa menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     upgrade: 'Upgrade ke Pro',
     upgrade_subtitle: 'Buka fitur tanpa batas',
-    active: 'Anda sudah Pro',
+    active: 'Kamu sudah Pro',
     active_subtitle: 'Semua fitur terbuka',
     restore: 'Pulihkan Pembelian',
     restoring: 'Memulihkan...',
@@ -2471,7 +2473,7 @@ const id = {
     currencies_label: 'Mata uang',
     albums_label: 'Album',
     limit_albums:
-      'Anda dapat membuat hingga {{count}} album di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
+      'Kamu bisa membuat hingga {{count}} album di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
     cloud_sync_label: 'Cloud Sync',
     shared_ledgers_label: 'Buku bersama',
     shared_ledgers_free: 'Gabung',
@@ -2503,7 +2505,7 @@ const id = {
     trial_free: 'Gratis {{duration}}',
     trial_cta: 'Mulai uji coba gratis',
     subscribe: 'Berlangganan',
-    buy_lifetime: 'Beli Lifetime',
+    buy_lifetime: 'Beli Seumur Hidup',
     maybe_later: 'Mungkin nanti',
     trial_terms: 'Gratis selama {{duration}}, lalu {{price}}.',
     plans_heading: 'Pilih paketmu',
@@ -2556,7 +2558,7 @@ const id = {
     limit_loans:
       'Paket gratis bisa melacak {{count}} pinjaman. Tingkatkan ke Pro untuk tanpa batas.',
     limit_instalments:
-      'Di paket gratis, Anda bisa melunasi {{count}} cicilan sekaligus. Tingkatkan ke Pro untuk tanpa batas.',
+      'Di paket gratis, kamu bisa punya {{count}} cicilan berjalan sekaligus. Tingkatkan ke Pro untuk tanpa batas.',
     badge: 'PRO',
     trend_preview_title: 'Buka tren jangka panjang',
     trend_preview_message:
@@ -2608,7 +2610,7 @@ const id = {
       'Belum ada akun {{currency}}. Tabung otomatis butuh akun dengan mata uang yang sama.',
     auto_save_rule_name: 'Tabung otomatis: {{name}}',
     auto_save_managed_in_recurring:
-      'Tabung otomatis tujuan ini memakai jadwal khusus. Ubah di {{settings}} > {{recurring}}.',
+      'Tabung otomatis target ini memakai jadwal khusus. Ubah di {{settings}} > {{recurring}}.',
     edit_title: 'Edit target',
     delete_title: 'Hapus target?',
     delete_message: 'Ini menghapus target beserta transaksinya. Tidak bisa dibatalkan.',
@@ -2668,7 +2670,7 @@ const id = {
   },
   notifications: {
     title: 'Notifikasi',
-    subtitle: 'Tetap on top of pengeluaranmu dengan pengingat dan peringatan tepat waktu.',
+    subtitle: 'Pantau terus pengeluaranmu dengan pengingat dan peringatan tepat waktu.',
     permission_required: 'Notifikasi dinonaktifkan',
     permission_required_message:
       'Aktifkan notifikasi di pengaturan perangkatmu untuk menerima pengingat.',
@@ -2690,7 +2692,7 @@ const id = {
     weekly_review: {
       title: 'Tinjauan Mingguan',
       label: 'Tinjauan mingguan',
-      description: 'Rangkuman minggu yang baru saja berakhir, pada hari minggu itu ditutup.',
+      description: 'Rangkuman minggu yang baru saja berakhir, dikirim pada hari penutupannya.',
     },
     monthly_review: {
       title: 'Tinjauan Bulanan',
@@ -2723,23 +2725,23 @@ const id = {
       autolog_failure_body: 'Ketuk untuk menambahkannya secara manual.',
       autolog_test_title: 'Otomatisasi berfungsi',
       autolog_test_card_body:
-        'Tidak ada pembayaran dalam proses ini, hal yang wajar saat pengujian. Jika Anda baru saja membayar, buka Money2Time untuk menambahkannya.',
+        'Tidak ada pembayaran dalam proses ini, hal yang wajar saat pengujian. Jika kamu baru saja membayar, buka Money2Time untuk menambahkannya.',
       autolog_test_alert_body:
         'Tidak ada teks notifikasi dalam proses ini, hal yang wajar saat pengujian. Notifikasi bank akan muncul di Money2Time untuk ditinjau.',
       autolog_limit_body:
-        'Anda sudah memakai semua {{count}} otomatisasi gratis. Tingkatkan ke Pro di Money2Time untuk tanpa batas.',
+        'Kamu sudah memakai semua {{count}} otomatisasi gratis. Tingkatkan ke Pro di Money2Time untuk tanpa batas.',
       daily_title: 'Bagaimana harimu?',
       daily_body: 'Luangkan 30 detik untuk mencatat pengeluaran hari ini selagi masih ingat.',
       recurring_title: '{{name}} · {{amount}}',
       recurring_body: 'Transaksi berulangmu dicatat secara otomatis.',
       recurring_body_with_hours: 'Dicatat otomatis. Itu setara dengan {{hours}} kerjamu.',
       live_earnings_title: 'Siap mulai bekerja?',
-      live_earnings_body: 'Ketuk untuk memulai jam penghasilan langsung Anda.',
+      live_earnings_body: 'Ketuk untuk memulai jam penghasilan langsungmu.',
       live_earnings_started_title: 'Penghasilan langsung dimulai',
-      live_earnings_started_body: 'Jam Anda sedang berjalan.',
-      weekly_review_title: 'Mingguanmu dalam tinjauan',
+      live_earnings_started_body: 'Jammu sedang berjalan.',
+      weekly_review_title: 'Rekap minggumu',
       weekly_review_body: 'Lihat ke mana uang dan waktumu pergi minggu lalu.',
-      monthly_review_title: 'Bulananmu dalam tinjauan',
+      monthly_review_title: 'Rekap bulanmu',
       monthly_review_body: 'Lihat ke mana uang dan waktumu pergi bulan lalu.',
     },
   },
@@ -2755,7 +2757,7 @@ const id = {
     confirm_message:
       'Pastikan komputer menampilkan kode {{code}}. Lanjutkan hanya jika kamu sendiri yang membuka app.money2time.com di komputer yang sedang kamu pakai: komputer itu akan menerima semua datamu setiap kali layar ini terbuka.',
     confirm_edits:
-      'Selama layar ini terbuka, browser itu juga bisa menambah, mengubah, dan menghapus entri Anda.',
+      'Selama layar ini terbuka, browser itu juga bisa menambah, mengubah, dan menghapus entrimu.',
     confirm_waiting: 'Sekarang klik juga Tautkan di komputer.',
     confirm_action: 'Tautkan',
     browsers_title: 'Tertaut',
@@ -2772,12 +2774,12 @@ const id = {
     browser_options: 'Opsi browser',
     edits_on: 'Browser ini bisa menambah, mengubah, dan menghapus entri selama layar ini terbuka.',
     edits_off:
-      'Browser ini hanya bisa melihat data Anda. Izinkan perubahan untuk menambah, mengubah, dan menghapus entri dari browser ini selama layar ini terbuka.',
+      'Browser ini hanya bisa melihat datamu. Izinkan perubahan untuk menambah, mengubah, dan menghapus entri dari browser ini selama layar ini terbuka.',
     edits_allow: 'Izinkan perubahan',
     edits_disallow: 'Hanya lihat',
     read_only: 'Hanya lihat',
     edit_hint_some_read_only:
-      'Selama layar ini terbuka, browser yang Anda izinkan juga bisa menambah, mengubah, dan menghapus entri. Ketuk ⋯ di samping browser untuk mengizinkannya. Perubahan disimpan di ponsel ini.',
+      'Selama layar ini terbuka, browser yang kamu izinkan juga bisa menambah, mengubah, dan menghapus entri. Ketuk ⋯ di samping browser untuk mengizinkannya. Perubahan disimpan di ponsel ini.',
     send_now: 'Kirim sekarang',
     open_web: 'Buka app.money2time.com',
     unlink: 'Putuskan tautan',
@@ -2841,7 +2843,7 @@ const id = {
       offline: 'Tidak ada koneksi internet. Hubungkan lalu coba lagi.',
       timeout: 'Koneksi habis waktu. Coba lagi di jaringan yang lebih cepat.',
       auth: 'Masuk lagi ke Google Drive untuk melanjutkan pencadangan.',
-      quota: 'Google Drive Anda penuh. Kosongkan ruang lalu coba lagi.',
+      quota: 'Google Drive-mu penuh. Kosongkan ruang lalu coba lagi.',
       rate_limited: 'Google Drive sedang sibuk. Coba lagi sebentar lagi.',
       server: 'Google Drive sementara tidak tersedia. Coba lagi nanti.',
       client: 'Google Drive menolak cadangan ini.',
@@ -2875,7 +2877,7 @@ const id = {
     preprompt_happy: 'Ya, saya suka',
     preprompt_unhappy: 'Kurang suka',
     preprompt_dismiss: 'Mungkin nanti',
-    feedback_prompt: 'Maaf mendengar itu — mau berbagi apa yang bisa diperbaiki?',
+    feedback_prompt: 'Maaf mendengarnya. Mau berbagi apa yang bisa membuatnya lebih baik?',
     feedback_open: 'Bagikan masukan',
     feedback_skip: 'Tidak, terima kasih',
   },
@@ -3018,14 +3020,14 @@ const id = {
       add: 'Tambah lokasi',
       clear: 'Hapus lokasi',
       picker_title: 'Pilih tempat',
-      search_placeholder: 'Cari kota…',
-      search_hint: 'Cari kota untuk menempatkan perjalanan ini di peta.',
+      search_placeholder: 'Cari kota, provinsi, atau negara…',
+      search_hint: 'Cari kota, provinsi, atau negara untuk menempatkan perjalanan ini di peta.',
       no_results: 'Tidak ada tempat ditemukan',
       empty_title: 'Belum ada tempat',
       empty_message: 'Tambahkan lokasi ke album untuk melihatnya di globe dan peta.',
     },
     title: 'Album',
-    active_label: 'Tambah transaksi baru ke',
+    active_label: 'Otomatis tambahkan transaksi baru ke',
     active_sheet_title: 'Perjalanan aktif',
     active_none: 'Tidak ada',
     active_badge: 'Aktif',
@@ -3109,13 +3111,13 @@ const id = {
       body: 'Kamu keluar dari album ini, berbagi dihentikan, atau kamu keluar dari akun. Album disimpan seperti semula, beserta transaksimu, dan tidak diperbarui lagi. Masuk lagi atau bergabung lagi untuk mengembalikannya.',
     },
     balances: {
-      tab: 'Saldo',
-      empty_title: 'Belum ada saldo',
+      tab: 'Utang piutang',
+      empty_title: 'Belum ada utang piutang',
       who_owes_whom: 'Siapa berutang kepada siapa',
-      owes_you: '{{name}} berutang kepada Anda',
+      owes_you: '{{name}} berutang kepadamu',
       owes: '{{from}} berutang kepada {{to}}',
       group_spending: 'Pengeluaran grup',
-      your_share: 'Bagian Anda',
+      your_share: 'Bagianmu',
       record_others_title: 'Catat pembayaran ini?',
       record_others_body: '{{from}} membayar {{to}} {{amount}}.',
       record_others_confirm: 'Catat',
@@ -3128,7 +3130,7 @@ const id = {
       title: 'Album bersama',
       own: 'Ini salah satu albummu sendiri.',
       already: 'Kamu sudah ada di album ini.',
-      main_shared: 'Buku utama Anda dibagikan, jadi tidak bisa memuat album bersama.',
+      main_shared: 'Buku utamamu dibagikan, jadi tidak bisa memuat album bersama.',
       unavailable: 'Album bersama belum tersedia di versi ini.',
       full: 'Album ini sudah penuh. Minta pemiliknya untuk memberi ruang.',
     },
@@ -3231,7 +3233,7 @@ const id = {
     nothing_logged_title: 'Periode yang sepi',
     nothing_logged_description: 'Tidak ada yang dicatat pada periode ini.',
     spent: 'Dibelanjakan',
-    delta_flat: 'Setara',
+    delta_flat: 'Tetap',
     in_and_out: 'Masuk dan keluar',
     came_in: 'Masuk',
     went_out: 'Keluar',
@@ -3352,7 +3354,7 @@ const id = {
       'Sertakan pengeluaran dari kategori tanpa pos anggaran ke total bulan.',
     count_unbudgeted_caption_year:
       'Sertakan pengeluaran dari kategori tanpa pos anggaran ke total tahun.',
-    children_hint: 'Jika mau, bagikan jumlah ini ke subkategori.',
+    children_hint: 'Jika mau, bagi jumlah ini ke subkategori.',
     subcategories: 'Subkategori',
     edit_budget: 'Edit anggaran',
   },
@@ -3651,7 +3653,7 @@ const id = {
     ai_settings: 'Pengaturan tinjauan otomatis',
     ai_quota_free: 'Sisa %{count} dari %{limit} gratis',
     ai_quota_pro: 'Tanpa batas dengan Pro',
-    ai_quota_left: 'Sisa %{count}',
+    ai_quota_left: 'Sisa %{count} gratis',
     ai_quota_unlimited: 'Tanpa batas',
     ai_quota_info_title: 'Tinjauan otomatis gratis',
     ai_quota_info:

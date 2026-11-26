@@ -1,20 +1,20 @@
 const da = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Gendan sikkerhedskopi',
+    export_description: 'Personlige data og delte regnskaber, du ejer.',
+    import_description: 'Vælg, hvad der skal gendannes fra en sikkerhedskopi.',
+    personal: 'Personlige regnskaber',
+    personal_note: 'Erstatter regnskaber og indstillinger på synkroniserede enheder.',
+    personal_local_note: 'Erstatter regnskaber og indstillinger.',
+    shared_ledgers: 'Delte regnskaber',
+    owned: 'Du ejer dette regnskab',
+    unavailable: 'Kræver ejeradgang',
+    restore_action: 'Gendan valgte',
+    confirm_title: 'Gendan for alle?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nErstat med sikkerhedskopien fra {{date}}. Senere ændringer går tabt. Medlemmer og invitationer forbliver uændrede.',
+    sync_pending: 'Gendannet her. Forbliv logget ind, så synkroniseringen kan blive færdig.',
+    failed: 'Kunne ikke gendanne. Tjek din forbindelse, ejeradgang og ledig lagerplads.',
     photos_unavailable:
       'Kunne ikke hente sikkerhedskopiens billeder. Tjek din forbindelse, og prøv igen.',
     photos_missing:
@@ -140,7 +140,7 @@ const da = {
     invalid_file_path: 'Ugyldig filsti.',
     only_mmbak_supported: 'Kun .mmbak-sikkerhedskopier understøttes.',
     mm_unsupported_backup_schema:
-      'Dette sikkerhedskopieringsformats understøttes ikke. Brug en Money Manager-backup eksporteret fra iOS-appen.',
+      'Formatet på denne sikkerhedskopi understøttes ikke. Brug en Money Manager-backup eksporteret fra iOS-appen.',
     recurring_fallback_name: 'Tilbagevendende {{id}}',
     import_failed_generic: 'Import mislykkedes. Prøv igen.',
     data_load_failed_title: 'Kan ikke indlæse dine data',
@@ -280,7 +280,7 @@ const da = {
       },
       cardDesigns: {
         title: 'Nye kortdesigns',
-        body: 'Giv hvert kontokort sit eget udseende med over 70 designs, fra farveforløb og marmor til vores mønt-pung-kylling. Rediger en konto, og tryk på Kortdesign. Med Pro kan du også uploade dit eget billede.',
+        body: 'Giv hvert kontokort sit eget udseende med over 70 designs, fra farveforløb og marmor til vores møntpung-kylling. Rediger en konto, og tryk på Kortdesign. Med Pro kan du også uploade dit eget billede.',
       },
       bottomBar: {
         title: 'Gør bundbjælken til din',
@@ -361,7 +361,7 @@ const da = {
       },
     },
     subscriptions_tutorials_loans: {
-      title: 'Abonnementer & guider',
+      title: 'Abonnementer og vejledninger',
       subscriptionLogos: {
         title: 'Logoer til dine abonnementer',
         body: 'Skriv et navn som Netflix, så kommer logoet frem. Over 2.000 mærker. Egne billeder følger med Pro.',
@@ -438,22 +438,22 @@ const da = {
       title: 'Automatiseringer',
       auto: {
         title: 'Dit forbrug logger sig selv',
-        body: 'Tre nye automatiseringer til iOS: hold dit kort mod terminalen, og Apple Pay-betalingen registreres af sig selv, Log Screenshot gør et screenshot af en betaling til en scannet transaktion, og Back Tap åbner hurtig indtastning med et tryk på bagsiden af telefonen. Sæt dem op på siden Automatisering.',
+        body: 'Tre nye automatiseringer til iOS: hold dit kort mod terminalen, og Apple Pay-betalingen registreres af sig selv, Log Screenshot gør et skærmbillede af en betaling til en scannet transaktion, og Back Tap åbner hurtig indtastning med et tryk på bagsiden af telefonen. Sæt dem op på siden Automatisering.',
       },
     },
     receipt_split_update: {
       title: 'Opdel pr. vare',
       split: {
         title: 'Scan en kvittering, og opdel den vare for vare',
-        body: 'Tag et billede af regningen, og tildel hver linje til den, der fik den — del retter i portioner, mens moms og servicegebyr fordeles retfærdigt af sig selv. Alle lander under “Hvem skylder dig” med et præcist beløb.',
+        body: 'Tag et billede af regningen, og tildel hver linje til den, der fik den. Del retter i portioner, mens moms og servicegebyr fordeles retfærdigt af sig selv. Alle lander under “Hvem skylder dig” med et præcist beløb.',
       },
       selector: {
         title: 'En hurtigere måde at tilføje på',
-        body: 'Plus-knappen åbner nu en menu med fanerne Tilføj og Del, så hurtig registrering, kvitteringsscanning, stemme og opdeling af en regning kun er ét tryk væk. Vil du hellere gå direkte til hurtig registrering? Du kan slå denne menu fra når som helst i indstillingerne for Hurtig registrering.',
+        body: 'Plus-knappen åbner nu en menu med fanerne Tilføj og Del, så hurtig indtastning, kvitteringsscanning, stemme og opdeling af en regning kun er ét tryk væk. Vil du hellere gå direkte til hurtig indtastning? Du kan slå denne menu fra når som helst i indstillingerne for Hurtig indtastning.',
       },
     },
     budget_items_update: {
-      title: 'Budgetter & ejendele',
+      title: 'Budgetter og ting',
       budget: {
         title: 'Sæt et månedligt budget',
         body: 'Byg et budget ud fra genanvendelige skabeloner, og se hver kategori fyldes, mens du bruger. Se hvad der er tilbage med et blik, pr. måned eller direkte på din startskærm.',
@@ -524,7 +524,7 @@ const da = {
       open_scan_receipt: 'Scan kvitteringer',
       open_albums: 'Åbn Album',
       open_share_earn: 'Få Pro gratis',
-      open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
+      open_quick_entry_settings: 'Åbn indstillinger for Hurtig indtastning',
       open_auto_log: 'Opsæt automatiseringer',
       open_first_day_of_month: 'Vælg din månedsstart',
       open_excel_export: 'Gå til Excel-eksport',
@@ -553,7 +553,7 @@ const da = {
       ricecal_chicken_rice: 'Kylling med ris',
       ricecal_one_plate: '1 portion',
       ricecal_kcal: 'kcal',
-      autolog_screenshot: 'Screenshot',
+      autolog_screenshot: 'Skærmbillede',
       autolog_backtap: 'Tryk på bagsiden',
       autolog_merchant: 'Morgenkaffe',
       autolog_logged: 'Logget automatisk',
@@ -574,7 +574,7 @@ const da = {
       voice_logged: 'Registreret via stemme',
       voice_example: 'taxi 30',
       album_trip: 'Tokyo-tur',
-      album_trip_meta: '4. mar – 11. mar',
+      album_trip_meta: '4. mar - 11. mar',
       album_celebration: 'Mors fødselsdag',
       album_celebration_meta: '8 transaktioner',
       month_starts_on_payday: 'Din måned starter på lønningsdagen',
@@ -586,7 +586,7 @@ const da = {
       title: 'Widgets på startskærmen',
       overview: {
         title: 'Money2Time på din startskærm',
-        body: 'Se, hvad du har brugt denne måned, og hvad det koster i arbejdstimer – uden at åbne appen.',
+        body: 'Se, hvad du har brugt denne måned, og hvad det koster i arbejdstimer, uden at åbne appen.',
       },
       quick_log: {
         title: 'Registrér med ét tryk',
@@ -602,7 +602,7 @@ const da = {
       },
       savings: {
         title: 'Hvor meget du beholder',
-        body: 'Din opsparingsrate denne måned på et øjeblik – hvad du beholdt mod hvad du brugte, i penge og arbejdstimer.',
+        body: 'Din opsparingsrate denne måned på et øjeblik: hvad du beholdt mod hvad du brugte, i penge og arbejdstimer.',
       },
       trend: {
         title: 'Din opsparingstendens',
@@ -613,7 +613,7 @@ const da = {
       title: 'Tilføj transaktioner med stemmen',
       say_it: {
         title: 'Bare sig det',
-        body: 'Hold +-knappen nede og sig det, f.eks. "taxi 30" eller "kaffe 4.50". Vi finder beløbet og kategorien for dig – alt sammen på din telefon.',
+        body: 'Hold +-knappen nede og sig det, f.eks. "taxi 30" eller "kaffe 4.50". Vi finder beløbet og kategorien for dig, alt sammen på din telefon.',
       },
     },
   },
@@ -623,7 +623,7 @@ const da = {
     spent: 'Brugt',
     of_income_saved: 'af indtægten sparet',
     add_income_hint: 'Tilføj indtægt for at se din rate',
-    set_hourly_value: 'Angiv timeløn i appen',
+    set_hourly_value: 'Angiv timeværdi i appen',
     of_work: '{{hours}} arbejde',
     of_work_kept: '≈ {{hours}} arbejde beholdt',
     of_work_behind: '≈ {{hours}} arbejde bagud',
@@ -653,7 +653,7 @@ const da = {
       start_confirm: 'Start',
       stop: 'Stop uret',
       wage_title: 'Hvad er en time værd?',
-      wage_body: 'Live-indtjening tæller op med din reelle timeløn. Angiv den, så er du klar.',
+      wage_body: 'Live-indtjening tæller op med din reelle timeværdi. Angiv den, så er du klar.',
       wage_action: 'Angiv min timeværdi',
       disabled_title: 'Live-aktiviteter er slået fra',
       disabled_body: 'Slå dem til igen for Money2Time i iOS-indstillingerne, og kom så tilbage.',
@@ -674,7 +674,7 @@ const da = {
       summary_total: 'Vagt i alt',
       of_total: 'af {{total}}',
       refresh: 'Opdater',
-      widget_idle: 'Sporer ikke',
+      widget_idle: 'Kører ikke',
     },
   },
   home: {
@@ -789,7 +789,7 @@ const da = {
       confirm_skip: 'Spring over alligevel',
       icloud_pending_title: 'Sikkerhedskopi slået til',
       icloud_pending_message:
-        'Log ind på iCloud og slå iCloud Drive til i Indstillinger — din sikkerhedskopi starter automatisk, så snart den er tilgængelig.',
+        'Log ind på iCloud og slå iCloud Drive til i Indstillinger. Din sikkerhedskopi starter automatisk, så snart den er tilgængelig.',
     },
     source: {
       title: 'Hvordan fandt du os?',
@@ -813,7 +813,7 @@ const da = {
       discard_message: 'Dine varer og fordelinger går tabt.',
       discard_confirm: 'Kassér',
       keep_editing: 'Fortsæt redigering',
-      low_confidence_banner: 'Nogle linjer var svære at læse — tjek dem en ekstra gang.',
+      low_confidence_banner: 'Nogle linjer var svære at læse. Tjek dem en ekstra gang.',
       items_empty_title: 'Ingen varer endnu',
       items_empty_message: 'Tilføj hver linje fra kvitteringen for at opdele den vare for vare.',
       item_name_placeholder: 'Varenavn',
@@ -836,7 +836,7 @@ const da = {
       portions_title: 'Portioner',
       your_share: 'Din andel',
       tax_fees_label: 'Moms og gebyrer',
-      tax_service_title: 'Skat & service',
+      tax_service_title: 'Moms og service',
       people_label: 'Personer',
       optional_name: 'Navn (valgfrit)',
       person_named: 'Person {{label}}',
@@ -1006,7 +1006,7 @@ const da = {
         chip_active: 'Gebyr {{amount}}',
         title: 'Overførselsgebyr',
         amount_label: 'Gebyrbeløb',
-        charged_to: 'Betales af',
+        charged_to: 'Trækkes fra',
         remove: 'Fjern gebyr',
         row_note: 'Overførselsgebyr',
         delete_confirm: 'Gebyret på {{fee}} slettes også. Det kan ikke fortrydes. Fortsæt?',
@@ -1063,7 +1063,7 @@ const da = {
       optional: 'Valgfrit',
       yest_short: 'I går',
       subcategories: 'Underkategorier',
-      recurring_settings: 'Tilbagevendende indstillinger',
+      recurring_settings: 'Indstillinger for gentagelse',
       rule_name: 'Regelnavn',
       rule_name_placeholder: 'Netflix-abonnement',
       repeat: 'Gentag',
@@ -1078,7 +1078,7 @@ const da = {
       never: 'Aldrig',
       on_date: 'På dato',
       end_date: 'Slutdato',
-      sentiment_label: 'Hvordan har du det?',
+      sentiment_label: 'Hvordan føles det?',
       status: 'Status',
       active: 'Aktiv',
       paused: 'Sat på pause',
@@ -1130,7 +1130,7 @@ const da = {
         search_members: 'Søg medlemmer',
         sum_match: '{{sum}} af {{total}}',
         sum_left: '{{diff}} tilbage',
-        sum_mismatch: '{{diff}} uregistreret',
+        sum_mismatch: '{{diff}} ikke fordelt',
         sum_over: 'Over med {{diff}}',
         negative_self: 'Venner skylder mere end totalen',
         mark_paid: 'Markér betalt',
@@ -1246,7 +1246,7 @@ const da = {
       'Vælg en kategori og følg, hvordan dens forbrug udvikler sig over tid.',
     expense_sentiment: 'Udgiftsstemning',
     expense_sentiment_description:
-      'Se stemningen bag dine udgifter — glad, neutral eller fortrydende — dag for dag.',
+      'Se stemningen bag dine udgifter (glad, neutral eller fortrydende) dag for dag.',
     asset_history: 'Formuetendens',
     asset_history_description:
       'Følg dine samlede aktiver hen over året, og gennemgå månedlig saldotrend.',
@@ -1384,7 +1384,7 @@ const da = {
       none: 'Ingen undtagelser',
     },
     period: {
-      all_time: 'Al tid',
+      all_time: 'Hele perioden',
       week: 'Uge',
       month: 'Måned',
       year: 'År',
@@ -1529,7 +1529,7 @@ const da = {
       payment_alerts_android_step_7:
         'Åbn Historik for at gennemgå hver notifikation. Vælg Indtægt, Udgift eller Ignorer, eller brug Alle-knapperne.',
       payment_alerts_ios_step_1:
-        'Åbn Shortcuts, tryk + og derefter Edit. Tryk Automation i editoren.',
+        'Åbn Genveje, tryk + og derefter Edit. Tryk Automation i editoren.',
       payment_alerts_ios_step_2: 'Søg efter Notification, og vælg den.',
       payment_alerts_ios_step_3: 'Søg efter Log Notification, og tilføj den.',
       payment_alerts_ios_step_4: 'Tryk Message i Log Notification og derefter Select Variable.',
@@ -1537,7 +1537,8 @@ const da = {
         'Tryk på handlingspilen og derefter Account. Vælg, hvor gennemgåede transaktioner skal registreres. Category er valgfri.',
       payment_alerts_ios_step_7:
         'Tryk tilbage for at gemme. Gentag for hver bank- eller wallet-app. Tryk på historikikonet ved siden af Notifikationer i Money2Time for at gennemgå nye notifikationer, også offline.',
-      payment_alerts_android_disclosure: 'Læs om brugen af notifikationsadgang, og tryk Continue.',
+      payment_alerts_android_disclosure:
+        'Læs om brugen af notifikationsadgang, og tryk på Fortsæt.',
       payment_alerts_ios_app:
         'Tryk på App, og vælg din bank- eller wallet-app. Disse skærmbilleder bruger Wallet som eksempel.',
       payment_alerts_ios_run:
@@ -1553,13 +1554,13 @@ const da = {
     theme_dark: 'Mørk',
     theme_color: 'Temafarve',
     theme_color_sage: 'Salvie',
-    theme_color_ocean: 'Ocean',
+    theme_color_ocean: 'Hav',
     theme_color_terracotta: 'Terracotta',
-    theme_color_slate: 'Slate',
-    theme_color_amber: 'Amber',
+    theme_color_slate: 'Skifer',
+    theme_color_amber: 'Rav',
     theme_color_indigo: 'Indigo',
-    theme_color_emerald: 'Emerald',
-    theme_color_rosewood: 'Rosewood',
+    theme_color_emerald: 'Smaragd',
+    theme_color_rosewood: 'Rosentræ',
     icon_style: 'Ikonstil',
     icon_style_clay: 'Ler',
     icon_style_flat: 'Flad',
@@ -1612,7 +1613,7 @@ const da = {
     section_money: 'Økonomi',
     section_data: 'Data',
     section_support: 'Hjælp og om',
-    profile_member_since: 'Sporing siden {{date}}',
+    profile_member_since: 'Registrerer siden {{date}}',
     profile_member_new: 'Velkommen ombord 👋',
     profile_name_add: 'Tilføj dit navn',
     profile_edit_name: 'Rediger navn',
@@ -1642,8 +1643,8 @@ const da = {
         a: 'Kun én person i det skal have Pro, ejeren eller et hvilket som helst medlem. Hvis ingen i det har Pro, sættes det på pause for alle, indtil nogen får det. Intet bliver slettet.',
       },
       shared_free_limits: {
-        q: 'Kan jeg tilføje poster i en delt kassebog uden Pro?',
-        a: 'Ja, også når den har mere end 6 konti. Gratisplanens andre grænser gælder stadig, fx når du vil tilføje konti eller kategorier ud over grænsen. Bed kassebogens ejer om at lave de ændringer.',
+        q: 'Kan jeg tilføje poster i et delt regnskab uden Pro?',
+        a: 'Ja, også når det har mere end 6 konti. Gratisplanens andre grænser gælder stadig, fx når du vil tilføje konti eller kategorier ud over grænsen. Bed regnskabets ejer om at lave de ændringer.',
       },
       family_pro: {
         q: 'Kan min familie bruge min Pro?',
@@ -1659,7 +1660,7 @@ const da = {
     stat_this_month: 'Denne måned',
     news: 'Nyheder',
     quick_entry: {
-      title: 'Hurtig postering',
+      title: 'Hurtig indtastning',
       section_expense: 'Udgift',
       section_income: 'Indtægt',
       default_account_section: 'Standardindstillinger',
@@ -1733,7 +1734,7 @@ const da = {
     hourly_value: 'Timeværdi',
     notifications: 'Notifikationer',
     manage_formulas:
-      'Tilføj kun en postering, når din indkomst ændres — ingen grund til at opdatere hver måned.',
+      'Tilføj kun en postering, når din indkomst ændres. Du behøver ikke opdatere hver måned.',
     accounts: 'Konti',
     categories: 'Kategorier',
     recurring: 'Tilbagevendende transaktioner',
@@ -1754,7 +1755,7 @@ const da = {
     year: 'År',
     month: 'Måned',
     hourly_history_empty: 'Ingen timeværdihistorik endnu.',
-    hourly_now_label: 'Din reelle timeløn nu',
+    hourly_now_label: 'Din reelle timeværdi nu',
     hourly_now_weekly: 'Din ugentlige indkomst nu',
     hourly_now_monthly: 'Din månedlige indkomst nu',
     hourly_now_yearly: 'Din årlige indkomst nu',
@@ -1773,17 +1774,17 @@ const da = {
       'Slet satsen for {{month}}? Måneder, der afhænger af den, falder tilbage til den forrige tilgængelige måned.',
     hourly_add_title: 'Tilføj indkomstsats',
     hourly_month_exists_title: '{{month}} findes allerede',
-    hourly_month_exists_message: 'Erstat dens indtægtssats med denne?',
+    hourly_month_exists_message: 'Erstat dens indkomstsats med denne?',
     hourly_replace: 'Erstat',
     account_settings: 'Personalisering',
     haptics: 'Haptik',
     haptics_subtitle: 'Slå trykvibration til eller fra i hele appen.',
     data_management: 'Datastyring',
     web_dashboard: 'Webdashboard',
-    statement_import: 'Kontoopgørelse-import',
+    statement_import: 'Import af kontoudtog',
   },
   statement_import: {
-    title: 'Kontoopgørelse-import',
+    title: 'Import af kontoudtog',
     step1_title: 'Kopiér prompt',
     copy_prompt: 'Kopiér prompt',
     step1_instructions:
@@ -1811,7 +1812,7 @@ const da = {
     import_error_generic: 'Kunne ikke importere transaktioner. Prøv igen.',
     account_placeholder: 'Vælg konto',
     account_required: 'Vælg venligst en konto inden import.',
-    account_mapping_required: 'Tilknyt venligst alle kontoopgørelseskonti inden import.',
+    account_mapping_required: 'Tilknyt venligst alle konti fra kontoudtoget inden import.',
     selected: 'Valgt',
     how_to_video: 'Se, hvordan det fungerer',
     currency_label: 'Kontoudtogets valuta',
@@ -1827,9 +1828,12 @@ const da = {
       '- category: bedste match fra mine kategorier nedenfor ved brug af "Forælder > Underkategori", når en underkategori passer; ellers kun forældrens navn; "Other" hvis usikker\n' +
       '- account: specifikt kontonavn som trykt på kontoudtoget (f.eks. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), ikke generiske etiketter\n\n' +
       'Spring kun over: saldolinjer, kontoudtogssum, oplysninger, sidehoveder/sidefødder.\n\n' +
-      '## Mine konti\n{{accounts}}\n\n' +
-      '## Mine udgiftskategorier\n{{expenses}}\n\n' +
-      '## Mine indtægtskategorier\n{{incomes}}\n\n' +
+      '## Mine konti\n' +
+      '{{accounts}}\n\n' +
+      '## Mine udgiftskategorier\n' +
+      '{{expenses}}\n\n' +
+      '## Mine indtægtskategorier\n' +
+      '{{incomes}}\n\n' +
       'Svar KUN med en json-kodeblok, ingen anden tekst:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1844,13 +1848,13 @@ const da = {
       '}\n' +
       '```\n\n' +
       '## Regler\n' +
-      '- Angiv kontoudtogets valuta som en ISO 4217-kode (f.eks. "MYR", "SGD", "USD"). Kopier alle beløb nøjagtigt som de står, og omregn dem ALDRIG til en anden valuta.\\n' +
+      '- Angiv kontoudtogets valuta som en ISO 4217-kode (f.eks. "MYR", "SGD", "USD"). Kopier alle beløb nøjagtigt som de står, og omregn dem ALDRIG til en anden valuta.\n' +
       '- OPFIND ALDRIG eller hallucinér transaktioner. Output kun det, der er i dokumentet.\n' +
       '- SPRING ALDRIG over, afkort eller udelad transaktioner. Læs hver side af hver fil fra start til slut. Output hver eneste transaktionsrække.\n' +
       '- Hvis flere filer er uploadet, behandl hver fil fuldt ud og flet derefter alle transaktioner i det ene "transactions"-array.\n' +
       '- Hvis kontoudtoget strækker sig over en årsgrænse og kun viser måned/dag, udled året fra kontoudtogets periode.\n' +
       '- Stil ikke spørgsmål, afvis ikke, tilbyd ikke at opdele i flere svar.\n' +
-      "- Hvis dit output bliver afskåret, stop midt i JSON, og jeg svarer 'continue', så du kan færdiggøre. Stop ikke tidligt for at undgå at blive afskåret — fortsæt bare.",
+      "- Hvis dit output bliver afskåret, stop midt i JSON, og jeg svarer 'continue', så du kan færdiggøre. Stop ikke tidligt for at undgå at blive afskåret, fortsæt bare.",
   },
   data_management: {
     section_export: 'Eksport',
@@ -1971,9 +1975,9 @@ const da = {
       'For at beholde en kvittering, detaljer eller refusion skal første afdrag være i dag eller tidligere.',
     remove: 'Fjern afdrag',
     add_payments: 'Tilføj {{count}} afdrag',
-    convert_payments: 'Gør til {{count}} betalinger',
+    convert_payments: 'Del op i {{count}} afdrag',
     convert_note: 'Denne udgift bliver betaling 1 af {{count}}. Resten følger planen.',
-    convert_failed: 'Udgiften kunne ikke deles op i rater. Prøv igen.',
+    convert_failed: 'Udgiften kunne ikke deles op i afdrag. Prøv igen.',
     already_due_one: '{{count}} betaling mere er allerede forfalden. Den tilføjes, når du gemmer.',
     already_due_other:
       '{{count}} betalinger mere er allerede forfaldne. De tilføjes, når du gemmer.',
@@ -2035,7 +2039,8 @@ const da = {
     paused: 'Sat på pause',
     empty_title: 'Ingen forpligtelser endnu.',
     create_commitment: 'Opret forpligtelse',
-    empty_message: 'Opret faste regler for at automatisere dine faste indtægter og udgifter.',
+    empty_message:
+      'Opret tilbagevendende regler for at automatisere dine faste indtægter og udgifter.',
     per_month_suffix: '/måned',
     this_year: 'I år',
     active_count: 'Aktive',
@@ -2208,7 +2213,7 @@ const da = {
       interest_rate_info_flat:
         'Den årlige faste rente, beregnet af hele det lånte beløb i hele låneperioden. Skriv den, så udregnes månedlig ydelse og total, eller skriv totalen, så udregnes renten.',
       effective_rate_hint:
-        'Effektiv rente {{rate}}%. Det er, hvad denne flade rente koster på en faldende saldo.',
+        'Effektiv rente {{rate}}%. Det er, hvad denne faste rente koster på en faldende saldo.',
       rate_change_title: 'Fra hvornår gælder den nye rente?',
       rate_change_message:
         'Renten ændres fra {{from}}% til {{to}}%. Anvend den fra i dag for at beholde de renter, der allerede er beregnet, eller fra starten, hvis du retter en fejl.',
@@ -2234,7 +2239,7 @@ const da = {
       collect_account_info:
         'Kontoen afdraget trækkes fra hver måned. Vælg en, så bogføres det automatisk; lad den stå tom, og du bogfører selv.',
       collect_account_manual: 'Jeg bogfører selv',
-      collect_account_external: 'Denne betaling er sat op under Gentagne. Rediger den der.',
+      collect_account_external: 'Denne betaling er sat op under Faste. Rediger den der.',
       count_as_expense_label: 'Tæl ydelsen med som udgift',
       count_as_expense_info:
         'En indbetaling flytter altid penge over på lånet, så din restgæld falder uanset hvad. Med denne slået til tæller den også med som forbrug i dine totaler, budgetter og grafer, under den kategori du vælger. Slå den fra, og indbetalinger holdes uden for dit forbrug. Ændrer du den senere, gælder det kun indbetalinger, der bogføres derefter.',
@@ -2259,9 +2264,9 @@ const da = {
       total_repayable_info:
         'Alt hvad du betaler tilbage over hele lånet: det lånte beløb plus alle renter.',
       balance_owed_info:
-        'Det du stadig skylder i dag, uden de renter du endnu ikke er blevet opkrævet. Det er normalt lavere end tallet på din kontoudskrift.',
+        'Det du stadig skylder i dag, uden de renter du endnu ikke er blevet opkrævet. Det er normalt lavere end tallet på dit kontoudtog.',
       balance_owed_hint:
-        'Din kontoudskrift viser måske {{amount}}, hvor renterne der stadig kommer er lagt til.',
+        'Dit kontoudtog viser måske {{amount}}, hvor de kommende renter er lagt til.',
       paid_so_far_label: 'Betalt indtil nu',
       left_to_pay_label: 'Tilbage at betale',
       awaiting_contract: 'Udfyld felterne ovenfor',
@@ -2276,7 +2281,7 @@ const da = {
       archive_action: 'Arkivér lån',
       celebration_title: 'Lån betalt ud',
       celebration_message: '{{name}} er fuldt indfriet. Den gæld er bag dig.',
-      celebration_message_with_amount: '{{name}} er fuldt indfriet, alle {{amount}}.',
+      celebration_message_with_amount: '{{name}} er fuldt indfriet, hele {{amount}}.',
       celebration_archive_cta: 'Arkivér',
       celebration_keep_cta: 'Behold synlig',
     },
@@ -2299,13 +2304,13 @@ const da = {
     show_balances: 'Vis saldoer',
     type: 'Type',
     statement_day: 'Kontoudtogsdag',
-    due_day: 'Forfaldsdato',
+    due_day: 'Forfaldsdag',
     due_rule: 'Forfaldsdato',
     due_rule_day_of_month: 'Dag i måneden',
-    due_rule_days_after: 'Dage efter opgørelse',
+    due_rule_days_after: 'Dage efter kontoudtog',
     due_next_date: 'Næste forfaldsdato: {{date}}',
     due_days_after_error: 'Angiv 1 til {{max}} dage',
-    due_days_after_needs_statement: 'Angiv en opgørelsesdag at tælle fra',
+    due_days_after_needs_statement: 'Angiv en kontoudtogsdag at tælle fra',
     current_balance: 'Nuværende saldo',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoændring registreres?',
     balance_adjustment_prompt_message:
@@ -2386,7 +2391,7 @@ const da = {
     budget_templates_label: 'Budgetskabeloner',
     goals_label: 'Opsparingsmål',
     receipts_label: 'Kvitteringer',
-    split_bills_label: 'Uafgjorte delte regninger',
+    split_bills_label: 'Uafregnede delte regninger',
     custom_item_images_label: 'Egne tingbilleder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
     custom_subscription_logos_label: 'Egne abonnementslogoer',
@@ -2399,7 +2404,7 @@ const da = {
     limit_custom_category_icons:
       'Upload af egne ikoner er en Pro-funktion. Opgrader for at bruge ethvert billede til kategorier, mål og budgetter.',
     limit_app_icon:
-      'Ekstra appikoner er en Pro-funktion. Opgrader for at give Money2Time et nyt look på din hjemmeskærm.',
+      'Ekstra appikoner er en Pro-funktion. Opgrader for at give Money2Time et nyt look på din startskærm.',
     limit_custom_card_designs:
       'Egne kortdesigns er en Pro-funktion. Opgrader for at bruge ethvert foto eller kunstværk på dine kort.',
     limit_icon_packs: 'Ekstra ikonpakker er en Pro-funktion. Opgrader for at bruge alle pakker.',
@@ -2455,7 +2460,7 @@ const da = {
     receipt_scans_label: 'Kvitteringsscanninger',
     notification_ai_label: 'Autogennemgang af notifikationer',
     apple_pay_automation_label: 'Apple Pay-automatisering',
-    screenshot_automation_label: 'Screenshot-automatisering',
+    screenshot_automation_label: 'Skærmbillede-automatisering',
     live_earnings_auto_start_label: 'Automatisk start af live-indtjening',
     widgets_label: 'Widgets på startskærmen',
     currencies_label: 'Valutaer',
@@ -2470,7 +2475,7 @@ const da = {
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se præcis, hvad du låser op for, når du opgraderer.',
     hero_title: 'Få styr på dine penge og din tid',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: 'App Store-bedømmelse',
     social_downloads_value: '60k+',
     social_downloads_label: 'Brugernes valg',
@@ -2523,7 +2528,7 @@ const da = {
     not_now: 'Ikke nu',
     cancel_subscription_note:
       'For at annullere dit abonnement omdirigeres du til enhedens abonnementsindstillinger.',
-    limit_reached_title: 'Gratis-planens grænse nået',
+    limit_reached_title: 'Gratisplanens grænse er nået',
     limit_accounts:
       'Du kan have op til {{count}} konti på den gratis plan. Opgrader til Pro for ubegrænset.',
     limit_categories:
@@ -2540,7 +2545,7 @@ const da = {
     limit_receipts:
       'Med gratisplanen kan du vedhæfte op til {{count}} kvitteringer. Ubegrænset med Pro.',
     limit_split_bills:
-      'Med gratisplanen kan du have op til {{count}} uafgjorte delte regninger. Afregn én eller opgrader til Pro for ubegrænset.',
+      'Med gratisplanen kan du have op til {{count}} uafregnede delte regninger. Afregn én eller opgrader til Pro for ubegrænset.',
     limit_goals:
       'Med gratisplanen kan du have op til {{count}} opsparingsmål. Opgrader til Pro for ubegrænset.',
     limit_loans: 'Du kan følge {{count}} lån på gratisplanen. Opgrader til Pro for ubegrænset.',
@@ -2575,11 +2580,11 @@ const da = {
     pace_behind: 'Bagud',
     name_label: 'Målets navn',
     name_placeholder: 'f.eks. Japanrejse',
-    add_cover: 'Tilføj coverbillede',
-    change_cover: 'Skift forside',
+    add_cover: 'Tilføj forsidebillede',
+    change_cover: 'Skift forsidebillede',
     remove_cover: 'Fjern foto',
     cover_permission_title: 'Adgang til fotos kræves',
-    cover_permission_body: 'Tillad adgang til fotos for at vælge et coverbillede.',
+    cover_permission_body: 'Tillad adgang til fotos for at vælge et forsidebillede.',
     target_label: 'Målbeløb',
     target_date_toggle: 'Måldato',
     target_date_hint: 'Valgfrit. Viser dig, om du er på rette spor mod dit mål.',
@@ -2597,7 +2602,7 @@ const da = {
       'Ingen {{currency}}-konti endnu. Auto-opsparing kræver en konto i samme valuta.',
     auto_save_rule_name: 'Auto-opsparing: {{name}}',
     auto_save_managed_in_recurring:
-      'Denne opsparings auto-opsparing har en tilpasset plan. Ret den i {{settings}} > {{recurring}}.',
+      'Dette måls auto-opsparing har en tilpasset plan. Ret den i {{settings}} > {{recurring}}.',
     edit_title: 'Rediger mål',
     delete_title: 'Slet mål?',
     delete_message: 'Dette sletter målet og dets transaktioner. Det kan ikke fortrydes.',
@@ -2668,7 +2673,7 @@ const da = {
     daily_checkin: {
       title: 'Daglig check-in',
       label: 'Daglig påmindelse',
-      description: 'Få en reminder om at registrere dine udgifter hver dag.',
+      description: 'Få en påmindelse om at registrere dit forbrug hver dag.',
       time: 'Påmindelsestidspunkt',
     },
     recurring: {
@@ -2726,9 +2731,9 @@ const da = {
       live_earnings_body: 'Tryk for at starte dit live-lønur.',
       live_earnings_started_title: 'Live-indtjening er startet',
       live_earnings_started_body: 'Dit ur kører.',
-      weekly_review_title: 'Din uge i retrospekt',
+      weekly_review_title: 'Tilbageblik på din uge',
       weekly_review_body: 'Se, hvor dine penge og din tid gik hen i sidste uge.',
-      monthly_review_title: 'Din måned i retrospekt',
+      monthly_review_title: 'Tilbageblik på din måned',
       monthly_review_body: 'Se, hvor dine penge og din tid gik hen i sidste måned.',
     },
   },
@@ -2822,17 +2827,17 @@ const da = {
     fallback_local_reconnect: 'Opret forbindelse igen',
     google_drive_not_connected_short: 'Ikke forbundet',
     google_drive_disconnected_notice:
-      'Google Drev er ikke forbundet, så sikkerhedskopier gemmes på denne enhed.',
+      'Google Drive er ikke forbundet, så sikkerhedskopier gemmes på denne enhed.',
     fallback_local_error: 'Kunne ikke nå {{target}}. Gemt på denne enhed i stedet.',
     error: {
       prefix: '{{target}}: {{reason}}',
       offline: 'Ingen internetforbindelse. Opret forbindelse, og prøv igen.',
       timeout: 'Forbindelsen fik timeout. Prøv igen på et hurtigere netværk.',
-      auth: 'Log ind på Google Drev igen for at fortsætte med at sikkerhedskopiere.',
-      quota: 'Dit Google Drev er fuldt. Frigør plads, og prøv igen.',
-      rate_limited: 'Google Drev er optaget lige nu. Prøv igen om et øjeblik.',
-      server: 'Google Drev er midlertidigt utilgængeligt. Prøv igen senere.',
-      client: 'Google Drev afviste sikkerhedskopien.',
+      auth: 'Log ind på Google Drive igen for at fortsætte med at sikkerhedskopiere.',
+      quota: 'Dit Google Drive er fuldt. Frigør plads, og prøv igen.',
+      rate_limited: 'Google Drive er optaget lige nu. Prøv igen om et øjeblik.',
+      server: 'Google Drive er midlertidigt utilgængeligt. Prøv igen senere.',
+      client: 'Google Drive afviste sikkerhedskopien.',
       unknown: 'Noget gik galt.',
     },
     last_backup: 'Seneste backup {{relative}}',
@@ -2859,17 +2864,17 @@ const da = {
   },
   review_prompt: {
     preprompt_title: 'Nyder du Money2Time?',
-    preprompt_subtitle: 'Din ærlige mening hjælper os med at forbedre.',
+    preprompt_subtitle: 'Din ærlige mening hjælper os med at blive bedre.',
     preprompt_happy: 'Ja, jeg kan godt lide den',
     preprompt_unhappy: 'Ikke rigtig',
     preprompt_dismiss: 'Måske senere',
-    feedback_prompt: 'Ærgerligt at høre — vil du dele, hvad der kunne gøre det bedre?',
+    feedback_prompt: 'Ærgerligt at høre. Vil du dele, hvad der kunne gøre det bedre?',
     feedback_open: 'Del feedback',
     feedback_skip: 'Nej tak',
   },
   cloud_backup_prompt: {
     title: 'Hold dine data sikre',
-    body: 'Dine sikkerhedskopier gemmes kun på denne enhed, så de forsvinder, hvis du afinstallerer appen. Slå cloud-backup til for at holde dem sikre i iCloud eller Google Drev.',
+    body: 'Dine sikkerhedskopier gemmes kun på denne enhed, så de forsvinder, hvis du afinstallerer appen. Slå cloud-backup til for at holde dem sikre i iCloud eller Google Drive.',
     cta: 'Sikkerhedskopiér til skyen',
     dismiss: 'Måske senere',
   },
@@ -3006,19 +3011,19 @@ const da = {
       add: 'Tilføj placering',
       clear: 'Ryd placering',
       picker_title: 'Vælg et sted',
-      search_placeholder: 'Søg efter byer…',
-      search_hint: 'Søg efter en by for at placere denne tur på kortet.',
+      search_placeholder: 'Søg by, region eller land…',
+      search_hint: 'Søg efter by, region eller land for at placere denne rejse på kortet.',
       no_results: 'Ingen steder fundet',
       empty_title: 'Ingen steder endnu',
       empty_message: 'Tilføj en placering til et album for at se det på globussen og kortet.',
     },
     title: 'Album',
-    active_label: 'Føj nye transaktioner til',
+    active_label: 'Føj automatisk nye transaktioner til',
     active_sheet_title: 'Aktiv rejse',
     active_none: 'Ingen',
     active_badge: 'Aktiv',
     synced_badge: 'Delt',
-    change_cover: 'Skift forside',
+    change_cover: 'Skift forsidebillede',
     edit_details_title: 'Rediger rejse',
     start_date: 'Startdato',
     end_date: 'Slutdato',
@@ -3027,7 +3032,7 @@ const da = {
     create_title: 'Nyt album',
     name_label: 'Albumnavn',
     name_placeholder: 'f.eks. Tokyo-tur',
-    add_cover: 'Tilføj coverbillede',
+    add_cover: 'Tilføj forsidebillede',
     select_transactions: 'Tilføj transaktioner',
     transactions_selected: '{{count}} valgt',
     transaction_count: '{{count}} transaktioner',
@@ -3055,13 +3060,13 @@ const da = {
       'Det slettes fra denne telefon, og dine transaktioner kommer tilbage under deres egne kategorier. De andre beholder albummet.',
     deleting: 'Sletter album…',
     cover_permission_title: 'Adgang til fotos kræves',
-    cover_permission_body: 'Tillad adgang til fotos for at vælge et coverbillede.',
+    cover_permission_body: 'Tillad adgang til fotos for at vælge et forsidebillede.',
     people: {
       title: 'Personer',
       split_with: 'Del med',
       me_tag: 'Dig',
       joined: 'Deltager',
-      left: 'Forladt',
+      left: 'Forlod',
       unnamed: 'Ven',
       name_taken: 'En person her har allerede det navn.',
       remove_joined_title: 'Fjern {{name}} fra albummet?',
@@ -3096,8 +3101,8 @@ const da = {
       body: 'Du forlod albummet, delingen sluttede, eller du loggede ud. Det bevares, som det var, med dine transaktioner, og opdateres ikke længere. Log ind igen eller deltag igen for at få det tilbage.',
     },
     balances: {
-      tab: 'Saldi',
-      empty_title: 'Ingen saldi endnu',
+      tab: 'Mellemværender',
+      empty_title: 'Ingen mellemværender endnu',
       who_owes_whom: 'Hvem skylder hvem',
       owes_you: '{{name}} skylder dig',
       owes: '{{from}} skylder {{to}}',
@@ -3109,7 +3114,7 @@ const da = {
     },
     simplify: {
       row: 'Forenkl gruppens gæld',
-      info: 'Samler gælden i gruppen, så der skal laves færre betalinger. Ingen betaler eller får mere i alt.',
+      info: 'Samler gælden i gruppen, så der skal laves færre betalinger. Ingen betaler mere eller får mere tilbage i alt.',
     },
     join: {
       title: 'Delt album',
@@ -3190,7 +3195,7 @@ const da = {
       renamed_member: '{{before}} hedder nu {{after}}',
       simplify_on: '{{actor}} slog Forenkl gruppens gæld til',
       simplify_off: '{{actor}} slog Forenkl gruppens gæld fra',
-      cover: '{{actor}} skiftede forsiden',
+      cover: '{{actor}} skiftede forsidebilledet',
       category_added: '{{actor}} tilføjede kategorien {{name}}',
       category_removed: '{{actor}} fjernede kategorien {{name}}',
       category_renamed: '{{actor}} omdøbte kategorien {{before}} til {{after}}',
@@ -3283,7 +3288,7 @@ const da = {
     delete_budget_message_month: 'Det genoprettes ikke automatisk for denne måned.',
     delete_budget_message_year: 'Det genoprettes ikke automatisk for dette år.',
     unbudgeted_section: 'Ikke-budgetteret forbrug',
-    albums_section: 'Albummer',
+    albums_section: 'Album',
     left: '{{amount}} tilbage',
     over: '{{amount}} over',
     name_label: 'Navn',
@@ -3307,9 +3312,9 @@ const da = {
     fill_remainder: 'Udfyld',
     currency_label: 'Valuta',
     currency_hint_template:
-      'Hvert budget bruger kursen fra den dag, det oprettes, og omregner udgifter i andre valutaer til den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
+      'Hvert budget bruger kursen fra den dag, det oprettes, og omregner udgifter i andre valutaer med den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
     currency_hint_budget:
-      'Udgifter i andre valutaer omregnes til 1 {{currency}} = {{rate}} {{main}}.',
+      'Udgifter i andre valutaer omregnes med kursen 1 {{currency}} = {{rate}} {{main}}.',
     currency_hint_no_rate:
       'Der er endnu ingen kurs for {{currency}}. Tilføj en under Flere valutaer, så udgifter i andre valutaer tæller med.',
     unconverted_one: '1 udgift tæller ikke med endnu: der er ingen kurs for {{currency}}.',
@@ -3372,7 +3377,7 @@ const da = {
     add_title: 'Ny ting',
     edit_title: 'Rediger ting',
     empty_title: 'Ingen ting endnu',
-    empty_message: 'Registrer et køb og se omkostningen falde for hver dag, du ejer den.',
+    empty_message: 'Registrer et køb, og se prisen falde for hver dag, du ejer det.',
     choose_icon: 'Vælg ikon',
     name_label: 'Navn',
     name_placeholder: 'f.eks. Espressomaskine',
@@ -3407,7 +3412,7 @@ const da = {
     label: 'Regnskab',
     title: 'Regnskaber',
     switcher_label: 'Regnskab: {{name}}. Skift regnskab',
-    default_name: 'Hoved',
+    default_name: 'Hovedregnskab',
     untitled: 'Unavngivet regnskab',
     entries_one: '{{count}} post',
     entries_other: '{{count}} poster',
@@ -3426,8 +3431,8 @@ const da = {
     categories: 'Kategorier',
     copy_from_hint: 'Vælg hvilket regnskab der skal kopieres fra',
     everything: 'Alt',
-    everything_caption_one: 'En fuld kopi med dens {{count}} post, budgetter og album',
-    everything_caption_other: 'En fuld kopi med dens {{count}} poster, budgetter og album',
+    everything_caption_one: 'En fuld kopi med dets {{count}} post, budgetter og album',
+    everything_caption_other: 'En fuld kopi med dets {{count}} poster, budgetter og album',
     everything_currency_note: 'En fuld kopi beholder valutaen fra {{name}}.',
     delete_open_note: 'Det er åbent nu, så {{name}} åbnes i stedet.',
     copy_from: 'Kopiér fra',
@@ -3594,7 +3599,7 @@ const da = {
     badge_ios: 'iPhone',
     category: {
       start: 'Kom i gang',
-      logging: 'Registrer penge',
+      logging: 'Registrering',
       organize: 'Organiser',
       plan: 'Planlæg',
       share: 'Del og afregn',
@@ -3630,7 +3635,7 @@ const da = {
     ai_settings: 'Indstillinger for autogennemgang',
     ai_quota_free: '%{count} af %{limit} gratis tilbage',
     ai_quota_pro: 'Ubegrænset med Pro',
-    ai_quota_left: '%{count} tilbage',
+    ai_quota_left: '%{count} gratis tilbage',
     ai_quota_unlimited: 'Ubegrænset',
     ai_quota_info_title: 'Gratis autogennemgange',
     ai_quota_info:
@@ -3677,7 +3682,7 @@ const da = {
     history_none: 'Ignoreret',
     history_failed: 'Ikke registreret',
     history_error: 'Notifikationshistorikken kunne ikke indlæses.',
-    test_scan_failed_title: 'Testnotifikationen kunne ikke logges',
+    test_scan_failed_title: 'Testnotifikationen kunne ikke registreres',
     test_scan_failed:
       'Notifikationen kom frem, men hverken beløb eller konto kunne læses. Tjek den valgte konto, og prøv igen.',
     account_hint:
@@ -3790,7 +3795,7 @@ const da = {
     map_all_time: 'Hele perioden',
     map_empty_title: 'Ingen steder endnu',
     map_empty_period_title: 'Ingen steder i denne periode',
-    map_empty_message: 'Tilføj et sted til en udgift for at se den her.',
+    map_empty_message: 'Tilføj et sted til en udgift for at se det her.',
     map_disabled_message: 'Slå Steder til for at tilføje steder til udgifter.',
     map_turn_on: 'Slå Steder til',
     map_places_other: '{{count}} steder',
@@ -3801,7 +3806,7 @@ const da = {
     map_period_all: 'Alle',
     map_summary_work: '{{time}} arbejde',
     map_summary_earned: '{{amount}} tjent',
-    offer_title: 'Husk, hvor du bruger penge?',
+    offer_title: 'Vil du huske, hvor du bruger penge?',
     offer_body:
       'Mærk udgifter med steder og se dit forbrug på et kort. Skift det når som helst i Indstillinger.',
     offer_chip_auto: 'Automærk',

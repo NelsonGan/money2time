@@ -11,12 +11,12 @@ const zh: LocaleModule = {
     s5:  { h: '每一块钱\n都是时间', hl: '都是时间', sh: '消费变时间，重新审视支出', she: '⏰', time: '112小时', timeLabel: '本月', money: '¥8,551' },
     s6:  { h: '储蓄率\n多少？', hl: '多少？', sh: '每月追踪，养成存钱习惯', she: '📊', healthy: '20%+为健康', income: '收入', expense: '支出', saved: '已存' },
     s7:  { h: '3秒\n记一笔', hl: '3秒', sh: '在主页快速记录', she: '⚡', saved: '已保存', quick: '快速添加', mood: '约15分钟工作' },
-    s8:  { h: '分摊\n账单', hl: '账单', sh: 'AA分账、心情、备注，按需展开', she: '✍️', splitBill: 'AA 分账', mood: '心情', note: '备注' },
+    s8:  { h: '分摊\n账单', hl: '账单', sh: 'AA分账、心情、备注，按需展开', she: '✍️', splitBill: '分摊账单', mood: '心情', note: '备注' },
     s9:  { h: '你的真实\n时薪多少？', hl: '真实', sh: '按月记录，时薪随你成长', she: '💡', rate: '¥187', perHour: '每小时', revealed: '最新时薪', current: '2026年5月 · 当前' },
     s10: { h: '固定支出\n一清二楚', hl: '一清二楚', sh: '房租、订阅、会员费全管理', she: '🔁', total: '¥5,124 / 月', rent: '房租', gym: '健身房会员', streaming: '流媒体套餐' },
     s11: { h: '完全\n属于你', hl: '属于你', sh: '每一处都可以自定义', she: '⚙️', display: '显示', hourly: '时薪', categories: '分类' },
     s12: { h: '你的\n风格', hl: '风格', sh: '语言、货币、主题随心切换', she: '🎨', language: '中文', currency: 'CNY (¥)', theme: '浅色 · 鼠尾草' },
-    s13: { h: '一键\n导入账单', hl: '导入账单', sh: 'AI 读账单，你只需确认', she: '🤖', aiPowered: 'AI 智能', oneTap: '复制提示', pasteJSON: '粘贴 JSON' },
+    s13: { h: '一键\n导入账单', hl: '导入账单', sh: 'AI 读账单，你只需确认', she: '🤖', aiPowered: 'AI 智能', oneTap: '复制提示词', pasteJSON: '粘贴 JSON' },
     s14: { h: '输入\n即记账', hl: '即记账', sh: '键盘是最快的入口', she: '⌨️', type: '咖啡 25', tap: '↵', done: '0分钟搞定', category: '自动 · 餐饮 / 咖啡' },
     s15: {
       h: '你的数据\n只属于你。', hl: '只属于你。',
@@ -33,7 +33,7 @@ const zh: LocaleModule = {
 
   feature: {
     titleA: '每一块钱',
-    titleB: { pre: '都是 ', hl: '生命时间', post: '' },
+    titleB: { pre: '都是', hl: '生命时间', post: '' },
     sub: '看清你的真实时薪',
   },
 

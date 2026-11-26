@@ -419,13 +419,13 @@
             ]
           },
           {
-            "title": "Random App Identifier",
+            "title": "Random na Identifier ng App",
             "paragraphs": [
               "Sa unang pagbukas, gumagawa ang App ng random na unique identifier na nagsisimula sa m2t_. Ibinabahagi ito sa PostHog, Google Analytics for Firebase, at RevenueCat para sa product analytics at pamamahala ng subscription, at sa anumang browser na ili-link mo gamit ang Web Dashboard, na ginagamit din ito para sa usage analytics nito. Kung mag-sign in ka, ili-link namin ito sa iyong account sa aming mga server; hindi namin ipinapadala ang iyong pangalan o email address sa aming mga analytics provider."
             ]
           },
           {
-            "title": "Usage Analytics",
+            "title": "Analytics ng Paggamit",
             "paragraphs": [
               "Ginagamit namin ang PostHog at Google Analytics for Firebase upang mangolekta ng pseudonymous usage data na naka-link sa random app identifier para maunawaan namin kung paano ginagamit ang App at mapaganda ang karanasan. Hindi kasama sa analytics ang mga halagang pinansyal, detalye ng transaksyon, balanse ng account, tala, resibo, backup, pangalan, o email address.",
               "Tumatanggap din ang PostHog ng mga ulat ng crash at error, nire-record nito ang model, bilang ng token at gastos ng bawat AI request (hindi kailanman ang larawan o teksto), at nire-record nito ang maliit na sample ng mga session ng app bilang screen recording para mahanap at maayos namin ang mga problema. Sa mga recording na iyon, nakatago ang lahat ng nagpapakita ng iyong impormasyon: teksto, numero, input field, chart at anumang larawang idinagdag mo. Ang sariling disenyo lang ng app, gaya ng mga icon, ilustrasyon at label ng button, ang nakikita. Hindi kailanman ipinapakita ng mga recording na ito ang iyong financial data."
@@ -459,7 +459,7 @@
         ]
       },
       {
-        "title": "3. Google User Data",
+        "title": "3. Data ng User mula sa Google",
         "paragraphs": [
           "Ipinapaliwanag ng seksyong ito kung paano ina-access, ginagamit, iniimbak, at ibinabahagi ng App at ng aming mga website ang data na natanggap mula sa mga Google API.",
           "Ang paggamit at paglilipat ng Money2Time sa anumang ibang app ng impormasyong natanggap mula sa mga Google API ay susunod sa {userDataPolicy}, kabilang ang mga kinakailangan ng Limited Use (Limitadong Paggamit)."
@@ -636,7 +636,7 @@
       "title": "14. Makipag-ugnayan sa Amin",
       "body": "Kung mayroon kang anumang tanong tungkol sa Privacy Policy na ito, kailangan ng suporta, o gustong humiling ng pagbura ng iyong data, makipag-ugnayan sa amin sa:",
       "formPrefix": "Maaari mo ring gamitin ang",
-      "formLink": "contact form",
+      "formLink": "form sa pakikipag-ugnayan",
       "formSuffix": "sa site na ito."
     }
   },
@@ -687,7 +687,7 @@
                 "Hanggang 9 na expense/income categories",
                 "Hanggang 5 recurring transaction rules",
                 "Hanggang 5 hourly rate entries",
-                "Unlimited transaction records"
+                "Walang limitasyong bilang ng transaksyon"
               ]
             ]
           },
@@ -933,7 +933,7 @@
       "title": "Makipag-ugnayan sa Amin",
       "body": "Para humiling ng pagtanggal ng iyong data, o kung may mga tanong ka, makipag-ugnayan sa amin sa:",
       "formPrefix": "Maaari mo ring gamitin ang",
-      "formLink": "contact form",
+      "formLink": "form sa pakikipag-ugnayan",
       "formSuffix": "sa site na ito."
     }
   },
@@ -1427,10 +1427,10 @@
       "loansTitle": "Mga utang",
       "model": {
         "flat": "Flat rate",
-        "reducing": "Reducing balance"
+        "reducing": "Bumababang balanse"
       },
       "leftToPay": "Natitirang babayaran",
-      "leftInHours": "{hours} na trabaho",
+      "leftInHours": "{hours} ng trabaho",
       "paidOff": "Bayad na",
       "instalments": "{paid} ng {total} hulog",
       "principal": "Hiniram",
@@ -1584,7 +1584,7 @@
       "statusReady": "Naka-on ang pag-edit",
       "statusReadyTitle": "Sa telepono mo sine-save ang mga pagbabago",
       "statusReadyBody": "Nakakonekta ang telepono mo. Sinusuri at sine-save ng telepono mo ang bawat pagbabago, saka sini-sync pabalik dito ang na-update na data.",
-      "statusAway": "Read only",
+      "statusAway": "Pagtingin lang",
       "statusAwayTitle": "Ikonekta ang telepono mo para makapagbago.",
       "statusAwayBody": "Buksan ang Money2Time sa telepono mo at pumunta sa Mga setting → Web Dashboard. Habang nakakonekta ito, puwede kang magdagdag, mag-edit at magbura ng mga transaksyon dito. Magkasabay ang telepono mo at ang browser na ito.",
       "statusUpdateTitle": "I-update ang app para makapagbago rito.",
@@ -1692,11 +1692,11 @@
         "logoSearch": "Maghanap ng bangko at wallet",
         "logoCountry": "Bansa",
         "logoNoResults": "Walang nahanap",
-        "group": "Account group",
-        "currency": "Pera",
+        "group": "Grupo ng account",
+        "currency": "Currency",
         "statementDay": "Araw ng statement",
-        "dueDay": "Due date",
-        "dueRule": "Petsa ng due",
+        "dueDay": "Araw ng due",
+        "dueRule": "Due date",
         "dueRuleDay": "Araw ng buwan",
         "dueRuleAfter": "Araw pagkatapos ng statement",
         "dayRange": "Pumili ng araw mula 1 hanggang 31.",
@@ -1735,7 +1735,7 @@
         "pay": "Bayaran",
         "payFrom": "Bayaran mula sa",
         "none": "Wala",
-        "payable": "Balance Payable",
+        "payable": "Balanseng babayaran",
         "loanDue": "Halagang babayaran",
         "paidNote": "Bayad: {name}",
         "paymentNotePlaceholder": "Note ng bayad",
@@ -2028,10 +2028,10 @@
         "logo": "Logo",
         "logoAdd": "Magdagdag ng logo",
         "logoClear": "Alisin ang logo",
-        "group": "Account group",
-        "currency": "Pera",
+        "group": "Grupo ng account",
+        "currency": "Currency",
         "interestModel": "Interes",
-        "interestModelInfo": "Bumababang balanse: sinisingil ang interes buwan buwan sa natitira mong utang, kaya ang dagdag o maagang bayad ay nagpapababa ng interes. Ganito ang karamihan ng home loan. Flat rate: minsan lang kinukuwenta ang interes sa buong halagang hiniram at idinadagdag agad, kaya mas mabilis mabayaran ang utang pero walang natitipid na interes. Ganito ang karamihan ng car at personal loan.",
+        "interestModelInfo": "Bumababang balanse: sinisingil ang interes buwan-buwan sa natitira mong utang, kaya ang dagdag o maagang bayad ay nagpapababa ng interes. Ganito ang karamihan ng home loan. Flat rate: minsan lang kinukuwenta ang interes sa buong halagang hiniram at idinadagdag agad, kaya mas mabilis mabayaran ang utang pero walang natitipid na interes. Ganito ang karamihan ng car at personal loan.",
         "modelReducing": "Bumababang balanse",
         "modelFlat": "Flat rate",
         "principal": "Halaga ng utang",
@@ -2123,9 +2123,9 @@
         "deleteConfirm": "Tanggalin ang “{name}”? Hindi na ito maibabalik.",
         "amountRequired": "Kailangan ang halaga",
         "chooseCategory": "Pumili ng kategorya",
-        "settings": "Recurring settings",
+        "settings": "Mga setting ng paulit-ulit",
         "ruleName": "Pangalan ng rule",
-        "ruleNamePlaceholder": "Netflix subscription",
+        "ruleNamePlaceholder": "Subscription sa Netflix",
         "enterRuleName": "Mangyaring magpasok ng pangalan ng recurring rule.",
         "logo": "Logo",
         "noLogo": "Walang logo",
@@ -2154,7 +2154,7 @@
         "resume": "Ituloy"
       },
       "split": {
-        "title": "Split Bill",
+        "title": "Hatiin ang bill",
         "chip": "Hatiin",
         "evenly": "Hatiin nang pantay",
         "addPerson": "Magdagdag ng tao",
@@ -2175,7 +2175,7 @@
         "paidTo": "Binayaran pabalik sa",
         "sharesTitle": "Sino ang may utang sa iyo",
         "someone": "Isang tao",
-        "untitledBill": "Split bill",
+        "untitledBill": "Hinating bill",
         "paidTitle": "Nabayaran na",
         "personPaid": "Nagbayad si {name}",
         "sharedAlbum": "Shared na album",
@@ -2190,8 +2190,8 @@
       },
       "duplicate": "I-duplicate",
       "duplicateTitle": "I-duplicate sa petsa",
-      "expenseCategory": "Expense category",
-      "incomeCategory": "Income category",
+      "expenseCategory": "Kategorya ng gastos",
+      "incomeCategory": "Kategorya ng kita",
       "categoryNone": "Nananatili sa mga transfer ang kategorya nila. Pumili ng mga gastos o kita para palitan ito.",
       "duplicateNone": "Hindi madodoble ang mga balance adjustment at negatibong halaga.",
       "duplicateTooMany": "Hanggang {max} transaksyon lang ang puwedeng i-duplicate nang sabay.",
@@ -2204,20 +2204,20 @@
         "now": "Ngayong buwan",
         "perHour": "/oras",
         "type": {
-          "hourly": "Hourly",
-          "monthly": "Monthly",
-          "yearly": "Yearly"
+          "hourly": "Kada oras",
+          "monthly": "Buwanan",
+          "yearly": "Taunan"
         },
         "deleteTitle": "Burahin ang buwanang hourly value?",
         "deleteBody": "Burahin ang rate para sa {month}? Ang mga buwang nakasalalay dito ay babalik sa nakaraang available na buwan.",
         "year": "Taon",
         "month": "Buwan",
         "existsTitle": "Mayroon nang {month}",
-        "existsBody": "Mayroon nang income rate ang buwang ito. Palitan ito ng ito?",
+        "existsBody": "Mayroon nang income rate ang buwang ito. Palitan ito ng bago?",
         "replace": "Palitan",
         "saveFor": "I-save para sa {month}",
         "step1": "Magkano ang iyong kinikita?",
-        "step2": "Work week",
+        "step2": "Linggo ng trabaho",
         "step3": "Dagdag na oras sa trabaho",
         "amount": "Halaga ({symbol})",
         "afterTax": "Ilagay ang iyong after-tax na sahod.",
@@ -2225,9 +2225,9 @@
         "workdaysPerWeek": "Araw ng trabaho / linggo",
         "commuteMinutes": "Dagdag na oras / araw ng trabaho (min)",
         "commuteHint": "Isama ang paghahanda, biyahe, parking, at hindi bayad na oras ng trabaho.",
-        "trueRate": "True hourly rate",
+        "trueRate": "Totoong hourly rate",
         "weeklyIncome": "Lingguhang kita",
-        "baseRate": "Base hourly rate",
+        "baseRate": "Batayang hourly rate",
         "commutePerWeek": "Dagdag na oras / linggo",
         "totalPerWeek": "Kabuuang oras / linggo",
         "showAs": "Ipakita bilang",

@@ -1,20 +1,20 @@
 const ko = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: '백업 복원',
+    export_description: '개인 데이터와 내가 소유한 공유 가계부.',
+    import_description: '백업에서 복원할 항목을 선택하세요.',
+    personal: '개인 가계부',
+    personal_note: '동기화된 기기의 가계부와 설정을 대체합니다.',
+    personal_local_note: '가계부와 설정을 대체합니다.',
+    shared_ledgers: '공유 가계부',
+    owned: '내가 소유한 가계부',
+    unavailable: '소유자 권한 필요',
+    restore_action: '선택 항목 복원',
+    confirm_title: '모두에게 복원할까요?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\n{{date}} 백업으로 대체합니다. 이후 변경 사항은 사라집니다. 멤버와 초대는 그대로 유지됩니다.',
+    sync_pending: '이 기기에서 복원했습니다. 동기화가 끝날 때까지 로그인 상태를 유지하세요.',
+    failed: '복원하지 못했습니다. 연결, 소유자 권한, 여유 저장 공간을 확인하세요.',
     photos_unavailable:
       '이 백업의 사진을 다운로드하지 못했습니다. 연결을 확인하고 다시 시도하세요.',
     photos_missing: '이 백업의 사진 {{count}}장을 찾지 못해 복원하지 않았습니다.',
@@ -74,7 +74,7 @@ const ko = {
     voice_unavailable_title: '음성 입력을 사용할 수 없음',
     voice_unavailable_message: '이 기기는 음성 입력을 지원하지 않습니다.',
     over_account_limit_message:
-      '활성 계정이 {{active}}개 있습니다. 무료로 거래를 추가하려면 활성 계정을 {{count}}개 이하로 유지하세요. 초과 계정을 삭제하거나 Pro를 구독하세요. 다른 작업은 계속 사용할 수 있습니다.',
+      '활성 계좌이 {{active}}개 있습니다. 무료로 거래를 추가하려면 활성 계좌을 {{count}}개 이하로 유지하세요. 초과 계좌을 삭제하거나 Pro를 구독하세요. 다른 작업은 계속 사용할 수 있습니다.',
     quick_title: '빠른 입력',
     quick_subtitle: '키패드로 빠르게 추가',
     full_title: '전체 입력',
@@ -320,14 +320,14 @@ const ko = {
       },
     },
     pro_trial_accounts: {
-      title: '무료 체험과 늘어난 무료 계정 한도',
+      title: '무료 체험과 늘어난 무료 계좌 한도',
       trial: {
         title: '무료 체험이 시작됐어요',
         body: '스토어 계정이 대상이라면 결제 전에 Pro를 체험할 수 있습니다. 플랜 화면에서 체험 기간과 이후 청구될 정확한 금액을 확인하세요.',
       },
       accounts: {
-        title: '무료 플랜의 계정 확대',
-        body: '무료 플랜에서 사용할 수 있는 직불 또는 신용 계정이 기존 5개에서 {{count}}개로 늘었습니다. 목표와 대출에는 별도의 한도가 있습니다. 기존 거래와 다른 작업은 계속 사용할 수 있습니다.',
+        title: '무료 플랜의 계좌 확대',
+        body: '무료 플랜에서 사용할 수 있는 직불 또는 신용 계좌이 기존 5개에서 {{count}}개로 늘었습니다. 목표와 대출에는 별도의 한도가 있습니다. 기존 거래와 다른 작업은 계속 사용할 수 있습니다.',
       },
     },
     badge: { ad: '광고' },
@@ -343,7 +343,7 @@ const ko = {
       title: '월 주기와 실시간 수입',
       monthCycle: {
         title: '달마다 시작일을 따로 정하세요',
-        body: '월급날은 바뀌니 한 달의 시작도 바뀔 수 있습니다. 기본 시작일을 정한 뒤, 원하는 달을 눌러 그 달만 따로 바꾸세요. 분석, 예산, 급여, 달력이 모두 따라갑니다.',
+        body: '월급날은 바뀌니 한 달의 시작도 바뀔 수 있습니다. 기본 시작일을 정한 뒤, 원하는 달을 눌러 그 달만 따로 바꾸세요. 인사이트, 예산, 급여, 캘린더가 모두 따라갑니다.',
       },
       liveEarnings: {
         title: '수입이 올라가는 걸 지켜보세요',
@@ -436,14 +436,14 @@ const ko = {
       title: '자동화',
       auto: {
         title: '지출이 저절로 기록됩니다',
-        body: 'iOS를 위한 새로운 자동화 3가지: 카드를 태그하면 Apple Pay 결제가 저절로 기록되고, Log Screenshot은 결제 스크린샷을 스캔된 거래로 바꿔 주며, Back Tap은 휴대폰 뒷면을 두드려 빠른 입력을 엽니다. 자동화 페이지에서 설정하세요.',
+        body: 'iOS를 위한 새로운 자동화 3가지: 카드를 태그하면 Apple Pay 결제가 저절로 기록되고, Log Screenshot은 결제 스크린샷을 스캔된 거래로 바꿔 주며, 뒷면 탭은 휴대폰 뒷면을 두드려 빠른 입력을 엽니다. 자동화 페이지에서 설정하세요.',
       },
     },
     receipt_split_update: {
       title: '항목별로 나누기',
       split: {
         title: '영수증을 스캔해 항목별로 나누세요',
-        body: '계산서를 찍고 각 항목을 먹은 사람에게 배정하세요. 함께 먹은 요리는 몫으로 나누고, 세금과 봉사료는 알아서 공평하게 나뉩니다. 모두가 정확한 금액으로 “받을 돈”에 정리됩니다.',
+        body: '계산서를 찍고 각 항목을 먹은 사람에게 배정하세요. 함께 먹은 요리는 몫으로 나누고, 세금과 봉사료는 알아서 공평하게 나뉩니다. 모두가 정확한 금액으로 주고받을 돈에 정리됩니다.',
       },
       selector: {
         title: '더 빠르게 추가하기',
@@ -469,11 +469,11 @@ const ko = {
       },
       albums: {
         title: '지출을 앨범으로 묶기',
-        body: '여행, 파티, 프로젝트의 거래를 표지, 합계, 분석이 있는 앨범으로 모아 보세요. 하나를 활성으로 설정하면 새 지출이 자동으로 추가됩니다.',
+        body: '여행, 파티, 프로젝트의 거래를 커버, 합계, 분석이 있는 앨범으로 모아 보세요. 하나를 활성으로 설정하면 새 지출이 자동으로 추가됩니다.',
       },
     },
     multi_currency_update: {
-      title: '다중 통화 외',
+      title: '다중 통화 외 새 기능',
       showcase_main: '기본',
       currency: {
         title: '어떤 통화로든 지출',
@@ -481,7 +481,7 @@ const ko = {
       },
       redesign: {
         title: '새로워진 디자인',
-        body: '설정, 시간당 가치, 반복 지출 화면을 더 깔끔하고 쓰기 쉽게 새로 디자인했습니다.',
+        body: '설정, 시급, 반복 지출 화면을 더 깔끔하고 쓰기 쉽게 새로 디자인했습니다.',
       },
       app_lock: {
         title: '앱 잠금',
@@ -489,10 +489,10 @@ const ko = {
       },
     },
     account_logos: {
-      title: '계정 로고',
+      title: '계좌 로고',
       intro: {
-        title: '계정에 로고를 더하세요',
-        body: '어떤 계정에도 은행 또는 전자지갑 로고를 추가하세요. 전 세계 470개 이상 중에서 고르거나 직접 업로드하세요. 계정을 열어 선택하세요.',
+        title: '계좌에 로고를 더하세요',
+        body: '어떤 계좌에도 은행 또는 전자지갑 로고를 추가하세요. 전 세계 470개 이상 중에서 고르거나 직접 업로드하세요. 계좌을 열어 선택하세요.',
       },
     },
     share_earn: {
@@ -503,7 +503,7 @@ const ko = {
       },
     },
     cta: {
-      open_accounts: '계좌 열기',
+      open_accounts: '계좌 관리',
       open_hourly_value_settings: '근무 시간 설정',
       open_add_transaction: '거래 추가',
       open_recurring: '반복 거래 열기',
@@ -572,7 +572,7 @@ const ko = {
       voice_logged: '음성으로 기록됨',
       voice_example: '택시 30',
       album_trip: '도쿄 여행',
-      album_trip_meta: '3월 4일 – 3월 11일',
+      album_trip_meta: '3월 4일 - 3월 11일',
       album_celebration: '엄마 생일',
       album_celebration_meta: '거래 8건',
       month_starts_on_payday: '한 달이 월급날부터 시작돼요',
@@ -600,7 +600,7 @@ const ko = {
       },
       savings: {
         title: '얼마나 남겼는지',
-        body: '이번 달 저축률을 한눈에 — 남긴 금액과 쓴 금액을 돈과 노동 시간으로 보여줍니다.',
+        body: '이번 달 저축률을 한눈에: 남긴 금액과 쓴 금액을 돈과 노동 시간으로 보여줍니다.',
       },
       trend: {
         title: '저축 추세',
@@ -621,7 +621,7 @@ const ko = {
     spent: '지출',
     of_income_saved: '수입에서 저축',
     add_income_hint: '저축률을 보려면 수입을 추가하세요',
-    set_hourly_value: '앱에서 시간당 가치 설정',
+    set_hourly_value: '앱에서 시급 설정',
     of_work: '노동 {{hours}}',
     of_work_kept: '≈ 노동 {{hours}} 확보',
     of_work_behind: '≈ 노동 {{hours}} 부족',
@@ -652,7 +652,7 @@ const ko = {
       stop: '멈추기',
       wage_title: '한 시간의 가치는?',
       wage_body: '실시간 수입은 실제 시급을 기준으로 쌓입니다. 시급만 정하면 준비 끝이에요.',
-      wage_action: '시간당 가치 설정',
+      wage_action: '시급 설정',
       disabled_title: '라이브 액티비티가 꺼져 있어요',
       disabled_body: 'iOS 설정에서 Money2Time의 라이브 액티비티를 켠 다음 다시 오세요.',
       unavailable: '라이브 액티비티에는 iOS 16.2 이상의 iPhone이 필요합니다.',
@@ -787,7 +787,7 @@ const ko = {
       confirm_skip: '그래도 건너뛰기',
       icloud_pending_title: '백업이 켜졌습니다',
       icloud_pending_message:
-        'iCloud에 로그인하고 설정에서 iCloud Drive를 켜세요 — 사용 가능해지는 즉시 백업이 자동으로 시작됩니다.',
+        'iCloud에 로그인하고 설정에서 iCloud Drive를 켜세요. 사용 가능해지는 즉시 백업이 자동으로 시작됩니다.',
     },
     source: {
       title: '어떻게 알게 되셨나요?',
@@ -811,7 +811,7 @@ const ko = {
       discard_message: '항목과 배정 내용이 사라집니다.',
       discard_confirm: '버리기',
       keep_editing: '계속 편집',
-      low_confidence_banner: '읽기 어려운 줄이 있어요 — 다시 확인해 주세요.',
+      low_confidence_banner: '읽기 어려운 줄이 있어요. 다시 확인해 주세요.',
       items_empty_title: '아직 항목이 없어요',
       items_empty_message: '영수증의 각 줄을 추가해서 항목별로 나눠 보세요.',
       item_name_placeholder: '항목 이름',
@@ -834,7 +834,7 @@ const ko = {
       portions_title: '몫 나누기',
       your_share: '내 몫',
       tax_fees_label: '세금·수수료',
-      tax_service_title: '세금 및 서비스',
+      tax_service_title: '세금 및 봉사료',
       people_label: '인원',
       optional_name: '이름 (선택)',
       person_named: '참가자 {{label}}',
@@ -986,7 +986,7 @@ const ko = {
       },
       transfer_expense_label: '지출로 계산',
       transfer_expense_tooltip:
-        '이 이체를 선택한 카테고리의 지출로 합계, 예산, 차트에 반영합니다. 두 계정 사이의 자금 이동은 평소처럼 이루어집니다.',
+        '이 이체를 선택한 카테고리의 지출로 합계, 예산, 차트에 반영합니다. 두 계좌 사이의 자금 이동은 평소처럼 이루어집니다.',
       received_amount: '받는 금액 ({{currency}})',
       transfer_rate_hint: '비워 두면 최신 환율로 {{from}} → {{to}}(으)로 환산합니다.',
       received_label: '받음',
@@ -1145,7 +1145,7 @@ const ko = {
         subtotal_label: '소계',
         itemized_total: '합계: {{sum}}',
         itemized_total_zero_hint: '금액을 하나 이상 입력하세요',
-        adjustments_title: '세금 및 서비스료',
+        adjustments_title: '세금 및 봉사료',
         discount_title: '할인',
         percent_chip: '{{percent}}%',
         apply: '적용',
@@ -1460,7 +1460,7 @@ const ko = {
       new_transaction_step_3: '아래로 스크롤해 Shortcuts 섹션에서 New Transaction을 선택하세요.',
       new_transaction_step_4: '완료입니다. iPhone 뒷면을 두 번 두드리면 곧바로 새 거래가 열립니다.',
       log_screenshot_hint:
-        '결제나 영수증 화면에서 뒷면 두드리기만 하면 Money2Time이 화면을 캡처해 금액, 가맹점, 계정을 자동으로 읽습니다.',
+        '결제나 영수증 화면에서 뒷면을 두드리기만 하면 Money2Time이 화면을 캡처해 금액, 가맹점, 계좌를 자동으로 읽습니다.',
       log_screenshot_step_1: '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
       log_screenshot_step_2:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
@@ -1510,7 +1510,7 @@ const ko = {
         '동작의 화살표를 탭한 다음 Account를 탭하세요. 검토한 거래를 기록할 계좌를 선택하세요. Category는 선택 사항입니다.',
       payment_alerts_ios_step_7:
         '뒤로를 탭해 저장하세요. 은행이나 지갑 앱마다 반복하세요. 새 알림을 검토하려면 오프라인에서도 Money2Time에서 알림 옆의 기록 아이콘을 탭하세요.',
-      payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
+      payment_alerts_android_disclosure: "알림 접근 권한의 사용 방법을 읽고 '계속'을 누르세요.",
       payment_alerts_ios_app:
         'App을 탭하고 은행 또는 전자 지갑 앱을 선택하세요. 이 스크린샷은 Wallet을 예로 사용합니다.',
       payment_alerts_ios_run:
@@ -1596,11 +1596,11 @@ const ko = {
     account_signed_out: '로그인 안 됨',
     account_signed_in_a11y: '{{email}}(으)로 로그인됨',
     account_sign_in_prompt:
-      '로그인하면 앨범을 공유하고 공유 장부에 참여할 수 있어요. Cloud Sync를 켜기 전까지 데이터는 이 휴대폰에만 있어요.',
+      '로그인하면 앨범을 공유하고 공유 가계부에 참여할 수 있어요. Cloud Sync를 켜기 전까지 데이터는 이 휴대폰에만 있어요.',
     account_faq: {
       what: {
         q: '로그인하면 무엇을 할 수 있나요?',
-        a: '계정이 생겨서 앨범을 공유하고, 다른 사람이 공유한 장부에 참여할 수 있어요. 데이터는 이 휴대폰에 남아 있어요.',
+        a: '계정이 생겨서 앨범을 공유하고, 다른 사람이 공유한 가계부에 참여할 수 있어요. 데이터는 이 휴대폰에 남아 있어요.',
       },
       sync: {
         q: '로그인하면 데이터가 동기화되나요?',
@@ -1608,15 +1608,15 @@ const ko = {
       },
       pro: {
         q: '로그인하려면 Pro가 필요한가요?',
-        a: '아니요. 로그인, 앨범 공유, 공유 장부 참여는 무료예요. Pro는 내 데이터 동기화와 장부 공유에 필요해요.',
+        a: '아니요. 로그인, 앨범 공유, 공유 가계부 참여는 무료예요. Pro는 내 데이터 동기화와 가계부 공유에 필요해요.',
       },
       shared_pro: {
         q: '공유 가계부에는 Pro가 필요한가요?',
         a: '소유자든 멤버든 그 안의 한 명만 Pro가 있으면 돼요. 아무도 Pro가 없으면 누군가 Pro를 가질 때까지 모두에게 일시 중지돼요. 아무것도 삭제되지 않아요.',
       },
       shared_free_limits: {
-        q: 'Pro 없이 공유 장부에 내역을 추가할 수 있나요?',
-        a: '네, 계좌가 6개를 넘어도 추가할 수 있어요. 한도를 넘는 계좌나 카테고리 추가처럼 무료 플랜의 다른 제한은 그대로 적용돼요. 이런 변경은 장부 소유자에게 요청하세요.',
+        q: 'Pro 없이 공유 가계부에 내역을 추가할 수 있나요?',
+        a: '네, 계좌가 6개를 넘어도 추가할 수 있어요. 한도를 넘는 계좌나 카테고리 추가처럼 무료 플랜의 다른 제한은 그대로 적용돼요. 이런 변경은 가계부 소유자에게 요청하세요.',
       },
       family_pro: {
         q: '가족이 제 Pro를 쓸 수 있나요?',
@@ -1641,7 +1641,7 @@ const ko = {
       default_currency_label: '기본 통화',
       default_currency_auto: '계좌 통화에 맞춤',
       default_row: '기본값',
-      no_default: '자동 · 기타로 폴백',
+      no_default: '자동 · 없으면 기타',
       unmapped: '매핑 안 됨',
       custom_badge: '사용자 정의',
       bucket_labels: {
@@ -1742,10 +1742,10 @@ const ko = {
     hourly_timeline: '타임라인',
     hourly_delete_title: '월별 시급을 삭제하시겠어요?',
     hourly_delete_message:
-      '{{month}}의 시급을 삭제하시겠어요? 이 시급에 의존하는 월은 이전 이용 가능한 월로 폴백됩니다.',
+      '{{month}}의 시급을 삭제하시겠어요? 이 시급을 쓰던 달은 그 이전의 가장 가까운 시급을 사용합니다.',
     hourly_add_title: '수입 시급 추가',
     hourly_month_exists_title: '{{month}} 이미 존재',
-    hourly_month_exists_message: '이 수입 단가로 바꿀까요?',
+    hourly_month_exists_message: '이 수입 시급으로 바꿀까요?',
     hourly_replace: '바꾸기',
     account_settings: '개인화',
     haptics: '햅틱',
@@ -1800,9 +1800,12 @@ const ko = {
       '- category: 아래 내 카테고리에서 가장 잘 맞는 항목 선택, 하위 카테고리가 맞으면 "상위 > 하위" 형식 사용, 그렇지 않으면 상위 이름만, 불확실하면 "Other"\n' +
       '- account: 명세서에 인쇄된 구체적인 계좌 이름(예: "Chase Sapphire Reserve", "OCBC 365 Credit Card"), 일반 레이블 사용 금지\n\n' +
       '건너뛸 항목: 잔액 항목, 명세서 합계, 공시, 머리글/바닥글만 건너뛰세요.\n\n' +
-      '## 내 계좌\n{{accounts}}\n\n' +
-      '## 내 지출 카테고리\n{{expenses}}\n\n' +
-      '## 내 수입 카테고리\n{{incomes}}\n\n' +
+      '## 내 계좌\n' +
+      '{{accounts}}\n\n' +
+      '## 내 지출 카테고리\n' +
+      '{{expenses}}\n\n' +
+      '## 내 수입 카테고리\n' +
+      '{{incomes}}\n\n' +
       'json 코드 블록만으로 답하고 다른 텍스트는 포함하지 마세요:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1817,7 +1820,7 @@ const ko = {
       '}\n' +
       '```\n\n' +
       '## 규칙\n' +
-      '- 명세서의 통화를 ISO 4217 코드(예: "MYR", "SGD", "USD")로 표시하세요. 모든 금액은 인쇄된 그대로 옮기고 절대 다른 통화로 환산하지 마세요.\\n' +
+      '- 명세서의 통화를 ISO 4217 코드(예: "MYR", "SGD", "USD")로 표시하세요. 모든 금액은 인쇄된 그대로 옮기고 절대 다른 통화로 환산하지 마세요.\n' +
       '- 절대 거래를 만들거나 조작하지 마세요. 문서에 있는 내용만 출력하세요.\n' +
       '- 절대 거래를 건너뛰거나 잘라내거나 생략하지 마세요. 모든 파일의 모든 페이지를 처음부터 끝까지 읽고 모든 거래 항목을 출력하세요.\n' +
       '- 파일이 여러 개 업로드된 경우 각 파일을 완전히 처리한 후 모든 거래를 하나의 "transactions" 배열로 합치세요.\n' +
@@ -2178,7 +2181,7 @@ const ko = {
       interest_rate_info_flat:
         '연 정액 금리로, 빌린 원금 전체에 대해 전체 기간 동안 부과됩니다. 입력하면 월 상환액과 총액을 계산하고, 총액을 입력하면 금리를 계산합니다.',
       effective_rate_hint:
-        '실효 금리 {{rate}}%. 이 균등 금리를 잔액 기준으로 환산한 실제 비용입니다.',
+        '실효 금리 {{rate}}%. 이 정액 금리를 잔액 기준으로 환산한 실제 비용입니다.',
       rate_change_title: '새 금리를 언제부터 적용할까요?',
       rate_change_message:
         '금리가 {{from}}%에서 {{to}}%로 바뀝니다. 이미 부과된 이자를 그대로 두려면 오늘부터, 실수를 고치는 것이라면 처음부터 적용하세요.',
@@ -2203,7 +2206,7 @@ const ko = {
         '매월 상환금이 빠져나갈 계좌입니다. 지정하면 자동으로 기록되고, 비워 두면 매번 직접 기록합니다.',
       collect_account_manual: '직접 기록하겠습니다',
       collect_account_external: '이 상환은 반복에 설정되어 있습니다. 거기서 수정하세요.',
-      count_as_expense_label: '할부금을 지출로 계산',
+      count_as_expense_label: '상환액을 지출로 계산',
       count_as_expense_info:
         '상환은 항상 대출로 돈을 옮기므로 남은 빚은 어느 쪽이든 줄어듭니다. 이 설정을 켜면 선택한 카테고리로 합계, 예산, 차트의 지출에도 포함됩니다. 끄면 상환은 지출에서 제외됩니다. 나중에 변경하면 그 이후에 기록한 상환에만 적용됩니다.',
       payment_category_label: '상환 카테고리',
@@ -2213,7 +2216,7 @@ const ko = {
       balance_owed_label: '남은 잔액',
       interest_rate_label: '이자율',
       autopay_rule_name: '{{name}} 상환',
-      payment_below_interest_short: '상환액이 이자를 못 갚습니다',
+      payment_below_interest_short: '상환액이 이자보다 적습니다',
       payoff_by_label: '완납 시점',
       first_instalment_label: '첫 상환',
       instalments_left_label: '남은 횟수',
@@ -2266,14 +2269,14 @@ const ko = {
       '계좌 목록과 계좌 선택에서 숨깁니다. 거래는 유지되고 반복 거래는 일시 중지됩니다.',
     show_balances: '잔액 표시',
     type: '유형',
-    statement_day: '결제일',
-    due_day: '납부일',
+    statement_day: '명세서 마감일',
+    due_day: '결제일',
     due_rule: '결제일',
     due_rule_day_of_month: '매월 날짜',
-    due_rule_days_after: '명세서 후 일수',
+    due_rule_days_after: '명세서 마감 후 일수',
     due_next_date: '다음 결제일: {{date}}',
     due_days_after_error: '1~{{max}}일을 입력하세요',
-    due_days_after_needs_statement: '기준이 되는 명세서 날짜를 입력하세요',
+    due_days_after_needs_statement: '기준이 되는 명세서 마감일을 입력하세요',
     current_balance: '현재 잔액',
     balance_adjustment_prompt_title: '이 잔액 변동을 어떻게 기록할까요?',
     balance_adjustment_prompt_message:
@@ -2284,8 +2287,8 @@ const ko = {
     balance_adjustment_transaction_note: '잔액 조정',
     starting_balance: '초기 잔액',
     credit: '신용카드',
-    statement_on: '결제일 {{date}}',
-    due_on: '납부일 {{date}}',
+    statement_on: '명세서 마감 {{date}}',
+    due_on: '결제일 {{date}}',
     payable: '납부 잔액',
     outstanding: '미납 잔액',
     pay_this_card: '이 카드 결제',
@@ -2310,8 +2313,8 @@ const ko = {
     group_name: '그룹 이름',
     expand: '펼치기',
     collapse: '접기',
-    add_account_to_group: '계정 추가',
-    empty_group_accounts: '이 그룹에 아직 계정이 없습니다',
+    add_account_to_group: '계좌 추가',
+    empty_group_accounts: '이 그룹에 아직 계좌가 없습니다',
     delete_group_title: '그룹을 삭제하시겠어요?',
     delete_group_message: '이 그룹의 계좌는 그룹 없음으로 이동합니다.',
     empty_groups_title: '그룹 없음',
@@ -2349,7 +2352,7 @@ const ko = {
       '무료 플랜은 매월 {{count}}회 영수증 스캔을 포함합니다. 무제한 스캔을 위해 Pro로 업그레이드하세요.',
     limit_autolog:
       '무료 Apple Pay 자동화 {{count}}회를 모두 사용해서 최근 결제가 기록되지 않았습니다. Pro로 업그레이드하면 무제한으로 사용할 수 있습니다.',
-    custom_logos_label: '사용자 지정 계정 로고',
+    custom_logos_label: '사용자 지정 계좌 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',
     goals_label: '저축 목표',
@@ -2402,10 +2405,10 @@ const ko = {
     monthly: '월간',
     yearly: '연간',
     lifetime: '평생',
-    monthly_subtitle: '월별 청구',
+    monthly_subtitle: '매월 청구',
     per_month_suffix: ' / 월',
     per_year_suffix: ' / 년',
-    yearly_subtitle: '연별 청구',
+    yearly_subtitle: '매년 청구',
     lifetime_subtitle: '일회성 구매',
     lifetime_desc: '한 번 결제, 영원히 사용',
     best_value: '최고 가성비',
@@ -2501,7 +2504,7 @@ const ko = {
     limit_voice:
       '무료 플랜에는 음성 입력 {{count}}회가 포함됩니다. Pro로 업그레이드하면 무제한 음성 입력을 사용할 수 있습니다.',
     limit_items:
-      '무료 플랜에서는 최대 {{count}}개까지 추적할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
+      '무료 플랜에서는 물건을 최대 {{count}}개까지 추적할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_budget_templates:
       '무료 플랜에서는 예산 템플릿을 {{count}}개 만들 수 있어요. Pro는 무제한입니다.',
     limit_receipts:
@@ -2650,7 +2653,7 @@ const ko = {
     },
     review: {
       fires_on: '도착 시점',
-      fires_on_hint: '표시 설정의 주 시작일과 월 시작일에 따라 정해져요.',
+      fires_on_hint: '화면 설정의 주 시작일과 월 시작일에 따라 정해져요.',
       every_week_on: '매주 {{day}}',
       every_month_on: '매월 {{day}}일',
       day_of_month_short: '{{day}}일',
@@ -2776,7 +2779,7 @@ const ko = {
     google_drive_sign_in_failed_title: '로그인 실패',
     google_drive_sign_out_title: 'Google Drive에서 로그아웃하시겠어요?',
     google_drive_sign_out_message:
-      '자동 백업이 기기로 폴백됩니다. Google Drive의 기존 백업은 유지됩니다.',
+      '자동 백업은 이 기기에 저장됩니다. Google Drive의 기존 백업은 유지됩니다.',
     google_drive_sign_out_action: '로그아웃',
     google_drive_sign_out_link: 'Google 로그아웃',
     fallback_local_title: '이 기기에 저장됨',
@@ -2791,11 +2794,11 @@ const ko = {
       prefix: '{{target}}: {{reason}}',
       offline: '인터넷에 연결되어 있지 않습니다. 연결한 뒤 다시 시도하세요.',
       timeout: '연결 시간이 초과되었습니다. 더 빠른 네트워크에서 다시 시도하세요.',
-      auth: '백업을 계속하려면 Google 드라이브에 다시 로그인하세요.',
-      quota: 'Google 드라이브 저장공간이 가득 찼습니다. 공간을 확보한 뒤 다시 시도하세요.',
-      rate_limited: 'Google 드라이브가 사용량이 많습니다. 잠시 후 다시 시도하세요.',
-      server: 'Google 드라이브를 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.',
-      client: 'Google 드라이브가 백업을 거부했습니다.',
+      auth: '백업을 계속하려면 Google Drive에 다시 로그인하세요.',
+      quota: 'Google Drive 저장공간이 가득 찼습니다. 공간을 확보한 뒤 다시 시도하세요.',
+      rate_limited: 'Google Drive가 사용량이 많습니다. 잠시 후 다시 시도하세요.',
+      server: 'Google Drive를 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.',
+      client: 'Google Drive가 백업을 거부했습니다.',
       unknown: '문제가 발생했습니다.',
     },
     last_backup: '마지막 백업 {{relative}}',
@@ -2820,18 +2823,18 @@ const ko = {
     restore_failed_title: '복원 실패',
   },
   review_prompt: {
-    preprompt_title: 'Money2Time가 마음에 드시나요?',
+    preprompt_title: 'Money2Time이 마음에 드시나요?',
     preprompt_subtitle: '솔직한 의견이 개선에 도움이 됩니다.',
     preprompt_happy: '네, 좋아요',
     preprompt_unhappy: '별로요',
     preprompt_dismiss: '나중에',
-    feedback_prompt: '아쉽네요 — 더 나아질 수 있는 부분을 알려주시겠어요?',
+    feedback_prompt: '아쉽네요. 더 나아질 수 있는 부분을 알려주시겠어요?',
     feedback_open: '피드백 보내기',
     feedback_skip: '괜찮아요',
   },
   cloud_backup_prompt: {
     title: '데이터를 안전하게 보관하세요',
-    body: '백업은 이 기기에만 저장되어 있어 앱을 삭제하면 사라집니다. 클라우드 백업을 켜서 iCloud 또는 Google 드라이브에 안전하게 보관하세요.',
+    body: '백업은 이 기기에만 저장되어 있어 앱을 삭제하면 사라집니다. 클라우드 백업을 켜서 iCloud 또는 Google Drive에 안전하게 보관하세요.',
     cta: '클라우드에 백업',
     dismiss: '나중에',
   },
@@ -2925,7 +2928,7 @@ const ko = {
       items: {
         needs_pro: {
           q: 'Cloud Sync에 Pro가 필요한가요?',
-          a: '네, 내 데이터를 동기화하려면 Pro가 필요해요. 다른 사람이 공유한 앨범과 장부는 Pro 없이도 동기화돼요.',
+          a: '네, 내 데이터를 동기화하려면 Pro가 필요해요. 다른 사람이 공유한 앨범과 가계부는 Pro 없이도 동기화돼요.',
         },
         pro_other_phone: {
           q: '다른 휴대폰에는 Pro가 있어요. 이 휴대폰은 왜 아닌가요?',
@@ -2966,8 +2969,8 @@ const ko = {
       add: '위치 추가',
       clear: '위치 지우기',
       picker_title: '장소 선택',
-      search_placeholder: '도시 검색…',
-      search_hint: '이 여행을 지도에 표시할 도시를 검색하세요.',
+      search_placeholder: '도시, 지역 또는 국가 검색…',
+      search_hint: '도시, 지역 또는 국가로 검색해 이 여행을 지도에 표시하세요.',
       no_results: '장소를 찾을 수 없습니다',
       empty_title: '아직 장소가 없습니다',
       empty_message: '앨범에 위치를 추가하면 지구본과 지도에 표시됩니다.',
@@ -3156,7 +3159,7 @@ const ko = {
     },
   },
   assets: {
-    tab_accounts: '계정',
+    tab_accounts: '계좌',
     tab_goals: '목표',
     tab_items: '물건',
   },
@@ -3307,7 +3310,7 @@ const ko = {
     settings_title: '환급 설정',
     empty_title: '청구할 것이 없습니다',
     empty_message: '지출에 "환급 대기"를 체크하면 여기에 표시됩니다.',
-    mark_reimbursed: '받음',
+    mark_reimbursed: '받기',
     paid_into: '{{account}}(으)로',
     undo_title: '이 환급을 취소할까요?',
     undo_message: '입금 항목이 삭제됩니다.',
@@ -3384,7 +3387,7 @@ const ko = {
     everything_caption_other: '항목 {{count}}건, 예산, 앨범을 포함한 전체 복사본',
     everything_currency_note: '전체 복사본은 {{name}}의 통화를 유지합니다.',
     delete_open_note: '지금 열려 있으므로 대신 {{name}}이(가) 열립니다.',
-    copy_from: '복사할 장부',
+    copy_from: '복사할 가계부',
     copy_accounts_one: '계좌 {{count}}개, 잔액 0부터',
     copy_accounts_other: '계좌 {{count}}개, 잔액 0부터',
     starter_accounts_caption: '현금, 간편결제, 입출금 계좌, 저축 계좌, 신용카드.',
@@ -3451,7 +3454,7 @@ const ko = {
     share_toggle: '이 가계부 공유',
     share_toggle_caption:
       '최대 {{max}}명까지 초대할 수 있어요. 초대받은 사람은 Pro가 없어도 됩니다.',
-    needs_cloud_sync: '장부를 공유하려면 Cloud Sync를 켜세요.',
+    needs_cloud_sync: '가계부를 공유하려면 Cloud Sync를 켜세요.',
     has_shared_albums: '이 가계부에 공유 앨범이 있어요. 먼저 앨범 공유를 중지하세요.',
     limit_reached: '지금은 가계부를 최대 {{max}}개까지 공유할 수 있습니다.',
     share_failed:
@@ -3582,7 +3585,7 @@ const ko = {
     ai_settings: '자동 검토 설정',
     ai_quota_free: '무료 %{limit}회 중 %{count}회 남음',
     ai_quota_pro: 'Pro에서 무제한',
-    ai_quota_left: '%{count}개 남음',
+    ai_quota_left: '무료 %{count}회 남음',
     ai_quota_unlimited: '무제한',
     ai_quota_info_title: '무료 자동 검토',
     ai_quota_info:

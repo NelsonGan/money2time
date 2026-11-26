@@ -1,20 +1,21 @@
 const sv = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Återställ säkerhetskopia',
+    export_description: 'Personliga data och delade kassaböcker du äger.',
+    import_description: 'Välj vad som ska återställas från en säkerhetskopia.',
+    personal: 'Personliga kassaböcker',
+    personal_note: 'Ersätter kassaböcker och inställningar på synkade enheter.',
+    personal_local_note: 'Ersätter kassaböcker och inställningar.',
+    shared_ledgers: 'Delade kassaböcker',
+    owned: 'Du äger den här kassaboken',
+    unavailable: 'Kräver ägaråtkomst',
+    restore_action: 'Återställ valda',
+    confirm_title: 'Återställa för alla?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nErsätt med säkerhetskopian från {{date}}. Senare ändringar går förlorade. Medlemmar och inbjudningar påverkas inte.',
+    sync_pending: 'Återställt här. Förbli inloggad tills synkroniseringen är klar.',
+    failed:
+      'Det gick inte att återställa. Kontrollera anslutningen, ägaråtkomsten och ledigt lagringsutrymme.',
     photos_unavailable:
       'Det gick inte att hämta säkerhetskopians bilder. Kontrollera anslutningen och försök igen.',
     photos_missing:
@@ -52,7 +53,7 @@ const sv = {
     hour_unit: 'h',
     minute_unit: 'm',
     day_unit: 'd',
-    year_unit: 'å',
+    year_unit: 'år',
     none: 'Ingen',
     no_account: 'Inget konto',
     uncategorized: 'Okategoriserat',
@@ -356,8 +357,8 @@ const sv = {
         body: 'Myntpungen som appen bar förut är tillbaka bland ikonerna, gratis för alla. Finns i Inställningar under Visning, bredvid Pro-ikonerna.',
       },
       loanInterest: {
-        title: 'Fast ränta eller sjunkande saldo',
-        body: 'Lån offereras på båda sätten, så nu väljer du det som står i ditt avtal. Sjunkande saldo tar ränta på det du fortfarande är skyldig, fast ränta tar den på hela beloppet du lånade.',
+        title: 'Platt ränta eller sjunkande saldo',
+        body: 'Lån offereras på båda sätten, så nu väljer du det som står i ditt avtal. Sjunkande saldo tar ränta på det du fortfarande är skyldig, platt ränta tar den på hela beloppet du lånade.',
       },
     },
     subscriptions_tutorials_loans: {
@@ -442,14 +443,14 @@ const sv = {
       },
     },
     receipt_split_update: {
-      title: 'Dela upp per vara',
+      title: 'Dela per artikel',
       split: {
-        title: 'Skanna ett kvitto och dela upp det post för post',
-        body: 'Fota notan och tilldela varje rad till den som tog den — dela rätter i portioner, medan skatt och serveringsavgift fördelas rättvist av sig själva. Alla hamnar under ”Vem är skyldig dig” med ett exakt belopp.',
+        title: 'Skanna ett kvitto och dela det artikel för artikel',
+        body: 'Fota notan och tilldela varje rad till den som tog den. Dela rätter i portioner, medan moms och serviceavgift fördelas rättvist av sig själva. Alla hamnar i Mellanhavanden med ett exakt belopp.',
       },
       selector: {
         title: 'Ett snabbare sätt att lägga till',
-        body: 'Plusknappen öppnar nu en meny med flikarna Lägg till och Dela, så att snabbregistrering, kvittoskanning, röst och att dela en nota bara är ett tryck bort. Vill du hellre gå direkt till snabbregistrering? Du kan stänga av den här menyn när som helst i inställningarna för Snabbregistrering.',
+        body: 'Plusknappen öppnar nu en meny med flikarna Lägg till och Dela, så att snabbinmatning, kvittoskanning, röst och att dela en nota bara är ett tryck bort. Vill du hellre gå direkt till snabbinmatning? Du kan stänga av den här menyn när som helst i inställningarna för Snabbinmatning.',
       },
     },
     budget_items_update: {
@@ -505,7 +506,7 @@ const sv = {
       },
     },
     cta: {
-      open_accounts: 'Visa konton',
+      open_accounts: 'Hantera konton',
       open_hourly_value_settings: 'Ställ in arbetstimmar',
       open_add_transaction: 'Lägg till transaktion',
       open_recurring: 'Öppna Återkommande',
@@ -515,7 +516,7 @@ const sv = {
       open_ricecal: 'Prova RiceCal',
       open_pro_paywall: 'Se Pro-planer',
       open_cloud_sync: 'Slå på Cloud Sync',
-      open_bottom_bar: 'Ändra fältet',
+      open_bottom_bar: 'Ändra nedre fältet',
       open_notification_review: 'Slå på Autogranskning',
       open_insights: 'Öppna Insikter',
       open_instalments: 'Visa delbetalningar',
@@ -524,7 +525,7 @@ const sv = {
       open_scan_receipt: 'Skanna kvitton',
       open_albums: 'Öppna Album',
       open_share_earn: 'Få Pro gratis',
-      open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
+      open_quick_entry_settings: 'Öppna inställningar för Snabbinmatning',
       open_auto_log: 'Ställ in automatiseringar',
       open_first_day_of_month: 'Ställ in månadsstart',
       open_excel_export: 'Gå till Excel-export',
@@ -574,7 +575,7 @@ const sv = {
       voice_logged: 'Registrerat med röst',
       voice_example: 'taxi 30',
       album_trip: 'Tokyo-resa',
-      album_trip_meta: '4 mar – 11 mar',
+      album_trip_meta: '4 mar - 11 mar',
       album_celebration: 'Mammas födelsedag',
       album_celebration_meta: '8 transaktioner',
       month_starts_on_payday: 'Din månad börjar på lönedagen',
@@ -602,7 +603,7 @@ const sv = {
       },
       savings: {
         title: 'Hur mycket du behåller',
-        body: 'Din sparkvot den här månaden i ett ögonkast – vad du behöll mot vad du spenderade, i pengar och arbetstimmar.',
+        body: 'Din sparkvot den här månaden i ett ögonkast: vad du behöll mot vad du spenderade, i pengar och arbetstimmar.',
       },
       trend: {
         title: 'Din spartrend',
@@ -613,7 +614,7 @@ const sv = {
       title: 'Lägg till transaktioner med rösten',
       say_it: {
         title: 'Säg det bara',
-        body: 'Håll in +-knappen och säg det, som "taxi 30" eller "kaffe 4.50". Vi fångar upp beloppet och kategorin åt dig, allt på din telefon.',
+        body: 'Håll in +-knappen och säg det, som "taxi 30" eller "kaffe 4,50". Vi fångar upp beloppet och kategorin åt dig, allt på din telefon.',
       },
     },
   },
@@ -626,7 +627,7 @@ const sv = {
     set_hourly_value: 'Ange timvärde i appen',
     of_work: '{{hours}} arbete',
     of_work_kept: '≈ {{hours}} arbete behållet',
-    of_work_behind: '≈ {{hours}} arbete back',
+    of_work_behind: '≈ {{hours}} arbete i minus',
     budget_setup: 'Sätt en månadsbudget',
     budget_over: 'över budget',
     budget_left_of: 'kvar av {{total}}',
@@ -664,7 +665,7 @@ const sv = {
       schedule_tooltip:
         'På iOS 17.2 och senare startar Money2Time klockan åt dig vid den här tiden, även när appen är stängd. På äldre versioner skickas i stället en avisering, och ett tryck på den startar klockan.',
       schedule_title: 'Starta automatiskt',
-      schedule_body: 'En tryckning på påminnelsen startar klockan.',
+      schedule_body: 'Ett tryck på påminnelsen startar klockan.',
       schedule_body_auto: 'Klockan startar av sig själv de här dagarna.',
       schedule_time: 'Tid',
       schedule_duration: 'Passets längd',
@@ -674,7 +675,7 @@ const sv = {
       summary_total: 'Pass totalt',
       of_total: 'av {{total}}',
       refresh: 'Uppdatera',
-      widget_idle: 'Ingen session',
+      widget_idle: 'Inte igång',
     },
   },
   home: {
@@ -745,9 +746,9 @@ const sv = {
     automations: {
       title: 'Låt den logga åt dig',
       subtitle: 'Ställ in dem när som helst i Inställningar.',
-      screenshot_title: 'Skärmdumpar',
-      screenshot_subtitle_ios: 'Ta en skärmdump av ett kvitto eller en betalning.',
-      screenshot_subtitle_android: 'Dela en skärmdump av ett kvitto eller en betalning.',
+      screenshot_title: 'Skärmbilder',
+      screenshot_subtitle_ios: 'Ta en skärmbild av ett kvitto eller en betalning.',
+      screenshot_subtitle_android: 'Dela en skärmbild av ett kvitto eller en betalning.',
       apple_pay_title: 'Apple Pay',
       apple_pay_subtitle: 'Varje tryck loggar sig självt.',
       alerts_title: 'Betalningsaviseringar',
@@ -789,7 +790,7 @@ const sv = {
       confirm_skip: 'Hoppa över ändå',
       icloud_pending_title: 'Säkerhetskopiering påslagen',
       icloud_pending_message:
-        'Logga in på iCloud och slå på iCloud Drive i Inställningar — din säkerhetskopiering startar automatiskt så snart den är tillgänglig.',
+        'Logga in på iCloud och slå på iCloud Drive i Inställningar. Din säkerhetskopiering startar automatiskt så snart den är tillgänglig.',
     },
     source: {
       title: 'Hur hittade du oss?',
@@ -813,7 +814,7 @@ const sv = {
       discard_message: 'Dina artiklar och fördelningar går förlorade.',
       discard_confirm: 'Kasta',
       keep_editing: 'Fortsätt redigera',
-      low_confidence_banner: 'Några rader var svåra att läsa — dubbelkolla dem.',
+      low_confidence_banner: 'Några rader var svåra att läsa. Dubbelkolla dem.',
       items_empty_title: 'Inga artiklar ännu',
       items_empty_message: 'Lägg till varje rad från kvittot för att dela det artikel för artikel.',
       item_name_placeholder: 'Artikelnamn',
@@ -836,7 +837,7 @@ const sv = {
       portions_title: 'Portioner',
       your_share: 'Din andel',
       tax_fees_label: 'Moms och avgifter',
-      tax_service_title: 'Skatt & service',
+      tax_service_title: 'Moms & service',
       people_label: 'Personer',
       optional_name: 'Namn (valfritt)',
       person_named: 'Person {{label}}',
@@ -863,9 +864,9 @@ const sv = {
       receipt_total_label: 'Totalt',
       default_account_title: 'Betalas till som standard',
       default_account_subtitle: 'Nya delningar betalas till detta konto som standard.',
-      qr_card_title: 'Din betalnings-QR',
+      qr_card_title: 'Din betal-QR',
       qr_card_subtitle: 'Bifoga den en gång så följer den med på varje kvitto du skickar.',
-      qr_add: 'Lägg till din betalnings-QR',
+      qr_add: 'Lägg till din betal-QR',
       qr_replace: 'Ersätt',
       empty_title: 'Inga delade notor än',
       empty_subtitle: 'Dela en nota så visas här vad du och dina vänner är skyldiga varandra.',
@@ -893,14 +894,14 @@ const sv = {
       paid_in_payments: '{{count}} betalningar · senast {{date}}',
       payback_group: '{{count}} återbetalningar',
       remove_rest_message:
-        'Det tar bort de {{owed}} som fortfarande är skyldiga. Det som redan betalats tillbaka finns kvar.',
+        'Det tar bort de {{owed}} som de fortfarande är skyldiga. Det som redan betalats tillbaka finns kvar.',
       share_of_total: 'av {{total}}',
       share_paid: '{{paid}} återbetalt',
       bill_paid_progress: '{{paid}} av {{total}} återbetalt',
       receipt_paid_so_far: 'Betalat {{paid}} av {{total}}',
       payment_amount: 'Betalt belopp',
       payment_left_of: '{{left}} kvar av {{total}}',
-      payment_too_much: 'Mer än de {{owed}} som fortfarande är skyldiga',
+      payment_too_much: 'Mer än de {{owed}} som återstår',
       payment_paid_to: 'Betalt till',
       paid_from: 'Betalt från',
       you_owe_tag: 'Du är skyldig',
@@ -1013,7 +1014,7 @@ const sv = {
       },
       title_create: 'Lägg till',
       title_edit: 'Uppdatera',
-      bulk_mode: 'Bulk',
+      bulk_mode: 'Flera',
       subtitle_create: 'Snabb och enkel post',
       subtitle_edit: 'Uppdatera detaljer',
       subtitle_edit_balance_adjustment: 'Uppdatera belopp och berört konto',
@@ -1022,7 +1023,7 @@ const sv = {
       delete_payback_confirm:
         'Betalningen från {{name}} läggs tillbaka på det hen är skyldig för den här notan. Fortsätta?',
       delete_payback_confirm_unnamed:
-        'Den här betalningen läggs tillbaka på det som fortfarande är skyldigt för den här notan. Fortsätta?',
+        'Den här betalningen läggs tillbaka på det som fortfarande är obetalt på den här notan. Fortsätta?',
       receipt: {
         label: 'Kvitto',
         add: 'Lägg till',
@@ -1063,7 +1064,7 @@ const sv = {
       optional: 'Valfritt',
       yest_short: 'Igår',
       subcategories: 'Underkategorier',
-      recurring_settings: 'Återkommande inställningar',
+      recurring_settings: 'Inställningar för upprepning',
       rule_name: 'Regelnamn',
       rule_name_placeholder: 'Netflix-prenumeration',
       repeat: 'Upprepa',
@@ -1123,7 +1124,7 @@ const sv = {
         more_shares: 'Fler andelar',
         add_person: 'Lägg till person',
         me_label: 'Jag',
-        person_placeholder: 'Väns namn',
+        person_placeholder: 'Vännens namn',
         choose_member: 'Välj en medlem',
         no_members: 'Ingen har gått med i albumet än',
         members_on_bill: '{{count}} av {{total}} personer',
@@ -1210,7 +1211,7 @@ const sv = {
     short_labels: {
       review: 'Genomgång',
       expense_breakdown: 'Utgifter',
-      income_breakdown: 'Inkomst',
+      income_breakdown: 'Inkomster',
       time_cost_leaderboard: 'Tidskostnad',
       savings_rate: 'Sparande',
       expense_trend: 'Utgiftstrend',
@@ -1244,7 +1245,7 @@ const sv = {
     category_trend_description: 'Välj en kategori och följ hur dess utgifter utvecklas över tid.',
     expense_sentiment: 'Utgiftskänsla',
     expense_sentiment_description:
-      'Se känslan bakom dina utgifter — nöjd, neutral eller ångerfull — dag för dag.',
+      'Se känslan bakom dina utgifter: nöjd, neutral eller ångerfull, dag för dag.',
     asset_history: 'Tillgångstrend',
     asset_history_description:
       'Spåra dina totala tillgångar under året och se månatlig saldotrend.',
@@ -1277,7 +1278,7 @@ const sv = {
         message: 'Tidskostnadsranking behöver ditt timvärde för att omvandla utgifter till timmar.',
       },
       empty_no_rankings: {
-        title: 'Inga omvändbara utgifter ännu',
+        title: 'Inga utgifter att omvandla ännu',
         message: 'Inga positiva utgifter kunde omvandlas till tidskostnad under den här perioden.',
       },
     },
@@ -1330,7 +1331,7 @@ const sv = {
       },
       savings_rate: {
         saved: '{{value}} sparat',
-        overspent: '{{value}} överförbrukat',
+        overspent: '{{value}} i underskott',
         no_income_title: 'Ingen inkomst under perioden',
         no_income_short: 'Ingen inkomst',
         of_income: 'av {{value}} i inkomst',
@@ -1339,7 +1340,7 @@ const sv = {
         goal_hint: '20 %+ anses sunt.',
       },
       income_rate_history: {
-        rate_title: 'Inkomstgrad',
+        rate_title: 'Timlön',
         no_data_title: 'Inte tillräckligt med timlönedata',
         no_data_message: 'Lägg till minst 2 timlöneposter för att se ditt timlönehistorikdiagram.',
       },
@@ -1365,12 +1366,12 @@ const sv = {
       expense: 'Utgift',
       all_accounts: 'Alla konton',
       all_selected: 'Alla valda',
-      asset_history_accounts: 'Tillgångshistorik-konton',
-      expense_trend_exclusions: 'Utgiftstrendsundantag',
+      asset_history_accounts: 'Konton för tillgångshistorik',
+      expense_trend_exclusions: 'Undantag för utgiftstrend',
       include_accounts: 'Inkludera konton',
-      asset_history_exclusions: 'Tillgångshistorik-undantag',
-      time_cost_exclusions: 'Tidskostnadsundantag',
-      savings_exclusions: 'Sparandegrade-undantag',
+      asset_history_exclusions: 'Undantag för tillgångshistorik',
+      time_cost_exclusions: 'Undantag för tidskostnad',
+      savings_exclusions: 'Undantag för sparandegrad',
       excluded: 'exkluderade',
       included: 'inkluderade',
       income_categories: 'Inkomstkategorier',
@@ -1474,8 +1475,8 @@ const sv = {
       new_transaction_step_1:
         'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
       new_transaction_step_2:
-        'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
-      new_transaction_step_3: 'Rulla ned till avsnittet Shortcuts och välj New Transaction.',
+        'Öppna Inställningar → Hjälpmedel → Tryck → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
+      new_transaction_step_3: 'Rulla ned till avsnittet Genvägar och välj New Transaction.',
       new_transaction_step_4:
         'Klart. Dubbeltryck på baksidan av din iPhone för att direkt öppna en ny transaktion.',
       log_screenshot_hint:
@@ -1483,8 +1484,8 @@ const sv = {
       log_screenshot_step_1:
         'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
       log_screenshot_step_2:
-        'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
-      log_screenshot_step_3: 'Rulla ned till avsnittet Shortcuts och välj Log Screenshot.',
+        'Öppna Inställningar → Hjälpmedel → Tryck → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
+      log_screenshot_step_3: 'Rulla ned till avsnittet Genvägar och välj Log Screenshot.',
       log_screenshot_step_4:
         'På valfri betalnings- eller kvittoskärm dubbeltrycker du på baksidan av din iPhone. Den tar skärmbilden automatiskt åt dig.',
       log_screenshot_step_5:
@@ -1526,7 +1527,7 @@ const sv = {
       payment_alerts_android_step_7:
         'Öppna Historik för att granska varje avisering. Välj Inkomst, Utgift eller Ignorera, eller använd Alla-knapparna.',
       payment_alerts_ios_step_1:
-        'Öppna Shortcuts, tryck + och sedan Edit. Tryck Automation i redigeraren.',
+        'Öppna Genvägar, tryck på + och sedan på Edit. Tryck på Automation i redigeraren.',
       payment_alerts_ios_step_2: 'Sök efter Notification och välj den.',
       payment_alerts_ios_step_3: 'Sök efter Log Notification och lägg till den.',
       payment_alerts_ios_step_4: 'Tryck Message i Log Notification och sedan Select Variable.',
@@ -1534,7 +1535,8 @@ const sv = {
         'Tryck på åtgärdspilen och sedan Account. Välj var granskade transaktioner ska registreras. Category är valfritt.',
       payment_alerts_ios_step_7:
         'Tryck på tillbaka för att spara. Upprepa för varje bank- eller plånboksapp. Tryck på historikikonen bredvid Aviseringar i Money2Time för att granska nya aviseringar, även offline.',
-      payment_alerts_android_disclosure: 'Läs hur aviseringsåtkomsten används och tryck Continue.',
+      payment_alerts_android_disclosure:
+        'Läs hur aviseringsåtkomsten används och tryck på Fortsätt.',
       payment_alerts_ios_app:
         'Tryck på App och välj din bank- eller plånboksapp. Dessa skärmbilder använder Wallet som exempel.',
       payment_alerts_ios_run:
@@ -1605,7 +1607,7 @@ const sv = {
     language_confirm_action: 'Byta',
     user_id: 'Användar-ID',
     user_id_unavailable: 'Ej tillgängligt',
-    section_personal: 'Inställningar',
+    section_personal: 'Preferenser',
     section_money: 'Pengar',
     section_data: 'Data',
     section_support: 'Hjälp och om',
@@ -1620,11 +1622,11 @@ const sv = {
     account_signed_out: 'Inte inloggad',
     account_signed_in_a11y: 'Inloggad som {{email}}',
     account_sign_in_prompt:
-      'Logga in för att dela album och gå med i delade liggare. Dina data stannar på telefonen tills du slår på Cloud Sync.',
+      'Logga in för att dela album och gå med i delade kassaböcker. Dina data stannar på telefonen tills du slår på Cloud Sync.',
     account_faq: {
       what: {
         q: 'Vad gör inloggningen?',
-        a: 'Du får ett konto så att du kan dela album och gå med i liggare som andra delar med dig. Dina data stannar på telefonen.',
+        a: 'Du får ett konto så att du kan dela album och gå med i kassaböcker som andra delar med dig. Dina data stannar på telefonen.',
       },
       sync: {
         q: 'Synkar inloggningen mina data?',
@@ -1632,7 +1634,7 @@ const sv = {
       },
       pro: {
         q: 'Behöver jag Pro för att logga in?',
-        a: 'Nej. Att logga in, dela album och gå med i delade liggare är gratis. Pro är för att synka dina egna data och dela en liggare.',
+        a: 'Nej. Att logga in, dela album och gå med i delade kassaböcker är gratis. Pro är för att synka dina egna data och dela en kassabok.',
       },
       shared_pro: {
         q: 'Behöver en delad kassabok Pro?',
@@ -1717,7 +1719,7 @@ const sv = {
         sheet_label: 'Visa alternativ vid tillägg',
         sheet_subtitle: 'Tryck på + för att välja Skanna, Röst eller Manuell',
         tap_label: 'Vid tryck',
-        hold_label: 'Vid håll',
+        hold_label: 'Vid långt tryck',
         action_quick: 'Snabb inmatning',
         action_full: 'Fullständig inmatning',
         action_scan: 'Skanna kvitto',
@@ -1730,7 +1732,7 @@ const sv = {
     hourly_value: 'Timvärde',
     notifications: 'Notiser',
     manage_formulas:
-      'Lägg bara till en post när din inkomst ändras — du behöver inte uppdatera varje månad.',
+      'Lägg bara till en post när din inkomst ändras. Du behöver inte uppdatera varje månad.',
     accounts: 'Konton',
     categories: 'Kategorier',
     recurring: 'Återkommande transaktioner',
@@ -1759,7 +1761,7 @@ const sv = {
     hourly_period_hourly: 'Per timme',
     hourly_period_weekly: 'Veckovis',
     hourly_period_monthly: 'Månadsvis',
-    hourly_period_yearly: 'Årligen',
+    hourly_period_yearly: 'Årsvis',
     hourly_suffix_hourly: '/tim',
     hourly_suffix_weekly: '/v',
     hourly_suffix_monthly: '/mån',
@@ -1768,9 +1770,9 @@ const sv = {
     hourly_delete_title: 'Ta bort månadstimlön?',
     hourly_delete_message:
       'Ta bort timlönen för {{month}}? Månader som är beroende av den faller tillbaka till föregående tillgängliga månad.',
-    hourly_add_title: 'Lägg till inkomstgrad',
+    hourly_add_title: 'Lägg till timlön',
     hourly_month_exists_title: '{{month}} finns redan',
-    hourly_month_exists_message: 'Ersätta inkomstnivån med den här?',
+    hourly_month_exists_message: 'Ersätta timlönen med den här?',
     hourly_replace: 'Ersätt',
     account_settings: 'Personalisering',
     haptics: 'Haptik',
@@ -1824,9 +1826,12 @@ const sv = {
       '- category: bästa matchning från mina kategorier nedan med "Förälder > Underkategori" när en underkategori passar, annars bara föräldranamnet, "Other" om osäker\n' +
       '- account: specifikt kontonamn som anges på utdraget (t.ex. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), inte generiska etiketter\n\n' +
       'Hoppa bara över: saldorader, utdragstotaler, upplysningar, sidhuvuden/sidfötter.\n\n' +
-      '## Mina konton\n{{accounts}}\n\n' +
-      '## Mina utgiftskategorier\n{{expenses}}\n\n' +
-      '## Mina inkomstkategorier\n{{incomes}}\n\n' +
+      '## Mina konton\n' +
+      '{{accounts}}\n\n' +
+      '## Mina utgiftskategorier\n' +
+      '{{expenses}}\n\n' +
+      '## Mina inkomstkategorier\n' +
+      '{{incomes}}\n\n' +
       'Svara med ENDAST ett json-kodblock, ingen annan text:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1841,13 +1846,13 @@ const sv = {
       '}\n' +
       '```\n\n' +
       '## Regler\n' +
-      '- Ange kontoutdragets valuta som en ISO 4217-kod (till exempel "MYR", "SGD", "USD"). Kopiera varje belopp exakt som det står och räkna ALDRIG om det till en annan valuta.\\n' +
+      '- Ange kontoutdragets valuta som en ISO 4217-kod (till exempel "MYR", "SGD", "USD"). Kopiera varje belopp exakt som det står och räkna ALDRIG om det till en annan valuta.\n' +
       '- Fabricera eller hitta ALDRIG på transaktioner. Skriv bara ut det som finns i dokumentet.\n' +
       '- Hoppa ALDRIG över, korta av eller utelämna transaktioner. Läs varje sida i varje fil från början till slut. Skriv ut varje enskild transaktionsrad.\n' +
       '- Om flera filer laddas upp, bearbeta varje fil fullständigt och slå sedan ihop alla transaktioner till den enda "transactions"-arrayen.\n' +
-      '- Om utdraget sträcker sig över ett årsskifte och bara visar månad/dag, härleda året från utdragsperioden.\n' +
+      '- Om utdraget sträcker sig över ett årsskifte och bara visar månad/dag, härled året från utdragsperioden.\n' +
       '- Ställ inga frågor, vägra inte, erbjud dig inte att dela upp i flera svar.\n' +
-      "- Om ditt svar avbryts, stoppa mitt i JSON och jag svarar 'continue' så att du kan fortsätta. Sluta inte tidigt för att undvika att bli avbruten — fortsätt bara.",
+      "- Om ditt svar avbryts, stoppa mitt i JSON och jag svarar 'continue' så att du kan fortsätta. Sluta inte tidigt för att undvika att bli avbruten, fortsätt bara.",
   },
   data_management: {
     section_export: 'Export',
@@ -1987,7 +1992,7 @@ const sv = {
     next_payment_short: 'Nästa {{date}} · {{amount}}',
     status_paid: 'Betald',
     status_upcoming: 'Kommande',
-    status_skipped: 'Hoppades över',
+    status_skipped: 'Överhoppad',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Nästa betalning',
     pay_early_title: 'Betala {{amount}} nu?',
@@ -2041,7 +2046,7 @@ const sv = {
     due_tomorrow: 'I morgon',
     week_strip_label: 'Nästa 7 dagar',
     this_month: 'Denna månad',
-    paused_section: 'Pausad',
+    paused_section: 'Pausade',
     settings_title: 'Inställningar för återkommande',
     highlight_label: 'Färga återkommande poster',
     highlight_hint:
@@ -2122,10 +2127,10 @@ const sv = {
     move_confirm_action: 'Flytta och ta bort',
     name: 'Namn',
     icon: 'Ikon',
-    parent_optional: 'Förälder (valfritt)',
+    parent_optional: 'Överordnad (valfritt)',
     no_subcategories: 'Inga underkategorier ännu',
-    expand: 'Expandera',
-    collapse: 'Komprimera',
+    expand: 'Fäll ut',
+    collapse: 'Fäll ihop',
     add_subcategory: 'Lägg till underkategori',
     expense: 'Utgift',
     income: 'Inkomst',
@@ -2181,7 +2186,7 @@ const sv = {
       choose_subtitle: 'Sök eller bläddra efter land',
       search_placeholder: 'Sök banker och plånböcker',
       none: 'Ingen logga',
-      clear: 'Ta bort logotyp',
+      clear: 'Ta bort logga',
       no_results: 'Inga träffar',
       country: 'Land',
       tab_library: 'Bibliotek',
@@ -2197,13 +2202,13 @@ const sv = {
     loan: {
       interest_model_label: 'Ränta',
       interest_model_reducing: 'Sjunkande saldo',
-      interest_model_flat: 'Fast ränta',
+      interest_model_flat: 'Platt ränta',
       interest_model_info:
-        'Sjunkande saldo: ränta tas ut varje månad på det du fortfarande är skyldig, så extra eller tidiga betalningar sänker räntan. Så fungerar de flesta bolån. Fast ränta: räntan räknas ut en gång på hela lånebeloppet och läggs på direkt, så tidig betalning blir skuldfri snabbare men sparar ingen ränta. Så fungerar de flesta bil- och privatlån.',
+        'Sjunkande saldo: ränta tas ut varje månad på det du fortfarande är skyldig, så extra eller tidiga betalningar sänker räntan. Så fungerar de flesta bolån. Platt ränta: räntan räknas ut en gång på hela lånebeloppet och läggs på direkt, så tidig betalning gör dig skuldfri snabbare men sparar ingen ränta. Så fungerar de flesta bil- och privatlån.',
       interest_rate_info_reducing:
         'Den årliga räntan banken tar på din kvarvarande skuld. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
       interest_rate_info_flat:
-        'Den årliga fasta räntan, uttagen på hela lånebeloppet under hela löptiden. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
+        'Den årliga platta räntan, uttagen på hela lånebeloppet under hela löptiden. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
       effective_rate_hint:
         'Effektiv ränta {{rate}}%. Det är vad den här platta räntan kostar på sjunkande saldo.',
       rate_change_title: 'Från när gäller den nya räntan?',
@@ -2253,7 +2258,7 @@ const sv = {
       projection_payments_only_other: '{{count}} betalningar kvar',
       no_projection: 'Lägg till en månadsbetalning för att se ett slutdatum',
       instalment_info:
-        'Vad du betalar varje månad. Följer summan ovan; slå på reglaget om din bank drar ett annat belopp, så använder vi ditt precis så.',
+        'Vad du betalar varje månad. Följer summan ovan; slå på reglaget om din bank drar ett annat belopp, så använder vi exakt ditt belopp.',
       total_repayable_info:
         'Allt du betalar tillbaka under hela lånet: det du lånade plus all ränta.',
       balance_owed_info:
@@ -2274,7 +2279,7 @@ const sv = {
       archive_action: 'Arkivera lån',
       celebration_title: 'Lånet är slutbetalt',
       celebration_message: '{{name}} är helt återbetalat. Den skulden är avklarad.',
-      celebration_message_with_amount: '{{name}} är helt återbetalat, alla {{amount}}.',
+      celebration_message_with_amount: '{{name}} är helt återbetalat, hela {{amount}}.',
       celebration_archive_cta: 'Arkivera',
       celebration_keep_cta: 'Behåll synlig',
     },
@@ -2300,10 +2305,10 @@ const sv = {
     due_day: 'Förfallodag',
     due_rule: 'Förfallodag',
     due_rule_day_of_month: 'Dag i månaden',
-    due_rule_days_after: 'Dagar efter faktura',
+    due_rule_days_after: 'Dagar efter utdrag',
     due_next_date: 'Nästa förfallodag: {{date}}',
     due_days_after_error: 'Ange 1 till {{max}} dagar',
-    due_days_after_needs_statement: 'Ange en fakturadag att räkna från',
+    due_days_after_needs_statement: 'Ange en utdragsdag att räkna från',
     current_balance: 'Aktuellt saldo',
     balance_adjustment_prompt_title: 'Hur ska den här saldoändringen registreras?',
     balance_adjustment_prompt_message:
@@ -2316,14 +2321,14 @@ const sv = {
     credit: 'Kredit',
     statement_on: 'Utdrag {{date}}',
     due_on: 'Förfaller {{date}}',
-    payable: 'Betalningsbart saldo',
+    payable: 'Saldo att betala',
     outstanding: 'Utestående saldo',
     pay_this_card: 'Betala det här kortet',
     delete_account: 'Ta bort konto',
     delete_account_confirm:
       'Det här tar permanent bort det här kontot och alla dess transaktioner. Det kan inte ångras.',
     type_credit: 'Kredit',
-    type_debit: 'Debit',
+    type_debit: 'Debet',
     type_loan: 'Lån',
     title: 'Konton',
     assets: 'Tillgångar',
@@ -2338,8 +2343,8 @@ const sv = {
     create_group: 'Skapa grupp',
     create_group_placeholder: 'Utgifter',
     group_name: 'Gruppnamn',
-    expand: 'Expandera',
-    collapse: 'Komprimera',
+    expand: 'Fäll ut',
+    collapse: 'Fäll ihop',
     add_account_to_group: 'Lägg till konto',
     empty_group_accounts: 'Inga konton i den här gruppen ännu',
     delete_group_title: 'Ta bort grupp?',
@@ -2453,8 +2458,8 @@ const sv = {
     receipt_scans_label: 'Kvittoskanningar',
     notification_ai_label: 'Automatisk granskning av aviseringar',
     apple_pay_automation_label: 'Apple Pay-automatisering',
-    screenshot_automation_label: 'Skärmbild-automatisering',
-    live_earnings_auto_start_label: 'Automatisk start av live-intjäning',
+    screenshot_automation_label: 'Skärmbildsautomatisering',
+    live_earnings_auto_start_label: 'Automatisk start av live-intäkter',
     widgets_label: 'Widgetar på startskärmen',
     currencies_label: 'Valutor',
     albums_label: 'Album',
@@ -2468,7 +2473,7 @@ const sv = {
     compare_title: 'Allt i Pro',
     compare_subtitle: 'Se exakt vad du låser upp när du uppgraderar.',
     hero_title: 'Ta kontroll över dina pengar och din tid',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: 'App Store-betyg',
     social_downloads_value: '60k+',
     social_downloads_label: 'Användarnas val',
@@ -2544,7 +2549,7 @@ const sv = {
       'Du kan ha upp till {{count}} sparmål på gratisplanen. Uppgradera till Pro för obegränsat.',
     limit_loans: 'Du kan följa {{count}} lån i gratisplanen. Uppgradera till Pro för obegränsat.',
     limit_instalments:
-      'Du kan betala av {{count}} delbetalningar åt gången i gratisplanen. Uppgradera till Pro för obegränsat.',
+      'Du kan betala av {{count}} avbetalningsplaner åt gången i gratisplanen. Uppgradera till Pro för obegränsat.',
     badge: 'PRO',
     trend_preview_title: 'Lås upp långsiktiga trender',
     trend_preview_message:
@@ -2571,7 +2576,7 @@ const sv = {
     saved_of_target: '{{saved}} av {{target}}',
     pace_achieved: 'Uppnått',
     pace_on_track: 'I fas',
-    pace_behind: 'Efter',
+    pace_behind: 'Ligger efter',
     name_label: 'Målets namn',
     name_placeholder: 't.ex. Japanresa',
     add_cover: 'Lägg till omslagsbild',
@@ -2609,7 +2614,7 @@ const sv = {
     archived_banner: 'Det här målet är arkiverat. Återställ det för att fortsätta spara.',
     detail_achieved: 'Mål uppnått! 🎉',
     detail_on_track: 'I fas mot {{date}}',
-    detail_behind: 'Efter i tempot mot {{date}}',
+    detail_behind: 'Efter tidsplanen för {{date}}',
     detail_required_monthly: 'Spara {{amount}} per månad för att komma ikapp.',
     detail_projection: 'Med {{amount}} per månad når du målet runt {{date}}.',
     deposit: 'Sätt in',
@@ -2721,12 +2726,12 @@ const sv = {
       recurring_body: 'Din återkommande transaktion loggades automatiskt.',
       recurring_body_with_hours: 'Loggad automatiskt. Det motsvarar {{hours}} av ditt arbete.',
       live_earnings_title: 'Redo att stämpla in?',
-      live_earnings_body: 'Tryck för att starta din live-lönklocka.',
-      live_earnings_started_title: 'Live-intjäning startad',
+      live_earnings_body: 'Tryck för att starta klockan för live-intäkter.',
+      live_earnings_started_title: 'Live-intäkter startade',
       live_earnings_started_body: 'Din klocka går.',
-      weekly_review_title: 'Din vecka i genomgång',
+      weekly_review_title: 'Veckans genomgång',
       weekly_review_body: 'Se vart dina pengar och din tid tog vägen förra veckan.',
-      monthly_review_title: 'Din månad i genomgång',
+      monthly_review_title: 'Månadens genomgång',
       monthly_review_body: 'Se vart dina pengar och din tid tog vägen förra månaden.',
     },
   },
@@ -2782,7 +2787,7 @@ const sv = {
         'Det där är inte en kod för Money2Times webbpanel. Öppna app.money2time.com och skanna koden där.',
       timeout: 'Webbläsaren svarade inte. Ladda om app.money2time.com och skanna den nya koden.',
       offline: 'Ingen internetanslutning. Försök igen när du är online.',
-      rejected: 'Webbläsaren kunde inte öppna data. Försök igen.',
+      rejected: 'Webbläsaren kunde inte öppna dina data. Försök igen.',
       closed: 'Webbläsaren stängdes innan kopplingen var klar. Ladda om den och skanna igen.',
       too_many: 'Du kan koppla upp till {{max}} webbläsare. Koppla bort en först.',
       too_large: 'Dina data är för stora för att skickas till webbpanelen.',
@@ -2863,13 +2868,13 @@ const sv = {
     preprompt_happy: 'Ja, jag gillar den',
     preprompt_unhappy: 'Inte riktigt',
     preprompt_dismiss: 'Kanske senare',
-    feedback_prompt: 'Tråkigt att höra — kan du berätta vad som skulle göra det bättre?',
+    feedback_prompt: 'Tråkigt att höra. Kan du berätta vad som skulle göra det bättre?',
     feedback_open: 'Dela feedback',
     feedback_skip: 'Nej tack',
   },
   cloud_backup_prompt: {
     title: 'Håll dina data säkra',
-    body: 'Dina säkerhetskopior sparas bara på den här enheten, så de försvinner om du avinstallerar appen. Aktivera molnbackup för att hålla dem säkra i iCloud eller Google Drive.',
+    body: 'Dina säkerhetskopior sparas bara på den här enheten, så de försvinner om du avinstallerar appen. Aktivera säkerhetskopiering till molnet för att hålla dem säkra i iCloud eller Google Drive.',
     cta: 'Säkerhetskopiera till molnet',
     dismiss: 'Kanske senare',
   },
@@ -2965,7 +2970,7 @@ const sv = {
       items: {
         needs_pro: {
           q: 'Kräver Cloud Sync Pro?',
-          a: 'Ja, att synka dina egna data kräver Pro. Album och liggare som andra delar med dig synkas utan det.',
+          a: 'Ja, att synka dina egna data kräver Pro. Album och kassaböcker som andra delar med dig synkas utan det.',
         },
         pro_other_phone: {
           q: 'Jag har Pro på en annan telefon. Varför inte på den här?',
@@ -3006,8 +3011,8 @@ const sv = {
       add: 'Lägg till plats',
       clear: 'Rensa plats',
       picker_title: 'Välj en plats',
-      search_placeholder: 'Sök städer…',
-      search_hint: 'Sök efter en stad för att placera den här resan på kartan.',
+      search_placeholder: 'Sök stad, region eller land…',
+      search_hint: 'Sök efter stad, region eller land för att placera den här resan på kartan.',
       no_results: 'Inga platser hittades',
       empty_title: 'Inga platser ännu',
       empty_message: 'Lägg till en plats i ett album för att se det på globen och kartan.',
@@ -3048,9 +3053,9 @@ const sv = {
     delete_body:
       'Dina transaktioner sparas och går tillbaka till sina egna kategorier. Vill du behålla albumet som det är kan du arkivera det i stället.',
     delete_body_member:
-      'Du lämnar albumet och det raderas från den här telefonen. Dina transaktioner sparas under dina egna kategorier, och de andra behåller albumet och räkningarna. Vill du stanna kvar kan du arkivera det i stället.',
+      'Du lämnar albumet och det raderas från den här telefonen. Dina transaktioner sparas under dina egna kategorier, och de andra behåller albumet och dess notor. Vill du stanna kvar kan du arkivera det i stället.',
     delete_body_owner:
-      'Det avslutar också albumet för alla: de andra behåller det under Arkiverade som det är nu, och ingen kan ändra räkningarna. Dina transaktioner sparas under dina egna kategorier. Ska det fortsätta kan du arkivera det i stället.',
+      'Det avslutar också albumet för alla: de andra behåller det under Arkiverade som det är nu, och ingen kan ändra dess notor. Dina transaktioner sparas under dina egna kategorier. Ska det fortsätta kan du arkivera det i stället.',
     delete_body_ended:
       'Det raderas från den här telefonen, och dina transaktioner går tillbaka till sina egna kategorier. De andra behåller albumet.',
     deleting: 'Raderar album…',
@@ -3074,11 +3079,11 @@ const sv = {
       leave: 'Lämna album',
       leave_title: 'Lämna {{name}}?',
       leave_message:
-        'Det flyttas till Arkiverade och uppdateras inte längre. Du behåller dina transaktioner, och de andra behåller albumet och räkningarna.',
+        'Det flyttas till Arkiverade och uppdateras inte längre. Du behåller dina transaktioner, och de andra behåller albumet och dess notor.',
       end: 'Avsluta album',
       end_title: 'Avsluta {{name}} för alla?',
       end_message:
-        'Ingen kan längre lägga till eller ändra räkningarna. Alla behåller albumet under Arkiverade, med sina transaktioner och saldon som de är.',
+        'Ingen kan längre lägga till eller ändra dess notor. Alla behåller albumet under Arkiverade, med sina transaktioner och mellanhavanden som de är.',
       limit: 'Du kan dela upp till {{max}} album åt gången.',
       full: 'Upp till {{max}} personer kan gå med i ett album.',
       sign_in: 'Logga in för att dela det här albumet.',
@@ -3095,8 +3100,8 @@ const sv = {
       body: 'Du lämnade albumet, delningen avslutades eller du loggade ut. Det sparas som det var, med dina transaktioner, och uppdateras inte längre. Logga in igen eller gå med igen för att få tillbaka det.',
     },
     balances: {
-      tab: 'Saldon',
-      empty_title: 'Inga saldon än',
+      tab: 'Mellanhavanden',
+      empty_title: 'Inga mellanhavanden än',
       who_owes_whom: 'Vem är skyldig vem',
       owes_you: '{{name}} är skyldig dig',
       owes: '{{from}} är skyldig {{to}}',
@@ -3144,9 +3149,9 @@ const sv = {
     category_list: {
       title: 'Kategorier',
       edit: 'Redigera kategorier',
-      info: 'Alla i det här albumet lägger sina räkningar under de här kategorierna, i appen och på webben. En ändring du gör här gäller för alla. Tar du bort en flyttas dess räkningar till {{other}}.',
+      info: 'Alla i det här albumet lägger sina notor under de här kategorierna, i appen och på webben. En ändring du gör här gäller för alla. Tar du bort en flyttas dess notor till {{other}}.',
       limit: 'Ett album kan ha upp till {{count}} kategorier.',
-      remove_body: 'Dess räkningar flyttas till {{other}} för alla i det här albumet.',
+      remove_body: 'Dess notor flyttas till {{other}} för alla i det här albumet.',
     },
     categories: {
       food: 'Mat',
@@ -3175,7 +3180,7 @@ const sv = {
       renamed_bill: '{{actor}} döpte om {{before}} till {{after}}',
       moved_bill: '{{actor}} flyttade {{title}} till {{day}}',
       changed_bill: '{{actor}} ändrade {{title}}',
-      recategorized_bill: '{{actor}} flyttade {{title}} till {{category}}',
+      recategorized_bill: '{{actor}} lade {{title}} under {{category}}',
       your_share: 'Din andel {{money}}',
       your_share_change: 'Din andel {{before}} → {{after}}',
       your_share_gone: 'Din andel på {{money}} är borta',
@@ -3224,7 +3229,7 @@ const sv = {
     trend: 'Trend',
     pace: 'Takt',
     pace_of_budget: '{{spent}} av {{target}}',
-    pace_usual: 'Ditt vanliga är {{amount}}',
+    pace_usual: 'Vanligtvis {{amount}}',
     pace_left: '{{amount}} kvar',
     pace_over: '{{amount}} över',
     goals: 'Mål',
@@ -3306,9 +3311,9 @@ const sv = {
     fill_remainder: 'Fyll',
     currency_label: 'Valuta',
     currency_hint_template:
-      'Varje budget behåller kursen från dagen den skapas och räknar om utgifter i andra valutor till den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
+      'Varje budget behåller kursen från dagen den skapas och räknar om utgifter i andra valutor med den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
     currency_hint_budget:
-      'Utgifter i andra valutor räknas om till 1 {{currency}} = {{rate}} {{main}}.',
+      'Utgifter i andra valutor räknas om med 1 {{currency}} = {{rate}} {{main}}.',
     currency_hint_no_rate:
       'Ingen växelkurs för {{currency}} än. Lägg till en under Flera valutor så att utgifter i andra valutor räknas med.',
     unconverted_one: '1 utgift räknas inte med än: det finns ingen växelkurs för {{currency}}.',
@@ -3353,14 +3358,15 @@ const sv = {
     settings_title: 'Inställningar för ersättningar',
     empty_title: 'Inget att kräva tillbaka',
     empty_message: 'Kryssa i "Väntar på ersättning" på en utgift för att se den här.',
-    mark_reimbursed: 'Kräv',
+    mark_reimbursed: 'Ta emot',
     paid_into: 'Till {{account}}',
     undo_title: 'Ångra den här ersättningen?',
     undo_message: 'Inbetalningen tas bort.',
     undo_action: 'Ångra',
     refund_note_prefix: 'Ersatt',
     editor_label: 'Väntar på ersättning',
-    editor_tooltip: 'En utgift som någon betalar tillbaka. Kräv den på sidan Ersättningar.',
+    editor_tooltip:
+      'En utgift som någon ska betala tillbaka till dig. Ta emot den på sidan Ersättningar.',
     editor_reimbursed_label: 'Redan återbetalad',
     options_title: 'Alternativ för transaktionen',
     untitled: 'Utgift',
@@ -3408,7 +3414,7 @@ const sv = {
     label: 'Kassabok',
     title: 'Kassaböcker',
     switcher_label: 'Kassabok: {{name}}. Byt kassabok',
-    default_name: 'Huvud',
+    default_name: 'Huvudbok',
     untitled: 'Namnlös kassabok',
     entries_one: '{{count}} post',
     entries_other: '{{count}} poster',
@@ -3497,7 +3503,7 @@ const sv = {
     title: 'Delning',
     share_toggle: 'Dela den här kassaboken',
     share_toggle_caption: 'Bjud in upp till {{max}} personer. De behöver inte Pro.',
-    needs_cloud_sync: 'Slå på Cloud Sync för att dela en liggare.',
+    needs_cloud_sync: 'Slå på Cloud Sync för att dela en kassabok.',
     has_shared_albums: 'Den här kassaboken har delade album. Sluta dela dem först.',
     limit_reached: 'Du kan dela upp till {{max}} kassaböcker tills vidare.',
     share_failed:
@@ -3631,7 +3637,7 @@ const sv = {
     ai_settings: 'Inställningar för autogranskning',
     ai_quota_free: '%{count} av %{limit} gratis kvar',
     ai_quota_pro: 'Obegränsat med Pro',
-    ai_quota_left: '%{count} kvar',
+    ai_quota_left: '%{count} gratis kvar',
     ai_quota_unlimited: 'Obegränsat',
     ai_quota_info_title: 'Gratis autogranskningar',
     ai_quota_info:
@@ -3651,7 +3657,7 @@ const sv = {
     ai_scope_expense: 'Bokför bara utgifter',
     ai_scope_income: 'Bokför bara inkomster',
     ai_scope_both: 'Bokför utgifter och inkomster',
-    ai_get_unlimited: 'Obegränsat med Pro',
+    ai_get_unlimited: 'Skaffa obegränsat med Pro',
     ai_done_title: 'Sorterat åt dig',
     ai_logged_count: '%{count} registrerade',
     ai_ignored_count: '%{count} ignorerade',
@@ -3756,7 +3762,7 @@ const sv = {
     picker_title: 'Plats',
     search_placeholder: 'Sök platser',
     current_location: 'Nuvarande plats',
-    current_locating: 'Hittar plats…',
+    current_locating: 'Söker plats…',
     current_unavailable: 'Hittar inte din plats. Tryck för att försöka igen.',
     recent_places: 'Senaste platser',
     no_results: 'Inga platser hittades',
@@ -3801,10 +3807,10 @@ const sv = {
     map_period_all: 'Alla',
     map_summary_work: '{{time}} arbete',
     map_summary_earned: '{{amount}} tjänat',
-    offer_title: 'Kom ihåg var du handlar?',
+    offer_title: 'Vill du minnas var du handlar?',
     offer_body:
       'Tagga utgifter med platser och se ditt spenderande på en karta. Ändra när som helst i Inställningar.',
-    offer_chip_auto: 'Autotagg',
+    offer_chip_auto: 'Autotaggning',
   },
 };
 

@@ -1,20 +1,20 @@
 const vi = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Khôi phục bản sao lưu',
+    export_description: 'Dữ liệu cá nhân và các sổ dùng chung bạn sở hữu.',
+    import_description: 'Chọn nội dung cần khôi phục từ bản sao lưu.',
+    personal: 'Sổ cá nhân',
+    personal_note: 'Thay thế sổ và cài đặt trên các thiết bị đã đồng bộ.',
+    personal_local_note: 'Thay thế sổ và cài đặt.',
+    shared_ledgers: 'Sổ dùng chung',
+    owned: 'Bạn sở hữu sổ này',
+    unavailable: 'Cần quyền chủ sổ',
+    restore_action: 'Khôi phục mục đã chọn',
+    confirm_title: 'Khôi phục cho mọi người?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nThay thế bằng bản sao lưu ngày {{date}}. Các thay đổi sau đó sẽ bị mất. Thành viên và lời mời vẫn giữ nguyên.',
+    sync_pending: 'Đã khôi phục trên máy này. Hãy giữ đăng nhập để hoàn tất đồng bộ.',
+    failed: 'Không thể khôi phục. Hãy kiểm tra kết nối, quyền chủ sổ và dung lượng trống.',
     photos_unavailable: 'Không thể tải ảnh của bản sao lưu này. Hãy kiểm tra kết nối và thử lại.',
     photos_missing:
       'Không tìm thấy {{count}} ảnh từ bản sao lưu này nên chúng chưa được khôi phục.',
@@ -196,7 +196,7 @@ const vi = {
       },
       friendPaid: {
         title: 'Chia hóa đơn do bạn bè trả',
-        body: 'Trong Chia hóa đơn, chạm Người trả và chọn người bạn đã trả. Chỉ phần của bạn được tính là chi tiêu, và Công nợ cho biết bạn còn nợ bao nhiêu. Trả lại một lần hoặc từng phần, rồi thanh toán chỉ với một chạm.',
+        body: 'Trong Chia hóa đơn, chạm Người trả và chọn bạn bè đã trả tiền. Chỉ phần của bạn được tính là chi tiêu, và Công nợ cho biết bạn còn nợ họ bao nhiêu. Trả lại một lần hoặc từng phần, rồi thanh toán chỉ với một chạm.',
       },
       splitMethods: {
         title: 'Thêm cách chia',
@@ -294,7 +294,7 @@ const vi = {
       },
       accountLabels: {
         title: 'Xem tài khoản của từng giao dịch',
-        body: 'Tên tài khoản hiện xuất hiện trong danh sách giao dịch để bạn biết tiền đến từ đâu hoặc đi đâu. Muốn giao diện đơn giản hơn? Tắt hiển thị tài khoản trong Cài đặt > Hiển thị.',
+        body: 'Tên tài khoản giờ xuất hiện trong danh sách giao dịch để bạn biết tiền đến từ đâu hoặc đi đâu. Muốn giao diện đơn giản hơn? Tắt Hiển thị tài khoản trên giao dịch trong Cài đặt > Hiển thị.',
       },
       amountSearch: {
         title: 'Tìm giao dịch theo số tiền',
@@ -371,7 +371,7 @@ const vi = {
       },
       tutorials: {
         title: 'Hướng dẫn ngay trong ứng dụng',
-        body: 'Các hướng dẫn ngắn kèm ảnh màn hình, từ quét hóa đơn đến chia tiền. Tìm trong Cài đặt, mục Trợ giúp và giới thiệu.',
+        body: 'Các hướng dẫn ngắn kèm ảnh màn hình, từ quét hóa đơn đến chia hóa đơn. Tìm trong Cài đặt, mục Hỗ trợ & Giới thiệu.',
       },
       loanInstalments: {
         title: 'Tiền trả góp được ghi sẵn',
@@ -444,7 +444,7 @@ const vi = {
       title: 'Chia theo món',
       split: {
         title: 'Quét hóa đơn, chia từng món một',
-        body: 'Chụp hóa đơn và gán từng dòng cho người đã dùng món đó — món ăn chung chia theo phần, còn thuế và phí phục vụ tự chia công bằng. Mọi người đều vào “Ai nợ bạn” với số tiền chính xác.',
+        body: 'Chụp hóa đơn và gán từng dòng cho người đã dùng món đó. Món ăn chung chia theo phần, còn thuế và phí phục vụ tự chia công bằng. Mọi người đều vào Công nợ với số tiền chính xác.',
       },
       selector: {
         title: 'Cách thêm nhanh hơn',
@@ -504,7 +504,7 @@ const vi = {
       },
     },
     cta: {
-      open_accounts: 'Mở tài khoản',
+      open_accounts: 'Quản lý tài khoản',
       open_hourly_value_settings: 'Đặt số giờ làm việc',
       open_add_transaction: 'Thêm giao dịch',
       open_recurring: 'Mở Định kỳ',
@@ -573,7 +573,7 @@ const vi = {
       voice_logged: 'Ghi bằng giọng nói',
       voice_example: 'taxi 30',
       album_trip: 'Chuyến đi Tokyo',
-      album_trip_meta: '4 Th3 – 11 Th3',
+      album_trip_meta: '4 Th3 - 11 Th3',
       album_celebration: 'Sinh nhật mẹ',
       album_celebration_meta: '8 giao dịch',
       month_starts_on_payday: 'Tháng của bạn bắt đầu vào ngày lương',
@@ -601,7 +601,7 @@ const vi = {
       },
       savings: {
         title: 'Bạn giữ lại được bao nhiêu',
-        body: 'Tỷ lệ tiết kiệm tháng này trong nháy mắt — số bạn giữ lại so với số bạn chi, tính bằng tiền và giờ làm việc.',
+        body: 'Tỷ lệ tiết kiệm tháng này trong nháy mắt: số bạn giữ lại so với số bạn chi, tính bằng tiền và giờ làm việc.',
       },
       trend: {
         title: 'Xu hướng tiết kiệm của bạn',
@@ -654,12 +654,12 @@ const vi = {
       wage_title: 'Một giờ của bạn đáng bao nhiêu?',
       wage_body: 'Thu nhập trực tiếp tăng theo mức lương thực tế mỗi giờ. Đặt mức của bạn là xong.',
       wage_action: 'Đặt giá trị mỗi giờ',
-      disabled_title: 'Live Activity đang tắt',
+      disabled_title: 'Hoạt động trực tiếp đang tắt',
       disabled_body: 'Bật lại cho Money2Time trong Cài đặt iOS rồi quay lại đây.',
-      unavailable: 'Live Activity cần iPhone chạy iOS 16.2 trở lên.',
+      unavailable: 'Hoạt động trực tiếp cần iPhone chạy iOS 16.2 trở lên.',
       start_failed: 'Chưa bắt đầu được. Thử lại nhé.',
       stop_failed: 'Chưa dừng được. Thử lại nhé.',
-      schedule_section: 'Lịch',
+      schedule_section: 'Lịch trình',
       schedule_tooltip:
         'Trên iOS 17.2 trở lên, Money2Time bắt đầu tính giờ giúp bạn vào lúc này, ngay cả khi ứng dụng đã đóng. Trên phiên bản cũ hơn, ứng dụng gửi một thông báo và chạm vào đó để bắt đầu tính giờ.',
       schedule_title: 'Tự động bắt đầu',
@@ -788,7 +788,7 @@ const vi = {
       confirm_skip: 'Vẫn bỏ qua',
       icloud_pending_title: 'Đã bật sao lưu',
       icloud_pending_message:
-        'Đăng nhập iCloud và bật iCloud Drive trong Cài đặt — bản sao lưu của bạn sẽ tự động bắt đầu ngay khi khả dụng.',
+        'Đăng nhập iCloud và bật iCloud Drive trong Cài đặt. Bản sao lưu của bạn sẽ tự động bắt đầu ngay khi khả dụng.',
     },
     source: {
       title: 'Bạn biết đến chúng tôi qua đâu?',
@@ -812,7 +812,7 @@ const vi = {
       discard_message: 'Các món và phần phân chia sẽ bị mất.',
       discard_confirm: 'Bỏ',
       keep_editing: 'Tiếp tục chỉnh sửa',
-      low_confidence_banner: 'Một số dòng khó đọc — hãy kiểm tra lại.',
+      low_confidence_banner: 'Một số dòng khó đọc. Hãy kiểm tra lại.',
       items_empty_title: 'Chưa có món nào',
       items_empty_message: 'Thêm từng dòng trên hóa đơn để chia theo từng món.',
       item_name_placeholder: 'Tên món',
@@ -879,19 +879,19 @@ const vi = {
       share_receipt: 'Gửi biên nhận',
       receipt_qr_note: 'Quét mã QR mình đính kèm để trả lại cho mình nhé.',
       receipt_scan_short: 'Quét để thanh toán',
-      settings_title: 'Cài đặt Chia tiền',
-      settings_action: 'Cài đặt Chia tiền',
+      settings_title: 'Cài đặt Công nợ',
+      settings_action: 'Cài đặt Công nợ',
       qr_prompt_title: 'Thêm mã QR thanh toán của bạn?',
       qr_prompt_message:
-        'Thiết lập mã QR thanh toán của bạn để bạn bè có thể quét và trả lại tiền cho bạn ngay từ hóa đơn.',
+        'Thiết lập mã QR thanh toán của bạn để bạn bè có thể quét và trả lại tiền cho bạn ngay từ biên nhận.',
       qr_prompt_cta: 'Thêm mã QR thanh toán',
-      part_paid: 'Trả một phần',
+      part_paid: 'Đã trả một phần',
       section_owed: 'Còn nợ',
       section_paid: 'Đã trả lại',
       paid_on: 'Đã trả {{date}}',
       paid_in_payments: '{{count}} lần · gần nhất {{date}}',
       payback_group: '{{count}} khoản trả lại',
-      remove_rest_message: 'Thao tác này xoá {{owed}} còn nợ. Phần đã trả lại vẫn được ghi nhận.',
+      remove_rest_message: 'Thao tác này xóa {{owed}} còn nợ. Phần đã trả lại vẫn được ghi nhận.',
       share_of_total: 'trên {{total}}',
       share_paid: 'Đã trả lại {{paid}}',
       bill_paid_progress: 'Đã trả lại {{paid}} trên {{total}}',
@@ -1029,8 +1029,8 @@ const vi = {
         choose_from_library: 'Chọn từ thư viện',
         replace: 'Thay thế',
         save_to_photos: 'Lưu vào Ảnh',
-        save_success: 'Đã lưu biên nhận vào Ảnh.',
-        save_failed: 'Không thể lưu biên nhận. Hãy kiểm tra quyền truy cập ảnh rồi thử lại.',
+        save_success: 'Đã lưu biên lai vào Ảnh.',
+        save_failed: 'Không thể lưu biên lai. Hãy kiểm tra quyền truy cập ảnh rồi thử lại.',
         crop: 'Cắt',
         crop_title: 'Cắt biên lai',
         crop_hint: 'Kéo khung để di chuyển. Kéo cạnh hoặc góc bất kỳ để đổi kích thước.',
@@ -1239,12 +1239,12 @@ const vi = {
     category_trend_description: 'Chọn một danh mục và theo dõi xu hướng chi tiêu theo thời gian.',
     expense_sentiment: 'Cảm xúc chi tiêu',
     expense_sentiment_description:
-      'Xem cảm xúc đằng sau chi tiêu — vui, bình thường hay hối tiếc — theo từng ngày.',
+      'Xem cảm xúc đằng sau chi tiêu: vui, bình thường hay hối tiếc, theo từng ngày.',
     asset_history: 'Xu hướng tài sản',
     asset_history_description: 'Theo dõi tổng tài sản trong năm và xem xu hướng số dư hàng tháng.',
     income_rate_history: 'Lịch sử lương giờ',
     income_rate_history_description:
-      'Xem lương thực tế của bạn thay đổi theo thời gian qua toàn bộ lịch sử giao dịch.',
+      'Xem lương giờ thực tế của bạn thay đổi theo thời gian qua toàn bộ lịch sử giao dịch.',
     total_expense: 'Tổng chi tiêu',
     total_income: 'Tổng thu nhập',
     no_positive_slices: 'Không có dữ liệu chi tiêu dương trong kỳ này.',
@@ -1328,9 +1328,9 @@ const vi = {
         no_income_title: 'Không có thu nhập trong kỳ',
         no_income_short: 'Không có thu nhập',
         of_income: 'trên thu nhập {{value}}',
-        saved_per_year: '{{value}} tiết kiệm năm nay',
+        saved_per_year: 'Đã tiết kiệm {{value}} năm nay',
         exclusions_active: 'Đang loại trừ {{count}} danh mục khỏi tính toán.',
-        goal_hint: 'Trên 20% được coi là lành mạnh.',
+        goal_hint: 'Từ 20% trở lên được coi là lành mạnh.',
       },
       income_rate_history: {
         rate_title: 'Lương giờ',
@@ -1465,16 +1465,16 @@ const vi = {
       new_transaction_step_1:
         'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       new_transaction_step_2:
-        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
-      new_transaction_step_3: 'Cuộn xuống mục Shortcuts và chọn New Transaction.',
+        'Mở Cài đặt → Trợ năng → Cảm ứng → Chạm vào mặt sau, rồi chạm Chạm hai lần (hoặc Chạm ba lần).',
+      new_transaction_step_3: 'Cuộn xuống mục Phím tắt và chọn New Transaction.',
       new_transaction_step_4: 'Xong. Chạm hai lần vào mặt sau iPhone để mở ngay một giao dịch mới.',
       log_screenshot_hint:
         'Dùng chạm mặt sau ở bất kỳ màn hình thanh toán hoặc hóa đơn nào. Money2Time sẽ chụp lại và tự động đọc số tiền, người bán và tài khoản.',
       log_screenshot_step_1:
         'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       log_screenshot_step_2:
-        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
-      log_screenshot_step_3: 'Cuộn xuống mục Shortcuts và chọn Log Screenshot.',
+        'Mở Cài đặt → Trợ năng → Cảm ứng → Chạm vào mặt sau, rồi chạm Chạm hai lần (hoặc Chạm ba lần).',
+      log_screenshot_step_3: 'Cuộn xuống mục Phím tắt và chọn Log Screenshot.',
       log_screenshot_step_4:
         'Ở bất kỳ màn hình thanh toán hoặc hóa đơn nào, chỉ cần chạm hai lần vào mặt sau iPhone. Nó tự động chụp màn hình cho bạn.',
       log_screenshot_step_5:
@@ -1521,7 +1521,7 @@ const vi = {
       payment_alerts_ios_step_7:
         'Chạm quay lại để lưu. Lặp lại cho từng ứng dụng ngân hàng hoặc ví. Để xem lại thông báo mới, kể cả khi ngoại tuyến, chạm biểu tượng lịch sử cạnh Thông báo trong Money2Time.',
       payment_alerts_android_disclosure:
-        'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
+        'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Tiếp tục.',
       payment_alerts_ios_app:
         'Chạm App và chọn ứng dụng ngân hàng hoặc ví điện tử. Các ảnh này dùng Wallet làm ví dụ.',
       payment_alerts_ios_run:
@@ -1626,7 +1626,7 @@ const vi = {
         a: 'Chỉ cần một người trong sổ có Pro, là chủ sổ hoặc bất kỳ thành viên nào. Nếu không ai trong sổ có Pro, sổ sẽ tạm dừng với mọi người cho đến khi có người có Pro. Không có gì bị xóa.',
       },
       shared_free_limits: {
-        q: 'Tôi có thể thêm giao dịch vào sổ chung khi không có Pro không?',
+        q: 'Tôi có thể thêm giao dịch vào sổ dùng chung khi không có Pro không?',
         a: 'Có, kể cả khi sổ có hơn 6 tài khoản. Các giới hạn khác của gói miễn phí vẫn áp dụng, như thêm tài khoản hoặc danh mục vượt giới hạn. Hãy nhờ chủ sổ thực hiện những thay đổi đó.',
       },
       family_pro: {
@@ -1641,7 +1641,7 @@ const vi = {
     stat_days: 'Ngày theo dõi',
     stat_transactions: 'Đã ghi',
     stat_this_month: 'Tháng này',
-    news: 'Tin tức',
+    news: 'Có gì mới',
     quick_entry: {
       title: 'Nhập nhanh',
       section_expense: 'Chi tiêu',
@@ -1716,7 +1716,7 @@ const vi = {
     },
     hourly_value: 'Giá trị giờ',
     notifications: 'Thông báo',
-    manage_formulas: 'Chỉ thêm mục khi thu nhập thay đổi — không cần cập nhật mỗi tháng.',
+    manage_formulas: 'Chỉ thêm mục khi thu nhập thay đổi. Không cần cập nhật mỗi tháng.',
     accounts: 'Tài khoản',
     categories: 'Danh mục',
     recurring: 'Giao dịch định kỳ',
@@ -1751,7 +1751,7 @@ const vi = {
     hourly_suffix_monthly: '/tháng',
     hourly_suffix_yearly: '/năm',
     hourly_timeline: 'Dòng thời gian',
-    hourly_delete_title: 'Xóa giá trị giờ tháng?',
+    hourly_delete_title: 'Xóa giá trị giờ của tháng này?',
     hourly_delete_message:
       'Xóa mức lương cho {{month}}? Các tháng phụ thuộc vào nó sẽ dùng tháng trước đó.',
     hourly_add_title: 'Thêm mức lương',
@@ -1810,9 +1810,12 @@ const vi = {
       '- category: khớp tốt nhất từ danh mục của tôi bên dưới, dùng "Cha > Danh mục con" khi phù hợp, chỉ tên cha nếu không có danh mục con, "Other" nếu không chắc\n' +
       '- account: tên tài khoản cụ thể như in trên sao kê (vd. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), không dùng nhãn chung\n\n' +
       'Chỉ bỏ qua: dòng số dư, tổng sao kê, thông báo pháp lý, tiêu đề/chân trang.\n\n' +
-      '## Tài khoản của tôi\n{{accounts}}\n\n' +
-      '## Danh mục chi tiêu của tôi\n{{expenses}}\n\n' +
-      '## Danh mục thu nhập của tôi\n{{incomes}}\n\n' +
+      '## Tài khoản của tôi\n' +
+      '{{accounts}}\n\n' +
+      '## Danh mục chi tiêu của tôi\n' +
+      '{{expenses}}\n\n' +
+      '## Danh mục thu nhập của tôi\n' +
+      '{{incomes}}\n\n' +
       'Chỉ trả lời bằng một khối mã json, không có văn bản nào khác:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1827,13 +1830,13 @@ const vi = {
       '}\n' +
       '```\n\n' +
       '## Quy tắc\n' +
-      '- Ghi rõ loại tiền của sao kê dưới dạng mã ISO 4217 (ví dụ "MYR", "SGD", "USD"). Sao chép mọi số tiền đúng như được in và TUYỆT ĐỐI không quy đổi sang loại tiền khác.\\n' +
+      '- Ghi rõ loại tiền của sao kê dưới dạng mã ISO 4217 (ví dụ "MYR", "SGD", "USD"). Sao chép mọi số tiền đúng như được in và TUYỆT ĐỐI không quy đổi sang loại tiền khác.\n' +
       '- KHÔNG BAO GIỜ bịa đặt hoặc tạo ra giao dịch. Chỉ xuất những gì có trong tài liệu.\n' +
       '- KHÔNG BAO GIỜ bỏ qua, cắt bớt hay bỏ sót giao dịch. Đọc từng trang của từng tệp từ đầu đến cuối. Xuất mọi dòng giao dịch.\n' +
       '- Nếu có nhiều tệp được tải lên, xử lý đầy đủ từng tệp rồi gộp tất cả giao dịch vào một mảng "transactions" duy nhất.\n' +
       '- Nếu sao kê kéo dài qua năm mới và chỉ hiển thị tháng/ngày, suy luận năm từ kỳ sao kê.\n' +
       '- Không đặt câu hỏi, không từ chối, không đề xuất tách thành nhiều phản hồi.\n' +
-      "- Nếu đầu ra bị cắt ngang, dừng giữa JSON và tôi sẽ trả lời 'continue' để bạn tiếp tục. Đừng dừng sớm vì sợ bị cắt — cứ tiếp tục xuất.",
+      "- Nếu đầu ra bị cắt ngang, dừng giữa JSON và tôi sẽ trả lời 'continue' để bạn tiếp tục. Đừng dừng sớm vì sợ bị cắt, cứ tiếp tục xuất.",
   },
   data_management: {
     section_export: 'Xuất',
@@ -1990,7 +1993,7 @@ const vi = {
     delete_plan: 'Xóa khoản trả góp',
     delete_title: 'Xóa khoản trả góp này?',
     delete_message: 'Các kỳ sắp tới sẽ bị hủy. Bạn có muốn giữ các kỳ đã trả không?',
-    delete_message_none: 'Các kỳ thanh toán sẽ bị huỷ.',
+    delete_message_none: 'Các kỳ thanh toán sẽ bị hủy.',
     delete_keep_payments: 'Giữ các kỳ đã trả',
     delete_with_payments: 'Xóa luôn',
     edit_notice: 'Kỳ {{number}}/{{count}} · {{name}}',
@@ -2004,7 +2007,7 @@ const vi = {
       custom: 'Logo tùy chỉnh',
       search_placeholder: 'Tìm dịch vụ đăng ký',
     },
-    title: 'Cam kết định kỳ',
+    title: 'Khoản định kỳ',
     delete_rule: 'Xóa quy tắc',
     edit_rule: 'Sửa quy tắc định kỳ',
     new_rule: 'Quy tắc định kỳ mới',
@@ -2015,8 +2018,8 @@ const vi = {
     every_months: 'Mỗi {{count}} tháng',
     every_years: 'Mỗi {{count}} năm',
     paused: 'Tạm dừng',
-    empty_title: 'Chưa có cam kết nào.',
-    create_commitment: 'Tạo cam kết',
+    empty_title: 'Chưa có khoản định kỳ nào.',
+    create_commitment: 'Tạo khoản định kỳ',
     empty_message:
       'Thiết lập quy tắc định kỳ để tự động ghi nhận thu nhập và chi tiêu thường xuyên của bạn.',
     per_month_suffix: '/tháng',
@@ -2367,7 +2370,7 @@ const vi = {
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',
     goals_label: 'Mục tiêu tiết kiệm',
-    receipts_label: 'Hóa đơn',
+    receipts_label: 'Biên lai',
     split_bills_label: 'Hóa đơn chia chưa thanh toán',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     icon_packs_label: 'Bộ biểu tượng và biểu tượng tùy chỉnh',
@@ -2445,7 +2448,7 @@ const vi = {
     limit_albums:
       'Bạn có thể tạo tối đa {{count}} album trong gói miễn phí. Nâng cấp lên Pro để không giới hạn.',
     cloud_sync_label: 'Cloud Sync',
-    shared_ledgers_label: 'Sổ chia sẻ',
+    shared_ledgers_label: 'Sổ dùng chung',
     shared_ledgers_free: 'Tham gia',
     shared_ledgers_pro: 'Chia sẻ',
     biometric_label: 'Khóa ứng dụng (sinh trắc học)',
@@ -2519,7 +2522,7 @@ const vi = {
     limit_budget_templates:
       'Gói miễn phí cho phép tạo {{count}} mẫu ngân sách. Không giới hạn với Pro.',
     limit_receipts:
-      'Gói miễn phí cho phép đính kèm tối đa {{count}} hóa đơn. Không giới hạn với Pro.',
+      'Gói miễn phí cho phép đính kèm tối đa {{count}} biên lai. Không giới hạn với Pro.',
     limit_split_bills:
       'Gói miễn phí cho phép tối đa {{count}} hóa đơn chia chưa thanh toán. Thanh toán một hóa đơn hoặc nâng cấp Pro để không giới hạn.',
     limit_goals:
@@ -2536,7 +2539,7 @@ const vi = {
   goals: {
     new_goal: 'Mục tiêu mới',
     summary_total_saved: 'Tổng đã tiết kiệm',
-    summary_active: 'Mục tiêu đang theo',
+    summary_active: 'Mục tiêu đang thực hiện',
     picker_group: 'Mục tiêu tiết kiệm',
     deposit_from_account: 'Từ tài khoản',
     deposit_from_account_hint: 'Chuyển tiền từ một tài khoản của bạn.',
@@ -2653,7 +2656,7 @@ const vi = {
     },
     recurring: {
       title: 'Giao dịch định kỳ',
-      label: 'Cảnh báo tự động',
+      label: 'Báo khi tự động ghi',
       description: 'Nhận thông báo khi giao dịch định kỳ được tạo tự động.',
     },
     weekly_review: {
@@ -2843,7 +2846,8 @@ const vi = {
     preprompt_happy: 'Có, tôi thích',
     preprompt_unhappy: 'Chưa thực sự',
     preprompt_dismiss: 'Để sau',
-    feedback_prompt: 'Rất tiếc — bạn có thể cho biết điều gì sẽ làm ứng dụng tốt hơn không?',
+    feedback_prompt:
+      'Rất tiếc vì điều đó. Bạn có thể cho biết điều gì sẽ làm ứng dụng tốt hơn không?',
     feedback_open: 'Chia sẻ phản hồi',
     feedback_skip: 'Không, cảm ơn',
   },
@@ -2984,8 +2988,8 @@ const vi = {
       add: 'Thêm vị trí',
       clear: 'Xóa vị trí',
       picker_title: 'Chọn một địa điểm',
-      search_placeholder: 'Tìm thành phố…',
-      search_hint: 'Tìm một thành phố để đặt chuyến đi này lên bản đồ.',
+      search_placeholder: 'Tìm thành phố, tỉnh hoặc quốc gia…',
+      search_hint: 'Tìm theo thành phố, tỉnh/bang hoặc quốc gia để đặt chuyến đi này lên bản đồ.',
       no_results: 'Không tìm thấy địa điểm',
       empty_title: 'Chưa có địa điểm',
       empty_message: 'Thêm vị trí cho album để xem trên quả địa cầu và bản đồ.',
@@ -3074,8 +3078,8 @@ const vi = {
       body: 'Bạn đã rời album này, việc chia sẻ đã kết thúc hoặc bạn đã đăng xuất. Album được giữ nguyên như cũ, cùng các giao dịch của bạn, và không còn cập nhật. Đăng nhập lại hoặc tham gia lại để lấy lại album.',
     },
     balances: {
-      tab: 'Số dư',
-      empty_title: 'Chưa có số dư nào',
+      tab: 'Công nợ',
+      empty_title: 'Chưa có công nợ nào',
       who_owes_whom: 'Ai nợ ai',
       owes_you: '{{name}} nợ bạn',
       owes: '{{from}} nợ {{to}}',
@@ -3094,7 +3098,7 @@ const vi = {
       own: 'Đây là một trong các album của bạn.',
       already: 'Bạn đã ở trong album này.',
       main_shared: 'Sổ chính của bạn đang được chia sẻ nên không thể chứa album chung.',
-      unavailable: 'Album chia sẻ chưa có trong phiên bản này.',
+      unavailable: 'Album chung chưa có trong phiên bản này.',
       full: 'Album này đã đầy. Hãy nhờ chủ album nhường chỗ.',
     },
     bill: {
@@ -3322,8 +3326,9 @@ const vi = {
     title: 'Hoàn tiền',
     tile_label: 'Hoàn tiền',
     subtitle: 'Khoản chi người khác trả lại.',
-    count_as_expense_label: 'Tính là chi phí',
-    count_as_expense_hint: 'Tắt thì khoản chi được hoàn và tiền quay về không vào tổng chi phí.',
+    count_as_expense_label: 'Tính là chi tiêu',
+    count_as_expense_hint:
+      'Khi tắt, các khoản chi được hoàn và tiền hoàn lại không tính vào tổng chi tiêu.',
     pending_title: 'Đang chờ hoàn',
     settled_title: 'Đã hoàn',
     settings_title: 'Cài đặt hoàn tiền',
@@ -3332,13 +3337,13 @@ const vi = {
     mark_reimbursed: 'Đòi lại',
     paid_into: 'Vào {{account}}',
     undo_title: 'Hoàn tác khoản hoàn tiền này?',
-    undo_message: 'Bút toán tiền vào sẽ bị xoá.',
+    undo_message: 'Khoản tiền vào sẽ bị xóa.',
     undo_action: 'Hoàn tác',
     refund_note_prefix: 'Đã hoàn',
     editor_label: 'Chờ hoàn tiền',
     editor_tooltip: 'Khoản chi người khác sẽ trả lại. Đòi lại ở trang Hoàn tiền.',
     editor_reimbursed_label: 'Đã hoàn',
-    options_title: 'Tuỳ chọn giao dịch',
+    options_title: 'Tùy chọn giao dịch',
     untitled: 'Khoản chi',
     no_account: 'Hãy thêm một tài khoản trước',
   },
@@ -3379,7 +3384,7 @@ const vi = {
     },
   },
   ledgers: {
-    entry_ledger_gone: 'Mục này chưa được lưu: sổ của nó đã bị xoá trên điện thoại khác.',
+    entry_ledger_gone: 'Mục này chưa được lưu: sổ của nó đã bị xóa trên điện thoại khác.',
     label: 'Sổ',
     title: 'Sổ',
     switcher_label: 'Sổ: {{name}}. Đổi sổ',
@@ -3519,7 +3524,7 @@ const vi = {
     leave_message: 'Sổ sẽ bị gỡ khỏi điện thoại này. {{owner}} có thể mời bạn lại.',
     no_longer_shared: 'Sổ này không còn được chia sẻ.',
     reset_keeps_shared:
-      'Sổ chia sẻ không bị thay đổi. Để gỡ một sổ, hãy rời sổ hoặc ngừng chia sẻ.',
+      'Sổ dùng chung không bị thay đổi. Để gỡ một sổ, hãy rời sổ hoặc ngừng chia sẻ.',
     changes_for_everyone: 'Sổ này được chia sẻ, nên thay đổi này áp dụng cho mọi người trong sổ.',
     leave_unsent:
       'Các mục mới nhất của bạn trong sổ này chưa được gửi. Nếu rời sổ bây giờ, chúng sẽ bị mất.',
@@ -3529,18 +3534,18 @@ const vi = {
     sign_out_anyway: 'Vẫn đăng xuất',
     sign_out_joined_note:
       'Các sổ được chia sẻ với bạn sẽ bị gỡ khỏi điện thoại này cho đến khi bạn đăng nhập lại.',
-    removed_title: 'Đã gỡ sổ chia sẻ',
+    removed_title: 'Đã gỡ sổ dùng chung',
     removed_body: '{{names}} không còn được chia sẻ với bạn nên đã bị gỡ khỏi điện thoại này.',
     paused_title: 'Chia sẻ đang tạm dừng',
     paused_body:
       'Hiện không ai trong {{name}} có Pro nên sổ đang tạm dừng. Không có gì bị xóa, và sổ sẽ đồng bộ lại ngay khi có người trong sổ có Pro.',
     paused_owner_body:
       'Gói Pro của bạn đã hết hạn và không ai khác trong sổ này có Pro, nên sổ đang tạm dừng với mọi người. Gia hạn Pro để tiếp tục như trước.',
-    member_sync_title: 'Sổ chia sẻ của bạn được đồng bộ',
+    member_sync_title: 'Sổ dùng chung của bạn được đồng bộ',
     member_sync_body:
       '{{names}} vẫn được đồng bộ. Nâng cấp Pro để đồng bộ cả phần dữ liệu còn lại.',
     get_pro: 'Nâng cấp Pro',
-    join_title: 'Sổ chia sẻ',
+    join_title: 'Sổ dùng chung',
     join_from: '{{owner}} chia sẻ',
     people_one: '{{count}} người',
     people_other: '{{count}} người',
@@ -3555,7 +3560,7 @@ const vi = {
     join_full: 'Sổ này đã đầy. Hãy nhờ chủ sổ nhường chỗ.',
     join_paused: 'Sổ này đang tạm dừng vì hiện không ai trong sổ có Pro.',
     join_own: 'Đây là một sổ của chính bạn.',
-    join_unavailable: 'Phiên bản này chưa hỗ trợ sổ chia sẻ.',
+    join_unavailable: 'Phiên bản này chưa hỗ trợ sổ dùng chung.',
   },
   tutorials: {
     title: 'Hướng dẫn',
@@ -3583,7 +3588,7 @@ const vi = {
     review_income_all: 'Tất cả Thu nhập',
     review_expense_all: 'Tất cả Chi tiêu',
     review_ignore_all: 'Bỏ qua tất cả',
-    review_all: 'Xem xét cả %{count}',
+    review_all: 'Xem lại cả %{count}',
     review_banner: '%{count} thông báo cần xem lại',
     review_banner_single: '1 thông báo cần xem lại',
     review_missing: 'Một số mục vẫn cần số tiền hoặc tài khoản.',
@@ -3605,7 +3610,7 @@ const vi = {
     ai_settings: 'Cài đặt tự động xem lại',
     ai_quota_free: 'Còn %{count}/%{limit} lượt miễn phí',
     ai_quota_pro: 'Không giới hạn với Pro',
-    ai_quota_left: 'Còn %{count}',
+    ai_quota_left: 'Còn %{count} lượt miễn phí',
     ai_quota_unlimited: 'Không giới hạn',
     ai_quota_info_title: 'Lượt tự động xem lại miễn phí',
     ai_quota_info:
@@ -3762,8 +3767,8 @@ const vi = {
     category_health: 'Sức khỏe',
     map_title: 'Bản đồ chi tiêu',
     map_fit: 'Hiện tất cả địa điểm',
-    map_visits_one: '{{count}} lần',
-    map_visits_other: '{{count}} lần',
+    map_visits_one: '{{count}} lần ghé',
+    map_visits_other: '{{count}} lần ghé',
     map_all_time: 'Toàn bộ thời gian',
     map_empty_title: 'Chưa có địa điểm',
     map_empty_period_title: 'Không có địa điểm trong khoảng này',

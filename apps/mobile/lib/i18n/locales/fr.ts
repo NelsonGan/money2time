@@ -1,20 +1,21 @@
 const fr = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Restaurer une sauvegarde',
+    export_description: 'Données personnelles et carnets partagés dont vous êtes propriétaire.',
+    import_description: 'Choisissez ce que vous voulez restaurer depuis une sauvegarde.',
+    personal: 'Carnets personnels',
+    personal_note: 'Remplace les carnets et les réglages sur les appareils synchronisés.',
+    personal_local_note: 'Remplace les carnets et les réglages.',
+    shared_ledgers: 'Carnets partagés',
+    owned: 'Vous êtes propriétaire de ce carnet',
+    unavailable: 'Accès propriétaire requis',
+    restore_action: 'Restaurer la sélection',
+    confirm_title: 'Restaurer pour tout le monde ?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nRemplacer par la sauvegarde du {{date}}. Les modifications ultérieures seront perdues. Les membres et les invitations ne changent pas.',
+    sync_pending: 'Restauré ici. Restez connecté pour terminer la synchronisation.',
+    failed:
+      'Restauration impossible. Vérifiez votre connexion, votre accès propriétaire et l’espace de stockage libre.',
     photos_unavailable:
       'Impossible de télécharger les photos de cette sauvegarde. Vérifiez votre connexion et réessayez.',
     photos_missing:
@@ -220,7 +221,7 @@ const fr = {
       },
       batchScan: {
         title: 'Scannez plusieurs reçus à la fois',
-        body: "Touchez Scanner un reçu, ouvrez votre album et choisissez jusqu'à %{count} reçus. Chacun devient une dépense à part, avec son marchand, son montant, sa date et sa catégorie, pendant que vous continuez à utiliser l'app. Une carte sur Accueil indique où en est le traitement.",
+        body: "Touchez Scanner un reçu, ouvrez votre album et choisissez jusqu'à %{count} reçus. Chacun devient une dépense à part, avec son commerçant, son montant, sa date et sa catégorie, pendant que vous continuez à utiliser l'app. Une carte sur Accueil indique où en est le traitement.",
       },
       archive: {
         title: 'Archivez des comptes',
@@ -246,7 +247,7 @@ const fr = {
       title: 'Vérification auto et plus',
       autoReview: {
         title: 'Des notifications qui se trient seules',
-        body: "Une fois l'enregistrement des notifications activé dans Réglages > Automatisation, activez la Vérification auto. Les paiements sont enregistrés comme dépenses, les codes et promotions ignorés, et ce qui n'est pas clair vous attend. Chaque résultat peut être annulé. Le forfait gratuit inclut %{count} vérifications.",
+        body: "Une fois l'enregistrement des notifications activé dans Réglages > Automatisation, activez la Vérification auto. Les paiements sont enregistrés comme dépenses, les codes et promotions ignorés, et ce qui n'est pas clair vous attend. Chaque résultat peut être annulé. L'offre gratuite inclut %{count} vérifications.",
       },
       insights: {
         title: 'Analyses, repensées',
@@ -254,7 +255,7 @@ const fr = {
       },
       instalments: {
         title: 'Payer en plusieurs fois',
-        body: "Vous payez un achat en plusieurs fois ? Ajoutez-le comme dépense et touchez En plusieurs fois pour le répartir en paiements. Chacun est enregistré à son échéance, et le plan montre ce qu'il reste, avec Payer maintenant et Solder. Le forfait gratuit inclut %{count} plans à la fois.",
+        body: "Vous payez un achat en plusieurs fois ? Ajoutez-le comme dépense et touchez En plusieurs fois pour le répartir en paiements. Chacun est enregistré à son échéance, et le plan montre ce qu'il reste, avec Payer maintenant et Solder. L'offre gratuite inclut %{count} plans à la fois.",
       },
     },
     cloud_sync_ledgers: {
@@ -332,7 +333,7 @@ const fr = {
         body: "L'offre Gratuit comprend désormais {{count}} comptes de débit ou de crédit, contre cinq auparavant. Les objectifs et les prêts gardent leurs propres limites. Vos transactions existantes et les autres actions restent disponibles.",
       },
     },
-    badge: { ad: 'PUBLICITÉ' },
+    badge: { ad: 'PUB' },
     ricecal: {
       title: 'RiceCal',
       card_subtitle: 'Suivez vos calories',
@@ -349,15 +350,15 @@ const fr = {
       },
       liveEarnings: {
         title: 'Regardez votre paie monter',
-        body: "Placez une carte en direct sur votre écran verrouillé et voyez ce que vous avez gagné aujourd'hui, qui grimpe à votre taux horaire réel. Lancez-la vous-même, ou réglez votre journée et elle démarre toute seule.",
+        body: "Placez une carte en direct sur votre écran verrouillé et regardez ce que vous avez gagné aujourd'hui grimper à votre taux horaire réel. Lancez-la vous-même, ou indiquez vos horaires et elle démarre toute seule.",
       },
       appIcon: {
         title: "L'ancienne icône est de retour",
         body: "Le porte-monnaie que l'app portait avant revient dans le sélecteur d'icônes, gratuit pour tout le monde. Dans Réglages, sous Affichage, à côté des icônes Pro.",
       },
       loanInterest: {
-        title: 'Taux fixe ou capital restant dû',
-        body: 'Les prêts sont proposés des deux façons, vous choisissez donc celle de votre contrat. Le capital restant dû calcule les intérêts sur ce que vous devez encore, le taux fixe les calcule sur la totalité empruntée.',
+        title: 'Taux forfaitaire ou capital restant dû',
+        body: 'Les prêts sont proposés des deux façons, vous choisissez donc celle de votre contrat. Le capital restant dû calcule les intérêts sur ce que vous devez encore, le taux forfaitaire les calcule sur la totalité empruntée.',
       },
     },
     subscriptions_tutorials_loans: {
@@ -445,7 +446,7 @@ const fr = {
       title: 'Partager par article',
       split: {
         title: 'Scannez un ticket, partagez-le article par article',
-        body: 'Photographiez l’addition et attribuez chaque ligne à la bonne personne — partagez les plats en portions, taxes et service se répartissent équitablement tout seuls. Chacun se retrouve dans « Qui vous doit de l’argent » avec un montant exact.',
+        body: 'Photographiez l’addition et attribuez chaque ligne à la bonne personne. Partagez les plats en portions : taxes et service se répartissent équitablement tout seuls. Chacun se retrouve dans Soldes avec un montant exact.',
       },
       selector: {
         title: "Une façon plus rapide d'ajouter",
@@ -574,7 +575,7 @@ const fr = {
       voice_logged: 'Enregistré à la voix',
       voice_example: 'taxi 30',
       album_trip: 'Voyage à Tokyo',
-      album_trip_meta: '4 mars – 11 mars',
+      album_trip_meta: '4 mars - 11 mars',
       album_celebration: 'Anniversaire de maman',
       album_celebration_meta: '8 transactions',
       month_starts_on_payday: 'Votre mois commence le jour de paie',
@@ -613,7 +614,7 @@ const fr = {
       title: 'Ajouter des transactions à la voix',
       say_it: {
         title: 'Dites-le, tout simplement',
-        body: 'Maintenez le bouton + et dites-le, comme "taxi 30" ou "café 4.50". Nous détectons le montant et la catégorie pour vous, le tout sur votre téléphone.',
+        body: 'Maintenez le bouton + et dites-le, comme « taxi 30 » ou « café 4,50 ». Nous détectons le montant et la catégorie pour vous, le tout sur votre téléphone.',
       },
     },
   },
@@ -791,7 +792,7 @@ const fr = {
       confirm_skip: 'Ignorer quand même',
       icloud_pending_title: 'Sauvegarde activée',
       icloud_pending_message:
-        "Connectez-vous à iCloud et activez iCloud Drive dans les Réglages — votre sauvegarde démarrera automatiquement dès qu'elle sera disponible.",
+        "Connectez-vous à iCloud et activez iCloud Drive dans les Réglages. Votre sauvegarde démarrera automatiquement dès qu'elle sera disponible.",
     },
     source: {
       title: 'Comment nous avez-vous connus ?',
@@ -815,7 +816,7 @@ const fr = {
       discard_message: 'Vos articles et attributions seront perdus.',
       discard_confirm: 'Abandonner',
       keep_editing: 'Continuer à modifier',
-      low_confidence_banner: 'Certaines lignes étaient difficiles à lire — vérifiez-les.',
+      low_confidence_banner: 'Certaines lignes étaient difficiles à lire. Vérifiez-les.',
       items_empty_title: "Aucun article pour l'instant",
       items_empty_message: 'Ajoutez chaque ligne du reçu pour le partager article par article.',
       item_name_placeholder: "Nom de l'article",
@@ -831,7 +832,7 @@ const fr = {
       off_by: 'Écart de {{amount}}',
       add_adjustment: "Ajouter une ligne d'ajustement",
       trust_items: 'Utiliser le total des articles',
-      assign_hint: 'Choisis une personne, puis touche les articles qu’elle a pris.',
+      assign_hint: 'Choisissez une personne, puis touchez les articles qu’elle a pris.',
       unassigned_label: 'Non attribué',
       unassigned_count: '{{count}} non attribués',
       assign_rest_me: "M'attribuer le reste",
@@ -848,7 +849,7 @@ const fr = {
       save_action: 'Enregistrer le partage',
       paid_locked_title: 'Les parts réglées changeraient',
       paid_locked_message:
-        '{{names}} a déjà payé cette note. Marquez-les comme non payés avant de modifier leur part.',
+        'Déjà payé par {{names}}. Marquez ces parts comme non payées avant de les modifier.',
       settleup_cta: 'Partager un reçu',
       itemized_receipt: 'Reçu détaillé',
       split_by_item: 'Partager par article',
@@ -863,7 +864,7 @@ const fr = {
       search_placeholder: 'Rechercher des personnes ou des transactions',
       search_empty_title: 'Aucun résultat',
       receipt_total_label: 'Total',
-      default_account_title: 'Remboursement par défaut',
+      default_account_title: 'Compte de remboursement',
       default_account_subtitle: 'Les nouveaux partages sont remboursés sur ce compte par défaut.',
       qr_card_title: 'Votre QR de paiement',
       qr_card_subtitle: 'Ajoutez-le une fois et il apparaîtra sur chaque reçu que vous envoyez.',
@@ -1248,7 +1249,7 @@ const fr = {
       "Choisissez une catégorie et suivez l'évolution de ses dépenses au fil du temps.",
     expense_sentiment: 'Sentiment des dépenses',
     expense_sentiment_description:
-      "Visualisez l'humeur derrière vos dépenses — heureux, neutre ou regret — jour par jour.",
+      "Visualisez l'humeur derrière vos dépenses, jour par jour : contentement, neutralité ou regret.",
     asset_history: 'Tendance du patrimoine',
     asset_history_description:
       "Suivez vos actifs totaux sur l'année et consultez l'évolution mensuelle du solde.",
@@ -1461,13 +1462,13 @@ const fr = {
       lp27_m_merchant:
         'Faites de même pour Merchant : Select Variable, Transaction, puis Merchant.',
       bt27_touch: 'Ouvrez Réglages → Accessibilité → Toucher.',
-      bt27_backtap: 'Faites défiler et touchez Toucher l’arrière.',
+      bt27_backtap: 'Faites défiler et touchez Toucher le dos de l’appareil.',
       bt27_double: 'Touchez Toucher deux fois (ou Toucher trois fois).',
       bt27_shortcuts: 'Touchez Raccourcis.',
       step_counter: '%{current} sur %{total}',
       log_payment_step_1:
         'Ouvrez Raccourcis, allez dans l’onglet Automation et touchez New Automation.',
-      log_payment_step_2: 'Choisissez Wallet: « Quand je touche une carte ou un pass Wallet. »',
+      log_payment_step_2: 'Choisissez Wallet : « Quand je touche une carte ou un pass Wallet. »',
       log_payment_step_3: 'Sélectionnez la carte que vous voulez suivre.',
       log_payment_step_4:
         'Choisissez Run Immediately, désactivez Notify When Run, puis touchez Next.',
@@ -1480,11 +1481,11 @@ const fr = {
       log_payment_step_7:
         'Touchez › pour développer l’action, puis définissez l’Account de cette carte.',
       log_payment_step_8:
-        'Terminé. Répétez pour chaque carte: une automation par carte, chacune avec son propre Account.',
+        'Terminé. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
         "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       new_transaction_step_2:
-        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
+        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Toucher deux fois (ou Toucher trois fois).',
       new_transaction_step_3:
         'Faites défiler jusqu’à la section Shortcuts et choisissez New Transaction.',
       new_transaction_step_4:
@@ -1494,7 +1495,7 @@ const fr = {
       log_screenshot_step_1:
         "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       log_screenshot_step_2:
-        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
+        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Toucher deux fois (ou Toucher trois fois).',
       log_screenshot_step_3:
         'Faites défiler jusqu’à la section Shortcuts et choisissez Log Screenshot.',
       log_screenshot_step_4:
@@ -1548,7 +1549,7 @@ const fr = {
       payment_alerts_ios_step_7:
         'Touchez retour pour enregistrer. Répétez pour chaque app bancaire ou de portefeuille. Pour vérifier les nouvelles notifications, même hors ligne, touchez l’icône d’historique à côté de Notifications dans Money2Time.',
       payment_alerts_android_disclosure:
-        'Lisez comment l’accès aux notifications est utilisé, puis touchez Continue.',
+        'Lisez comment l’accès aux notifications est utilisé, puis touchez Continuer.',
       payment_alerts_ios_app:
         'Touchez App et choisissez votre app bancaire ou portefeuille électronique. Ces captures utilisent Wallet comme exemple.',
       payment_alerts_ios_run:
@@ -1653,8 +1654,8 @@ const fr = {
         a: 'Une seule personne du carnet doit avoir Pro, le propriétaire ou n’importe quel membre. Si personne n’a Pro, il est en pause pour tout le monde jusqu’à ce que quelqu’un l’ait. Rien n’est supprimé.',
       },
       shared_free_limits: {
-        q: 'Puis-je ajouter des opérations à un registre partagé sans Pro ?',
-        a: "Oui, même s'il compte plus de 6 comptes. Les autres limites du forfait gratuit s'y appliquent toujours, par exemple pour ajouter des comptes ou des catégories au-delà de la limite. Demandez au propriétaire du registre de faire ces changements.",
+        q: 'Puis-je ajouter des opérations à un carnet partagé sans Pro ?',
+        a: "Oui, même s'il compte plus de 6 comptes. Les autres limites de l'offre gratuite s'y appliquent toujours, par exemple pour ajouter des comptes ou des catégories au-delà de la limite. Demandez au propriétaire du carnet de faire ces changements.",
       },
       family_pro: {
         q: 'Ma famille peut-elle utiliser mon Pro ?',
@@ -1745,7 +1746,7 @@ const fr = {
     hourly_value: 'Valeur horaire',
     notifications: 'Notifications',
     manage_formulas:
-      'Ajoutez une entrée seulement quand vos revenus changent — pas besoin de mettre à jour chaque mois.',
+      'Ajoutez une entrée seulement quand vos revenus changent. Pas besoin de mettre à jour chaque mois.',
     accounts: 'Comptes',
     categories: 'Catégories',
     recurring: 'Transactions récurrentes',
@@ -1767,10 +1768,10 @@ const fr = {
     year: 'Année',
     month: 'Mois',
     hourly_history_empty: 'Aucun historique de taux horaire pour le moment.',
-    hourly_now_label: 'Ta vraie valeur horaire maintenant',
-    hourly_now_weekly: 'Ton revenu hebdomadaire maintenant',
-    hourly_now_monthly: 'Ton revenu mensuel maintenant',
-    hourly_now_yearly: 'Ton revenu annuel maintenant',
+    hourly_now_label: 'Votre vraie valeur horaire actuelle',
+    hourly_now_weekly: 'Votre revenu hebdomadaire actuel',
+    hourly_now_monthly: 'Votre revenu mensuel actuel',
+    hourly_now_yearly: 'Votre revenu annuel actuel',
     hourly_show_as: 'Afficher en',
     hourly_period_hourly: 'Horaire',
     hourly_period_weekly: 'Hebdomadaire',
@@ -1841,9 +1842,12 @@ const fr = {
       '- category: meilleure correspondance parmi mes catégories ci-dessous en utilisant « Parent > Sous-catégorie » si une sous-catégorie convient, sinon juste le nom du parent, « Other » si incertain\n' +
       "- account: nom exact du compte tel qu'il apparaît sur le relevé (ex. « Chase Sapphire Reserve », « OCBC 365 Credit Card »), pas de libellés génériques\n\n" +
       'Ignorez uniquement : les lignes de solde, totaux de relevé, mentions légales, en-têtes/pieds de page.\n\n' +
-      '## Mes comptes\n{{accounts}}\n\n' +
-      '## Mes catégories de dépenses\n{{expenses}}\n\n' +
-      '## Mes catégories de revenus\n{{incomes}}\n\n' +
+      '## Mes comptes\n' +
+      '{{accounts}}\n\n' +
+      '## Mes catégories de dépenses\n' +
+      '{{expenses}}\n\n' +
+      '## Mes catégories de revenus\n' +
+      '{{incomes}}\n\n' +
       'Répondez UNIQUEMENT avec un bloc de code json, sans autre texte :\n\n' +
       '```json\n' +
       '{\n' +
@@ -1858,13 +1862,13 @@ const fr = {
       '}\n' +
       '```\n\n' +
       '## Règles\n' +
-      '- Indique la devise du relevé sous forme de code ISO 4217 (par exemple "MYR", "SGD", "USD"). Recopie chaque montant exactement tel qu\'il est imprimé et ne le convertis JAMAIS dans une autre devise.\\n' +
-      "- Ne fabricquez JAMAIS ni n'inventez de transactions. N'affichez que ce qui est dans le document.\n" +
+      "- Indiquez la devise du relevé sous forme de code ISO 4217 (par exemple « MYR », « SGD », « USD »). Recopiez chaque montant exactement tel qu'il est imprimé et ne le convertissez JAMAIS dans une autre devise.\n" +
+      "- N'inventez JAMAIS de transactions. N'affichez que ce qui est dans le document.\n" +
       "- Ne sautez, ne tronquez, ni n'omettez JAMAIS de transactions. Lisez chaque page de chaque fichier du début à la fin. Affichez chaque ligne de transaction.\n" +
       '- Si plusieurs fichiers sont joints, traitez chaque fichier intégralement puis fusionnez toutes les transactions dans le seul tableau « transactions ».\n' +
       "- Si le relevé couvre un changement d'année et n'affiche que le mois/jour, déduisez l'année à partir de la période du relevé.\n" +
       '- Ne posez pas de questions, ne refusez pas, ne proposez pas de diviser en plusieurs réponses.\n' +
-      "- Si votre sortie est coupée, arrêtez-vous en milieu de JSON et je répondrai « continuer » pour que vous puissiez terminer. Ne vous arrêtez pas prématurément pour éviter d'être coupé — continuez simplement.",
+      "- Si votre sortie est coupée, arrêtez-vous en milieu de JSON et je répondrai « continuer » pour que vous puissiez terminer. Ne vous arrêtez pas prématurément pour éviter d'être coupé : continuez simplement.",
   },
   data_management: {
     section_export: 'Export',
@@ -1935,7 +1939,7 @@ const fr = {
       "Veuillez sélectionner un fichier de sauvegarde Money Manager avec l'extension .mmbak.",
     import_money_manager_success_title: 'Import Money Manager terminé',
     import_money_manager_success_message:
-      'Importé {{accounts}} comptes, {{categories}} catégories et {{transactions}} transactions.',
+      '{{accounts}} comptes, {{categories}} catégories et {{transactions}} transactions importés.',
     reset_data_description:
       'Supprimez définitivement tous les comptes, catégories, transactions et règles récurrentes de cet appareil.',
   },
@@ -2064,7 +2068,7 @@ const fr = {
     settings_title: 'Réglages des récurrences',
     highlight_label: 'Teinter les entrées récurrentes',
     highlight_hint:
-      'Les entrées ajoutées par tes règles récurrentes ont un léger fond lavande dans tes listes de transactions, pour les distinguer de celles que tu as saisies.',
+      'Les entrées ajoutées par vos règles récurrentes ont un léger fond lavande dans vos listes de transactions, pour les distinguer de celles que vous avez saisies.',
     overdue: 'En retard',
     show_all_days: 'Tous les jours',
     day_due_count: '{{count}} à échéance',
@@ -2094,7 +2098,7 @@ const fr = {
     pack_line: 'Ligne',
     pack_pixel: 'Pixel',
     pack_dough: 'Pâte',
-    pack_bold: 'Contour',
+    pack_bold: 'Gras',
     group_food_and_drink: 'Nourriture et boissons',
     tab_icons: 'Icônes',
     tab_emoji: 'Emoji',
@@ -2218,18 +2222,18 @@ const fr = {
     loan: {
       interest_model_label: 'Intérêts',
       interest_model_reducing: 'Capital restant dû',
-      interest_model_flat: 'Taux fixe',
+      interest_model_flat: 'Taux forfaitaire',
       interest_model_info:
-        'Capital restant dû : les intérêts sont calculés chaque mois sur ce que vous devez encore, donc payer plus ou plus tôt réduit les intérêts. La plupart des prêts immobiliers fonctionnent ainsi. Taux fixe : les intérêts sont calculés une seule fois sur la totalité du montant emprunté et ajoutés dès le départ, donc payer plus tôt solde la dette plus vite mais ne fait économiser aucun intérêt. La plupart des prêts auto et personnels fonctionnent ainsi.',
+        'Capital restant dû : les intérêts sont calculés chaque mois sur ce que vous devez encore, donc payer plus ou plus tôt réduit les intérêts. La plupart des prêts immobiliers fonctionnent ainsi. Taux forfaitaire : les intérêts sont calculés une seule fois sur la totalité du montant emprunté et ajoutés dès le départ, donc payer plus tôt solde la dette plus vite mais ne fait économiser aucun intérêt. La plupart des prêts auto et personnels fonctionnent ainsi.',
       interest_rate_info_reducing:
         'Le taux annuel appliqué par votre banque au capital restant dû. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
       interest_rate_info_flat:
-        'Le taux fixe annuel, appliqué à la totalité du montant emprunté sur toute la durée. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
+        'Le taux forfaitaire annuel, appliqué à la totalité du montant emprunté sur toute la durée. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
       effective_rate_hint:
-        "Taux effectif {{rate}}%. C'est ce que coûte ce taux fixe forfaitaire sur capital restant dû.",
+        "Taux effectif {{rate}} %. C'est ce que coûte ce taux forfaitaire sur capital restant dû.",
       rate_change_title: "À partir de quand le nouveau taux s'applique-t-il ?",
       rate_change_message:
-        "Le taux passe de {{from}}% à {{to}}%. Appliquez-le à partir d'aujourd'hui pour conserver les intérêts déjà facturés, ou depuis le début si vous corrigez une erreur.",
+        "Le taux passe de {{from}} % à {{to}} %. Appliquez-le à partir d'aujourd'hui pour conserver les intérêts déjà facturés, ou depuis le début si vous corrigez une erreur.",
       rate_change_from_today: "À partir d'aujourd'hui",
       rate_change_from_start: 'Depuis le début',
       interest_saved_label: 'Intérêts économisés',
@@ -2396,7 +2400,7 @@ const fr = {
   },
   pro: {
     limit_receipt_scans:
-      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour des scans illimités.',
+      "L'offre gratuite inclut {{count}} scans de reçus par mois. Passez à Pro pour des scans illimités.",
     limit_autolog:
       "Vous avez utilisé les {{count}} automatisations Apple Pay gratuites, vos derniers paiements n'ont donc pas été enregistrés. Passez à Pro pour un usage illimité.",
     custom_logos_label: 'Logos de compte personnalisés',
@@ -2409,13 +2413,13 @@ const fr = {
     icon_packs_label: "Packs d'icônes et icônes personnalisées",
     custom_subscription_logos_label: 'Logos d’abonnement perso',
     limit_custom_logos:
-      'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+      "Vous pouvez importer jusqu’à {{count}} logos personnalisés avec l'offre gratuite. Passez à Pro pour un nombre illimité.",
     limit_custom_subscription_logos:
       'Importer votre propre logo d’abonnement est réservé à Pro. Passez à Pro pour utiliser n’importe quelle image sur un paiement récurrent.',
     limit_custom_item_images:
-      "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
+      "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec l'offre gratuite. Passez à Pro pour un nombre illimité.",
     limit_subcurrencies:
-      'Vous pouvez ajouter {{count}} sous-devise avec le forfait gratuit. Passez à Pro pour un suivi multidevise illimité.',
+      "Vous pouvez ajouter {{count}} sous-devise avec l'offre gratuite. Passez à Pro pour un suivi multidevise illimité.",
     limit_custom_category_icons:
       "Importer vos propres icônes est une fonction Pro. Passez à Pro pour utiliser n'importe quelle image dans les catégories, objectifs et budgets.",
     limit_app_icon:
@@ -2425,7 +2429,7 @@ const fr = {
     limit_icon_packs:
       "Les packs d'icônes supplémentaires sont une fonction Pro. Passez à Pro pour tous les utiliser.",
     limit_live_earnings_auto_start:
-      "Démarrer l'horloge selon une programmation est une fonctionnalité Pro. Passez à Pro et votre service commence tout seul. Le démarrage manuel reste toujours gratuit.",
+      'Démarrer le compteur selon une programmation est une fonctionnalité Pro. Passez à Pro et il démarre tout seul au début de votre journée. Le démarrage manuel reste toujours gratuit.',
     limit_album_categories:
       "Modifier les catégories d'un album partagé est une fonction Pro. Passez à Pro pour les renommer, en ajouter ou en supprimer pour tous les membres de l'album.",
     limit_reimbursements:
@@ -2480,7 +2484,7 @@ const fr = {
     currencies_label: 'Devises',
     albums_label: 'Albums',
     limit_albums:
-      'Vous pouvez créer jusqu’à {{count}} albums avec le forfait gratuit. Passez à Pro pour un nombre illimité.',
+      "Vous pouvez créer jusqu’à {{count}} albums avec l'offre gratuite. Passez à Pro pour un nombre illimité.",
     cloud_sync_label: 'Cloud Sync',
     shared_ledgers_label: 'Carnets partagés',
     shared_ledgers_free: 'Rejoindre',
@@ -2489,7 +2493,7 @@ const fr = {
     compare_title: 'Tout dans Pro',
     compare_subtitle: 'Découvrez exactement ce que débloque la mise à niveau.',
     hero_title: 'Reprenez le contrôle de votre argent et de votre temps',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: "Note sur l'App Store",
     social_downloads_value: '60k+',
     social_downloads_label: 'Choix des utilisateurs',
@@ -2516,7 +2520,7 @@ const fr = {
     maybe_later: 'Peut-être plus tard',
     trial_terms: 'Gratuit pendant {{duration}}, puis {{price}}.',
     plans_heading: 'Choisissez votre formule',
-    save_percent: 'Économisez {{percent}}%',
+    save_percent: 'Économisez {{percent}} %',
     per_month_short: '/mois',
     no_commitment: 'Sans engagement. Annulez à tout moment.',
     compare_limited: 'Limité',
@@ -2555,15 +2559,15 @@ const fr = {
     limit_voice:
       "L'offre gratuite inclut {{count}} saisies vocales. Passez à Pro pour une saisie vocale illimitée.",
     limit_items:
-      "Vous pouvez suivre jusqu'à {{count}} objets avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
+      "Vous pouvez suivre jusqu'à {{count}} objets avec l'offre gratuite. Passez à Pro pour un nombre illimité.",
     limit_budget_templates:
-      'Le plan gratuit permet {{count}} modèle de budget. Passez à Pro pour un nombre illimité.',
+      "L'offre gratuite permet {{count}} modèle de budget. Passez à Pro pour un nombre illimité.",
     limit_receipts:
-      "Le plan gratuit permet d'ajouter jusqu'à {{count}} reçus. Passez à Pro pour un nombre illimité.",
+      "L'offre gratuite permet d'ajouter jusqu'à {{count}} reçus. Passez à Pro pour un nombre illimité.",
     limit_split_bills:
-      "Le plan gratuit permet jusqu'à {{count}} notes partagées non réglées. Réglez-en une ou passez à Pro pour un nombre illimité.",
+      "L'offre gratuite permet jusqu'à {{count}} notes partagées non réglées. Réglez-en une ou passez à Pro pour un nombre illimité.",
     limit_goals:
-      "Le plan gratuit permet jusqu'à {{count}} objectifs d'épargne. Passez à Pro pour un nombre illimité.",
+      "L'offre gratuite permet jusqu'à {{count}} objectifs d'épargne. Passez à Pro pour un nombre illimité.",
     limit_loans:
       "Vous pouvez suivre {{count}} prêt avec l'offre gratuite. Passez à Pro pour un nombre illimité.",
     limit_instalments:
@@ -2571,7 +2575,7 @@ const fr = {
     badge: 'PRO',
     trend_preview_title: 'Débloquez les tendances long terme',
     trend_preview_message:
-      'Débloquez les tendances pour suivre les patterns, repérer les changements et comprendre votre argent dans le temps.',
+      'Débloquez les tendances pour suivre vos habitudes, repérer les changements et comprendre votre argent dans le temps.',
     trend_preview_cta: 'Passer à Pro',
   },
   goals: {
@@ -2664,7 +2668,7 @@ const fr = {
     tier2_desc: 'Votre publication a touché les gens.',
     tier3_badge: '500+ likes',
     tier3_reward: 'Pro à vie',
-    tier3_desc: 'Vous êtes devenu viral. Pro est à vous pour toujours.',
+    tier3_desc: 'Votre publication est devenue virale. Pro est à vous pour toujours.',
     how_title: 'Comment ça marche',
     step1_body:
       "Publiez simplement à propos de l'app sur Instagram, 小红书, Reddit, Facebook ou ailleurs. Une capture de votre écran préféré suffit.",
@@ -2859,7 +2863,7 @@ const fr = {
       'Google Drive n’est pas connecté, les sauvegardes sont donc enregistrées sur cet appareil.',
     fallback_local_error: 'Impossible de joindre {{target}}. Enregistrée sur cet appareil.',
     error: {
-      prefix: '{{target}}: {{reason}}',
+      prefix: '{{target}} : {{reason}}',
       offline: 'Aucune connexion internet. Connectez-vous et réessayez.',
       timeout: 'Délai de connexion dépassé. Réessayez sur un réseau plus rapide.',
       auth: 'Reconnectez-vous à Google Drive pour continuer les sauvegardes.',
@@ -2873,8 +2877,8 @@ const fr = {
     last_backup_never: 'Aucune sauvegarde',
     just_now: "à l'instant",
     minutes_ago: 'il y a {{count}} min',
-    hours_ago: 'il y a {{count}}h',
-    days_ago: 'il y a {{count}}j',
+    hours_ago: 'il y a {{count}} h',
+    days_ago: 'il y a {{count}} j',
     back_up_now: 'Sauvegarder maintenant',
     backing_up: 'Sauvegarde en cours...',
     backup_partial_title: 'La sauvegarde a rencontré des erreurs',
@@ -2897,7 +2901,7 @@ const fr = {
     preprompt_happy: "Oui, j'aime bien",
     preprompt_unhappy: 'Pas vraiment',
     preprompt_dismiss: 'Peut-être plus tard',
-    feedback_prompt: "Désolé de l'apprendre — pouvez-vous partager ce qui pourrait être amélioré ?",
+    feedback_prompt: "Désolé de l'apprendre. Pouvez-vous nous dire ce qui pourrait être amélioré ?",
     feedback_open: 'Donner mon avis',
     feedback_skip: 'Non merci',
   },
@@ -2956,7 +2960,7 @@ const fr = {
     delete_confirm_cta: 'Supprimer',
     not_pro_title: 'Synchro en pause',
     not_pro_body:
-      'Pro a expiré. Tes données sont en sécurité et se synchronisent à nouveau dès que tu renouvelles.',
+      'Pro a expiré. Vos données sont en sécurité et se synchronisent à nouveau dès que vous renouvelez.',
     renew_pro: 'Renouveler Pro',
     phone_limit_title: 'Pro est sur 5 autres téléphones',
     phone_limit_body:
@@ -3041,8 +3045,9 @@ const fr = {
       add: 'Ajouter un lieu',
       clear: 'Effacer le lieu',
       picker_title: 'Choisir un lieu',
-      search_placeholder: 'Rechercher des villes…',
-      search_hint: 'Recherchez une ville pour situer ce voyage sur la carte.',
+      search_placeholder: 'Rechercher une ville, une région ou un pays…',
+      search_hint:
+        'Recherchez une ville, une région ou un pays pour situer ce voyage sur la carte.',
       no_results: 'Aucun lieu trouvé',
       empty_title: 'Aucun lieu pour l’instant',
       empty_message: 'Ajoutez un lieu à un album pour le voir sur le globe et la carte.',
@@ -3154,7 +3159,7 @@ const fr = {
       main_shared:
         'Votre carnet principal est partagé, il ne peut donc pas contenir d’album partagé.',
       unavailable: 'Les albums partagés ne sont pas encore disponibles dans cette version.',
-      full: 'Cet album est complet. Demande à son propriétaire de faire de la place.',
+      full: 'Cet album est complet. Demandez à son propriétaire de faire de la place.',
     },
     bill: {
       delete_shared:
@@ -3393,7 +3398,7 @@ const fr = {
     settled_title: 'Remboursé',
     settings_title: 'Réglages des remboursements',
     empty_title: 'Rien à réclamer',
-    empty_message: 'Cochez "Remboursement en attente" sur une dépense pour la voir ici.',
+    empty_message: 'Cochez « Remboursement en attente » sur une dépense pour la voir ici.',
     mark_reimbursed: 'Réclamer',
     paid_into: 'Sur {{account}}',
     undo_title: 'Annuler ce remboursement ?',
@@ -3512,7 +3517,7 @@ const fr = {
     create: 'Créer le carnet',
     delete_title: 'Supprimer {{name}} ?',
     delete_message_one:
-      'Cela supprime {{name}} avec son {{count}} opération, ses comptes, catégories, budgets et albums. Les autres carnets ne sont pas touchés.',
+      'Cela supprime {{name}} avec son opération ({{count}}), ses comptes, catégories, budgets et albums. Les autres carnets ne sont pas touchés.',
     delete_message_other:
       'Cela supprime {{name}} avec ses {{count}} opérations, comptes, catégories, budgets et albums. Les autres carnets ne sont pas touchés.',
     locked_note: 'Les carnets verrouillés sont conservés en sécurité et se rouvrent avec Pro.',
@@ -3523,7 +3528,7 @@ const fr = {
   },
   household: {
     alone_hint:
-      "Vous seul pour l'instant. Quand d'autres rejoindront et ajouteront des opérations, la part de chacun s'affichera ici.",
+      "Seulement vous pour l'instant. Quand d'autres rejoindront et ajouteront des opérations, la part de chacun s'affichera ici.",
     spent_together: 'Dépensé ensemble',
     who_covers: 'Qui paie quoi',
     trend: '6 derniers mois',
@@ -3678,7 +3683,7 @@ const fr = {
     ai_settings: 'Réglages de la vérification auto',
     ai_quota_free: '%{count} sur %{limit} gratuites restantes',
     ai_quota_pro: 'Illimité avec Pro',
-    ai_quota_left: '%{count} restantes',
+    ai_quota_left: '%{count} gratuites restantes',
     ai_quota_unlimited: 'Illimité',
     ai_quota_info_title: 'Vérifications auto gratuites',
     ai_quota_info:
