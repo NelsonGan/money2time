@@ -1386,7 +1386,9 @@ export function AlbumDetailScreen({
                 <TransactionSelectionActions {...selectionProps} />
               </View>
             ) : (
-              <View className="flex-1 flex-row px-5">
+              // The labels run long in some languages (Swedish "Mellanhavanden"):
+              // they shrink to fit a narrow phone instead of running off it.
+              <View className="flex-1 flex-row gap-6 px-5">
                 {tabs.map((value) => {
                   const active = shownTab === value;
                   return (
@@ -1396,10 +1398,13 @@ export function AlbumDetailScreen({
                       accessibilityRole="tab"
                       accessibilityState={{ selected: active }}
                       testID={`album-tab-${value}`}
-                      className="mr-6 justify-center"
+                      className="shrink justify-center"
                     >
                       <Text
                         variant="bodyStrong"
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.8}
                         className={cn(active ? 'text-primary' : 'text-muted-foreground')}
                       >
                         {tabLabel(value)}
