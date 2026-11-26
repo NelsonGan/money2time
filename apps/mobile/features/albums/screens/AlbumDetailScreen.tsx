@@ -1388,6 +1388,8 @@ export function AlbumDetailScreen({
             ) : (
               // The labels run long in some languages (Swedish "Mellanhavanden"):
               // they shrink to fit a narrow phone instead of running off it.
+              // `minimumFontScale` is iOS only: Android keeps shrinking (Swedish
+              // still reads at about 60% on a 270 dp screen).
               <View className="flex-1 flex-row gap-6 px-5">
                 {tabs.map((value) => {
                   const active = shownTab === value;
