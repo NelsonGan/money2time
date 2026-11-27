@@ -158,6 +158,7 @@ Time is the coin of your life. Only you can determine how it will be spent.
 Time is the most valuable thing a person can spend.
 Time spent together is time well spent.
 Too many people spend money they haven't earned, to buy things they don't want, to impress people they don't like.
+Waste not, want not.
 Watch where your money goes, for it carries the hours you worked to earn it.
 Wealth consists not in having great possessions, but in having few wants.
 What you call saving is just making a deal for the future.
