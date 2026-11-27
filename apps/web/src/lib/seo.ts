@@ -2,7 +2,15 @@ import type { Metadata } from "next";
 
 import { routing, type Locale } from "@/i18n/routing";
 
-export const SITE_URL = "https://money2time.com";
+/*
+ * The host that serves the site, which every canonical, hreflang alternate,
+ * sitemap `<loc>` and the robots.txt sitemap line derive from. It was the
+ * apex until November 2026, while the apex only `308`s here: a canonical
+ * naming a URL that redirects lost to the redirect, and Google began picking
+ * `www` for inner pages against our own tag. `src/proxy.ts` redirects the
+ * apex to this origin, so the two cannot drift.
+ */
+export const SITE_URL = "https://www.money2time.com";
 export const SITE_NAME = "Money2Time";
 export const SITE_METADATA_BASE = new URL(SITE_URL);
 

@@ -5,12 +5,12 @@ gap is the reason this step exists — it has caught real bugs on this site.
 
 Ways it happens: a stale CDN cache; a deployment that built but did not
 promote; a route that fell back to dynamic rendering and now emits a different
-head; a `SITE_URL` that names a host the deployment does not serve — which is
-the live bug on this site; a build that succeeded locally against data the
+head; a `SITE_URL` that names a host the deployment does not serve (this site's
+canonicals named the redirecting apex until November 2026); a build that succeeded locally against data the
 deploy did not have.
 
 Check the **serving** host, then check that the sitemap names the same host.
-Those are two different questions and today they have two different answers.
+Those are two different questions, and they once had two different answers.
 
 ## Run it against the real origin
 

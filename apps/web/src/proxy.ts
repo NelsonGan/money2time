@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { isLocale, routing, type Locale } from "./i18n/routing";
 import { ALBUM_ORIGIN, APP_ORIGIN, isAlbumHost, isAppHost, isProductionHost } from "./lib/platform";
+import { SITE_URL } from "./lib/seo";
 
 /*
  * next-intl is typed against the `next` package it lists as a peer, which npm
@@ -209,15 +210,14 @@ function albumHostResponse(request: NextRequest) {
 }
 
 /**
- * `www` serves the site and the bare domain only redirects to it. The
- * canonicals, sitemap and hreflang alternates name the apex (`SITE_URL`);
- * Google resolved that pair long ago, and AGENTS.md explains why it is left
- * alone. Here rather than in `next.config.ts` because vinext's config
- * redirects drop the query string when the destination is another host, and
- * an apex link with UTM tags has to keep them.
+ * `www` serves the site, and the bare domain only redirects to `SITE_URL`, the
+ * origin every canonical, sitemap `<loc>` and hreflang alternate names. Here
+ * rather than in `next.config.ts` because vinext's config redirects drop the
+ * query string when the destination is another host, and an apex link with UTM
+ * tags has to keep them.
  */
 const APEX_HOST = "money2time.com";
-const WWW_ORIGIN = "https://www.money2time.com";
+const WWW_ORIGIN = SITE_URL;
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
