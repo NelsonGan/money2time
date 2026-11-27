@@ -7351,16 +7351,18 @@ Exit code 1 means the gate is closed, and a failed gate is not deployed. After
 the deploy is live, run the same checker against `https://www.money2time.com`
 and follow `references/post-deploy-verify.md`.
 
-**The two hosts.** `SITE_URL` is `https://money2time.com`, which does not serve
-the site: it `308`s to `https://www.money2time.com` (`src/proxy.ts`). Google
-has resolved this correctly: the apex is indexed and `www` is a recognised
-alternate. Performance data still shows both hosts as separate rows, so sum
-them before reading a total. This is not an emergency and not a reason to hold
-up page work.
+**The two hosts.** `SITE_URL` is `https://www.money2time.com`, the host that
+serves the site, and the apex `308`s to it (`src/proxy.ts` redirects to
+`SITE_URL` itself, so the two cannot drift). Until November 2026 `SITE_URL`
+was the apex, so every canonical, hreflang alternate and sitemap `<loc>` named
+a URL that redirected; Google followed the redirect over the canonical and
+began choosing `www` for inner pages (`/en-my`, `/zh`) while keeping the apex
+for `/`. Performance data shows both hosts as separate rows for that history,
+so sum them before reading a total, and expect the apex rows to shrink.
 
 **Checked, and deliberately left alone.** Re-deciding these needs new
 evidence, not a re-reading: the `/` locale rewrite for MY and SG in
-`src/proxy.ts`; the apex/`www` split; the thin `/statements-import` page; and
+`src/proxy.ts`; the thin `/statements-import` page; and
 the `costInHours` description naming a country count that is wrong in all 32
 locales. The skill explains why each one stands.
 

@@ -26,12 +26,12 @@ Each item is answered with what was found, not "yes".
   why they look short next to the European ones and are not.
 - **H1** — one per page, matching the page's answer.
 - **Canonical** — absolute, from `pageAlternates()`, and naming the page it is
-  on. It resolves to the apex while the site serves on `www`; see the host
-  section in `SKILL.md` for why that is a warning and not a failure.
+  on. It resolves to `www`, the host that serves the site; see the host
+  section in `SKILL.md`.
 - **hreflang** — every locale plus `x-default`, and the page's own **canonical**
   among them. A set without a self-reference is dropped by Google wholesale.
-  The alternates name apex URLs that redirect; that is consistent with the
-  canonicals, which is why the set holds.
+  The alternates name `www` URLs, consistent with the canonicals, which is
+  why the set holds.
 - **`og:locale`** — `language_TERRITORY` via `ogLocale()`, never a bare tag.
 - **`<html lang>`** — via `htmlLang()`, matching the locale being served.
 

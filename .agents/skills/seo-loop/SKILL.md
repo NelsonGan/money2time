@@ -22,37 +22,29 @@ honest between two GSC readings.
 
 ## The two hosts, and what Google actually does with them
 
-`SITE_URL` in `src/lib/seo.ts` is `https://money2time.com`, and that host does
-not serve the site: it answers `308` to `https://www.money2time.com`
-(`src/proxy.ts`), which returns `200`. Every canonical, hreflang alternate and
-`<loc>` derives from `SITE_URL`, so all of them name the redirecting host.
+`SITE_URL` in `src/lib/seo.ts` is `https://www.money2time.com`, the host that
+serves the site. The apex answers `308` to it (`src/proxy.ts` redirects to
+`SITE_URL` itself). Every canonical, hreflang alternate and `<loc>` derives
+from `SITE_URL`, so all of them name the URL that answers `200`.
 
-**Google has resolved this correctly, and the URL Inspection API says so:**
+**Why it is `www`.** Until November 2026 `SITE_URL` was the apex, so every
+canonical and `<loc>` named a URL that redirected. Google kept the apex for
+`/` but followed the redirect over the canonical for inner pages: on
+2026-11-27 URL Inspection showed `https://www.money2time.com/en-my` and `/zh`
+indexed with Google's canonical on `www` against our apex tag, and the `www`
+rows had grown from about 50 impressions a day to about 180 since
+2026-11-01. A redirect outranks a canonical tag, so the canonical moved to the
+redirect's target rather than the redirect being reversed.
 
-| URL | verdict | coverage | Google's canonical |
-| --- | --- | --- | --- |
-| `https://money2time.com/` | `PASS` | Submitted and indexed | `https://money2time.com/` |
-| `https://www.money2time.com/` | `NEUTRAL` | Alternate page with proper canonical tag | `https://money2time.com/` |
+Performance data shows both hosts as separate rows for that history. Sum them
+before reading any total, and expect the apex rows to shrink, not grow. Check
+it against live data with `index_inspect` on both hosts before reading
+anything into a host split.
 
-So the apex is the indexed page, `www` is a recognised alternate, and the
-canonical tag is doing its job. This is **not** an emergency, and it is not a
-reason to hold up page work. Check it against live data before acting on it —
-`index_inspect` on both hosts is two calls.
-
-One thing is still worth fixing when convenient, and it is not urgent:
-
-- **The sitemap lists URLs that redirect.** Every `<loc>` is an apex URL that
-  `308`s. Google is following them, but a sitemap is meant to name the URL you
-  want crawled, and this one names the hop before it.
-
-Performance data still shows both hosts as separate rows (`money2time.com/` at
-440 clicks, `www.money2time.com/` at 18) — the residue of the split. Sum them
-before reading any total, and expect the `www` rows to shrink, not grow.
-
-The checker reports the hop as a **warning**, not a failure, and follows it to
-audit the page at the end. It compares the hreflang self-reference against the
-page's declared canonical rather than the URL requested, which is what makes a
-clean run possible on a site whose canonical host and serving host differ.
+The checker treats a canonical on another host as a **warning**, not a
+failure, and follows a redirect to audit the page at the end. It compares the
+hreflang self-reference against the page's declared canonical rather than the
+URL requested, so a run against the apex still audits cleanly.
 
 ## Known, checked, and deliberately left alone
 
@@ -68,9 +60,6 @@ that — and would put a redirect in front of the site's highest-traffic page
 (`/` is 440 of 507 clicks) for its biggest market. The theoretical gain is
 consistency under locale-adaptive crawling; the risk is real traffic. Left
 alone deliberately.
-
-**The apex/`www` split.** Covered above: Google has consolidated onto the apex
-and says so. The redirect is a permanent `308`.
 
 **`/statements-import` is thin** — 60 words and a video, no `h2`. That is a real
 weakness and the fix is copy, in 32 languages. It is the owner's call, not a

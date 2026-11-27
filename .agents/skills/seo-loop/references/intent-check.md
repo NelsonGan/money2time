@@ -35,7 +35,7 @@ For the target query, pull the last 3 months and answer all four:
 
 1. **Which URL already ranks for this query?** Query → Pages. Watch the host
    in the returned URLs — apex and `www` rows are the same page, and summing
-   them is the only honest total until the host bug is settled. Note clicks,
+   them is the only honest total while the old apex rows remain. Note clicks,
    impressions, CTR, average position.
 2. **What queries does that URL already receive clicks from?** Page → Queries.
    This is what the page is actually understood to be about, which is often not

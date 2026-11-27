@@ -17,10 +17,9 @@
  *     node ../../.claude/skills/seo-loop/scripts/seo-check.mjs https://www.money2time.com /en-my
  *     node ../../.claude/skills/seo-loop/scripts/seo-check.mjs https://www.money2time.com --sitemap=40
  *
- * NOTE the host. `www.money2time.com` answers 200; the apex 308s to it, while
- * `SITE_URL` in `src/lib/seo.ts` is the apex. Google has consolidated onto the
- * apex and reports it as indexed with a matching canonical, so this is a
- * warning here and not a failure — see the host section in `SKILL.md` before
+ * NOTE the host. `www.money2time.com` answers 200 and is `SITE_URL`; the apex
+ * 308s to it. Run against the apex and the canonical on another host is a
+ * warning here, not a failure — see the host section in `SKILL.md` before
  * deciding it needs fixing.
  *
  * FAIL blocks a deploy. WARN is a judgement call — read it, then decide.
