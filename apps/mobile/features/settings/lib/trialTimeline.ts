@@ -1,0 +1,114 @@
+import type { RevenueCatCustomerState, RevenueCatFreeTrial } from '~/services/revenueCat';
+
+/**
+ * The free-trial timeline on the paywall and the reminder before the first
+ * charge (README › Trial-aware paywall › Trial timeline and reminder).
+ *
+ * The reminder fires at 10:00 local time two calendar days before the trial
+ * ends, so a one-week trial started on a Thursday evening reminds on the next
+ * Tuesday morning and charges on Thursday evening. Pure: the paywall and the
+ * notification scheduler share it, so what the paywall promises is what the
+ * phone schedules.
+ */
+export const TRIAL_REMINDER_LEAD_DAYS = 2;
+export const TRIAL_REMINDER_HOUR = 10;
+
+/**
+ * `date` moved by whole months, kept on the same day of the month or the last
+ * day of a shorter one (Jan 31 + 1 month is Feb 28, not Mar 3).
+ */
+function addCalendarMonths(date: Date, months: number): Date {
+  const end = new Date(date);
+  const day = end.getDate();
+  end.setDate(1);
+  end.setMonth(end.getMonth() + months);
+  const lastDay = new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate();
+  end.setDate(Math.min(day, lastDay));
+  return end;
+}
+
+/** When a trial of this length, started at `start`, ends (calendar arithmetic). */
+export function trialEndDate(start: Date, trial: RevenueCatFreeTrial): Date {
+  const count = trial.durationCount;
+  switch (trial.durationUnit) {
+    case 'day': {
+      const end = new Date(start);
+      end.setDate(end.getDate() + count);
+      return end;
+    }
+    case 'week': {
+      const end = new Date(start);
+      end.setDate(end.getDate() + count * 7);
+      return end;
+    }
+    case 'month':
+      return addCalendarMonths(start, count);
+    case 'year':
+      return addCalendarMonths(start, count * 12);
+  }
+  return new Date(start);
+}
+
+/**
+ * When to remind before a trial that ends at `endsAt`, or null when that moment
+ * has passed or would not come before the end (a trial too short for a reminder).
+ */
+export function trialReminderDate(endsAt: Date, now: Date): Date | null {
+  if (Number.isNaN(endsAt.getTime())) return null;
+  const remindAt = new Date(endsAt);
+  remindAt.setDate(remindAt.getDate() - TRIAL_REMINDER_LEAD_DAYS);
+  remindAt.setHours(TRIAL_REMINDER_HOUR, 0, 0, 0);
+  if (remindAt.getTime() <= now.getTime()) return null;
+  if (remindAt.getTime() >= endsAt.getTime()) return null;
+  return remindAt;
+}
+
+export interface TrialTimeline {
+  endsAt: Date;
+  /** Null when no reminder can be promised (notifications denied, trial too short). */
+  remindAt: Date | null;
+}
+
+/** The timeline the paywall shows for a trial that would start `now`. */
+export function buildTrialTimeline(
+  trial: RevenueCatFreeTrial,
+  now: Date,
+  options: { canRemind: boolean },
+): TrialTimeline {
+  const endsAt = trialEndDate(now, trial);
+  return { endsAt, remindAt: options.canRemind ? trialReminderDate(endsAt, now) : null };
+}
+
+/**
+ * When to remind this customer, from what the store says: only a free trial
+ * that is still set to renew, so a trial the user already cancelled (or one
+ * that converted) gets no reminder.
+ */
+export function trialReminderDateForCustomer(
+  state: Pick<
+    RevenueCatCustomerState,
+    'periodType' | 'hasRenewingSubscription' | 'expirationDate'
+  > | null,
+  now: Date,
+): Date | null {
+  if (!state || state.periodType !== 'trial' || !state.hasRenewingSubscription) return null;
+  if (!state.expirationDate) return null;
+  return trialReminderDate(new Date(state.expirationDate), now);
+}
+
+export type TrialReminderPermissionStep =
+  /** Allowed already: schedule it. */
+  | 'none'
+  /** The system prompt can still be shown (never answered, or Android allows asking again). */
+  | 'ask'
+  /** Refused for good: only Settings can turn it on. */
+  | 'settings';
+
+/** What to do about notification permission once a free trial starts. */
+export function trialReminderPermissionStep(permission: {
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+}): TrialReminderPermissionStep {
+  if (permission.status === 'granted') return 'none';
+  return permission.status === 'undetermined' || permission.canAskAgain ? 'ask' : 'settings';
+}

@@ -18,6 +18,13 @@ export async function requestPermissions(): Promise<'granted' | 'denied' | 'unde
   return 'denied';
 }
 
+export async function getPermissionState(): Promise<{
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+}> {
+  return { status: 'denied', canAskAgain: false };
+}
+
 export async function getPermissionStatus(): Promise<'granted' | 'denied' | 'undetermined'> {
   return 'denied';
 }
@@ -27,6 +34,13 @@ export function initNotificationHandler(): void {}
 export function subscribeNotificationResponses(_onDeepLink: (url: string) => void): () => void {
   return () => {};
 }
+
+export async function scheduleTrialReminder(
+  _date: Date,
+  _content: { title: string; body: string; url: string },
+): Promise<void> {}
+
+export async function cancelTrialReminder(): Promise<void> {}
 
 export async function scheduleDailyCheckin(_hour: number, _minute: number): Promise<void> {}
 

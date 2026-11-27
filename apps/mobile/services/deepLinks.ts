@@ -13,6 +13,7 @@ import {
   requestStartLiveEarnings,
 } from '~/services/liveEarningsNavigation';
 import { parseReviewZoomParam, requestReviewZoom } from '~/services/reviewNavigation';
+import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import { ADD_BUTTON_ACTIONS, type AddButtonAction } from '~/types';
 import { runAfterInteractions } from '~/utils/interactions';
@@ -176,6 +177,16 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     runDeepLinkNavigation(navigationRef, {
       name: 'JoinLedger',
       params: kind ? { code, kind } : { code },
+    });
+    return true;
+  }
+
+  // `money2time://pro-management` — the reminder before a free trial's first
+  // charge, so the member can keep or cancel it there.
+  if (parsed.action === 'pro-management') {
+    runDeepLinkNavigation(navigationRef, null, () => {
+      requestOpenTab('settings');
+      requestOpenSettingsScreen('ProManagement');
     });
     return true;
   }

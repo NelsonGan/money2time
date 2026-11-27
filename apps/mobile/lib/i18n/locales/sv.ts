@@ -179,12 +179,8 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
-    free_scans_locations: {
-      title: 'Fler gratisskanningar och platser',
-      freeScans: {
-        title: '%{count} gratis kvittoskanningar i månaden',
-        body: 'Alla med gratisplanen får nu %{count} kvittoskanningar varje månad, som fylls på månadsvis. Ta ett foto eller välj kvitton från ditt album under Skanna kvitto, så fyller Money2Time i butik, belopp, datum och kategori åt dig. Pro är fortsatt obegränsat.',
-      },
+    location_tagging: {
+      title: 'Tagga transaktioner med platser',
       locations: {
         title: 'Tagga transaktioner med platser',
         body: 'Slå på Platser under Inställningar > Personalisering för att tagga utgifter och inkomster med var de skedde. Nya utgifter kan taggas automatiskt med din nuvarande plats, eller välj en plats via sökning eller senaste platser. Öppna Utgiftskarta från Kalendern för att se vart pengarna tar vägen.',
@@ -2381,7 +2377,7 @@ const sv = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för obegränsad skanning.',
+      'Gratisplanen inkluderar totalt {{count}} kvittoskanningar. Uppgradera till Pro för obegränsad skanning.',
     limit_autolog:
       'Du har använt alla {{count}} gratis Apple Pay-automatiseringar, så dina senaste betalningar registrerades inte. Uppgradera till Pro för obegränsad användning.',
     custom_logos_label: 'Anpassade kontologotyper',
@@ -2499,6 +2495,14 @@ const sv = {
     buy_lifetime: 'Köp livstidsåtkomst',
     maybe_later: 'Kanske senare',
     trial_terms: 'Gratis i {{duration}}, därefter {{price}}.',
+    trial_timeline_title: 'Så fungerar din gratis provperiod',
+    trial_timeline_today_body: 'Lås upp allt i Pro. Du betalar ingenting i dag.',
+    trial_timeline_reminder_body: 'Vi påminner dig {{count}} dagar innan provperioden tar slut.',
+    trial_reminder_settings_title: 'Slå på aviseringar för påminnelsen',
+    trial_reminder_settings_body:
+      'Aviseringar är avstängda för Money2Time. Slå på dem i Inställningar så påminner vi dig {{count}} dagar innan din gratis provperiod tar slut.',
+    trial_timeline_end_body:
+      'Provperioden tar slut och {{price}} börjar. Avsluta när som helst innan dess.',
     plans_heading: 'Välj din plan',
     save_percent: 'Spara {{percent}}%',
     per_month_short: '/mån',
@@ -2720,6 +2724,11 @@ const sv = {
         'Ingen aviseringstext följde med den här körningen, vilket är normalt vid ett test. Bankaviseringar visas i Money2Time för granskning.',
       autolog_limit_body:
         'Du har använt alla {{count}} gratis automatiseringar. Uppgradera till Pro i Money2Time för obegränsad användning.',
+      trial_ending_title: 'Din gratis provperiod tar slut om {{count}} dagar',
+      trial_ending_body:
+        'Din första betalning är {{date}}. Tryck för att behålla eller avsluta prenumerationen.',
+      trial_ending_body_price:
+        'Din första betalning på {{price}} är {{date}}. Tryck för att behålla eller avsluta prenumerationen.',
       daily_title: 'Hur gick dagen?',
       daily_body: 'Ta 30 sekunder och logga dagens utgifter medan du minns dem.',
       recurring_title: '{{name}} · {{amount}}',

@@ -22,6 +22,7 @@ import {
   MONTHLY_REVIEW_ID,
   monthlyReminderDay,
   reviewNotificationUrl,
+  TRIAL_REMINDER_ID,
   WEEKLY_REVIEW_ID,
 } from './notifications.shared';
 
@@ -35,6 +36,21 @@ export async function requestPermissions(): Promise<'granted' | 'denied' | 'unde
 
   const { status } = await Notifications.requestPermissionsAsync();
   return status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined';
+}
+
+/**
+ * The permission and whether the system prompt can still be shown: false once
+ * iOS (or Android after repeated refusals) only lets Settings turn it on.
+ */
+export async function getPermissionState(): Promise<{
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+}> {
+  const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+  return {
+    status: status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined',
+    canAskAgain,
+  };
 }
 
 export async function getPermissionStatus(): Promise<'granted' | 'denied' | 'undetermined'> {
@@ -401,6 +417,28 @@ export async function cancelLiveEarningsStart(): Promise<void> {
     // foreground re-runs the sync and repairs it.
     await Notifications.cancelScheduledNotificationAsync(id);
   }
+}
+
+// Free-trial reminder
+
+/**
+ * The one notification before a free trial's first charge. It does not check
+ * permission: `syncTrialReminder` does, and cancels when the trial ends.
+ */
+export async function scheduleTrialReminder(
+  date: Date,
+  content: { title: string; body: string; url: string },
+): Promise<void> {
+  await cancelTrialReminder();
+  await scheduleNotification({
+    identifier: TRIAL_REMINDER_ID,
+    content: { title: content.title, body: content.body, data: { url: content.url } },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date },
+  });
+}
+
+export async function cancelTrialReminder(): Promise<void> {
+  await cancelNotification(TRIAL_REMINDER_ID);
 }
 
 // Cancel everything

@@ -179,12 +179,8 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
-    free_scans_locations: {
-      title: 'Più scansioni gratis e luoghi',
-      freeScans: {
-        title: '%{count} scansioni di scontrini gratis al mese',
-        body: 'Il piano gratuito include ora %{count} scansioni di scontrini al mese, che si rinnovano ogni mese. Scatta una foto o scegli scontrini dal tuo album in Scansiona scontrino, e Money2Time compila negozio, importo, data e categoria per te. Pro resta illimitato.',
-      },
+    location_tagging: {
+      title: 'Aggiungi un luogo alle transazioni',
       locations: {
         title: 'Aggiungi un luogo alle transazioni',
         body: 'Attiva Luoghi in Impostazioni > Personalizzazione per associare un luogo a spese ed entrate. Le nuove spese possono usare automaticamente la tua posizione attuale, oppure scegli un luogo dalla ricerca o dai luoghi recenti. Apri la Mappa delle spese dal Calendario per vedere dove spendi.',
@@ -2384,7 +2380,7 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansioni illimitate.',
+      'Il piano gratuito include {{count}} scansioni di scontrini in totale. Passa a Pro per scansioni illimitate.',
     limit_autolog:
       'Hai usato tutte le {{count}} automazioni Apple Pay gratuite, quindi gli ultimi pagamenti non sono stati registrati. Passa a Pro per usarle senza limiti.',
     custom_logos_label: 'Loghi dei conti personalizzati',
@@ -2503,6 +2499,14 @@ const it = {
     buy_lifetime: 'Acquista Pro a vita',
     maybe_later: 'Magari più tardi',
     trial_terms: 'Gratis per {{duration}}, poi {{price}}.',
+    trial_timeline_title: 'Come funziona la tua prova gratuita',
+    trial_timeline_today_body: 'Sblocca tutto Pro. Oggi non paghi nulla.',
+    trial_timeline_reminder_body: 'Ti avviseremo {{count}} giorni prima della fine della prova.',
+    trial_reminder_settings_title: 'Attiva le notifiche per il promemoria',
+    trial_reminder_settings_body:
+      'Le notifiche di Money2Time sono disattivate. Attivale in Impostazioni e ti avviseremo {{count}} giorni prima della fine della prova gratuita.',
+    trial_timeline_end_body:
+      'La prova finisce e inizia {{price}}. Puoi annullare in qualsiasi momento prima.',
     plans_heading: 'Scegli il tuo piano',
     save_percent: 'Risparmia {{percent}}%',
     per_month_short: '/mese',
@@ -2729,6 +2733,11 @@ const it = {
         'Questa esecuzione non conteneva testo di notifica, è normale in un test. Le notifiche bancarie compariranno in Money2Time da controllare.',
       autolog_limit_body:
         'Hai usato tutte le {{count}} automazioni gratuite. Passa a Pro in Money2Time per usarle senza limiti.',
+      trial_ending_title: 'La tua prova gratuita finisce tra {{count}} giorni',
+      trial_ending_body:
+        'Il tuo primo pagamento è il {{date}}. Tocca per mantenere o annullare l’abbonamento.',
+      trial_ending_body_price:
+        'Il tuo primo pagamento di {{price}} è il {{date}}. Tocca per mantenere o annullare l’abbonamento.',
       daily_title: "Com'è andata oggi?",
       daily_body: 'Dedica 30 secondi a registrare le spese di oggi finché sono fresche.',
       recurring_title: '{{name}} · {{amount}}',

@@ -178,12 +178,8 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
-    free_scans_locations: {
-      title: 'Więcej darmowych skanów i lokalizacje',
-      freeScans: {
-        title: '%{count} darmowych skanów paragonów miesięcznie',
-        body: 'W darmowym planie masz teraz %{count} skanów paragonów miesięcznie, odnawianych co miesiąc. Zrób zdjęcie lub wybierz paragony z albumu w Skanuj paragon, a Money2Time uzupełni sprzedawcę, kwotę, datę i kategorię za Ciebie. Pro pozostaje bez limitu.',
-      },
+    location_tagging: {
+      title: 'Oznaczaj transakcje miejscami',
       locations: {
         title: 'Oznaczaj transakcje miejscami',
         body: 'Włącz Lokalizacje w Ustawienia > Personalizacja, aby dodawać miejsca do wydatków i przychodów. Nowe wydatki mogą automatycznie zapisywać Twoją bieżącą lokalizację, możesz też wyszukać miejsce lub wybrać z ostatnich. Otwórz opcję Mapa wydatków w Kalendarzu, aby zobaczyć, gdzie wydajesz pieniądze.',
@@ -2388,7 +2384,7 @@ const pl = {
   },
   pro: {
     limit_receipt_scans:
-      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować bez ograniczeń.',
+      'Plan darmowy obejmuje łącznie {{count}} skanów paragonów. Przejdź na Pro, aby skanować bez ograniczeń.',
     limit_autolog:
       'Wykorzystano wszystkie {{count}} darmowych automatyzacji Apple Pay, więc ostatnie płatności nie zostały zapisane. Przejdź na Pro, aby korzystać bez ograniczeń.',
     custom_logos_label: 'Własne logo konta',
@@ -2506,6 +2502,14 @@ const pl = {
     buy_lifetime: 'Kup dostęp dożywotni',
     maybe_later: 'Może później',
     trial_terms: 'Bezpłatnie przez {{duration}}, potem {{price}}.',
+    trial_timeline_title: 'Jak działa bezpłatny okres próbny',
+    trial_timeline_today_body: 'Odblokuj wszystko w Pro. Dziś nic nie płacisz.',
+    trial_timeline_reminder_body: 'Przypomnimy Ci {{count}} dni przed końcem okresu próbnego.',
+    trial_reminder_settings_title: 'Włącz powiadomienia, aby dostać przypomnienie',
+    trial_reminder_settings_body:
+      'Powiadomienia Money2Time są wyłączone. Włącz je w Ustawieniach, a przypomnimy Ci {{count}} dni przed końcem bezpłatnego okresu próbnego.',
+    trial_timeline_end_body:
+      'Okres próbny się kończy i zaczyna się {{price}}. Możesz anulować w dowolnym momencie przed tym terminem.',
     plans_heading: 'Wybierz swój plan',
     save_percent: 'Oszczędź {{percent}}%',
     per_month_short: '/mies.',
@@ -2730,6 +2734,11 @@ const pl = {
         'To uruchomienie nie zawierało tekstu powiadomienia, co jest normalne podczas testu. Powiadomienia z banku pojawią się w Money2Time do przejrzenia.',
       autolog_limit_body:
         'Wykorzystano wszystkie {{count}} darmowych automatyzacji. Przejdź na Pro w Money2Time, aby korzystać bez ograniczeń.',
+      trial_ending_title: 'Twój bezpłatny okres próbny kończy się za {{count}} dni',
+      trial_ending_body:
+        'Pierwsza płatność nastąpi {{date}}. Dotknij, aby zachować lub anulować subskrypcję.',
+      trial_ending_body_price:
+        'Pierwsza płatność w wysokości {{price}} nastąpi {{date}}. Dotknij, aby zachować lub anulować subskrypcję.',
       daily_title: 'Jak minął dzień?',
       daily_body: 'Poświęć 30 sekund, by zapisać dzisiejsze wydatki, póki są świeże.',
       recurring_title: '{{name}} · {{amount}}',

@@ -153,12 +153,8 @@ const en = {
     },
   },
   news: {
-    free_scans_locations: {
-      title: 'More free scans and locations',
-      freeScans: {
-        title: '%{count} free receipt scans a month',
-        body: 'Everyone on the free plan now gets %{count} receipt scans every month, refreshing each month. Snap a photo or pick receipts from your album under Scan receipt, and Money2Time fills in the merchant, amount, date and category for you. Pro stays unlimited.',
-      },
+    location_tagging: {
+      title: 'Tag transactions with places',
       locations: {
         title: 'Tag transactions with places',
         body: 'Turn on Locations in Settings > Personalize to tag expenses and income with where they happened. New expenses can auto-tag your current spot, or pick any place from search or recent spots. Open the Spending map from Calendar to see where your money goes.',
@@ -2347,7 +2343,7 @@ const en = {
   },
   pro: {
     limit_receipt_scans:
-      'Free plan includes {{count}} receipt scans a month. Upgrade to Pro for unlimited scanning.',
+      'Free plan includes {{count}} receipt scans in total. Upgrade to Pro for unlimited scanning.',
     limit_autolog:
       "You've used all {{count}} free Apple Pay automations, so your latest payments weren't logged. Upgrade to Pro for unlimited.",
     custom_logos_label: 'Custom account logos',
@@ -2467,6 +2463,13 @@ const en = {
     buy_lifetime: 'Buy Lifetime',
     maybe_later: 'Maybe later',
     trial_terms: 'Free for {{duration}}, then {{price}}.',
+    trial_timeline_title: 'How your free trial works',
+    trial_timeline_today_body: 'Unlock everything in Pro. You pay nothing today.',
+    trial_timeline_reminder_body: "We'll remind you {{count}} days before your trial ends.",
+    trial_reminder_settings_title: 'Turn on notifications for your reminder',
+    trial_reminder_settings_body:
+      "Notifications are off for Money2Time. Turn them on in Settings and we'll remind you {{count}} days before your free trial ends.",
+    trial_timeline_end_body: 'Your trial ends and {{price}} starts. Cancel any time before.',
     save_percent: 'Save {{percent}}%',
     per_month_short: '/mo',
     no_commitment: 'No commitment. Cancel anytime.',
@@ -2688,6 +2691,11 @@ const en = {
         'No notification text came with this run, which is normal for a test. Bank notifications will show up in Money2Time for review.',
       autolog_limit_body:
         'You have used all {{count}} free automations. Upgrade to Pro in Money2Time for unlimited.',
+      trial_ending_title: 'Your free trial ends in {{count}} days',
+      trial_ending_body:
+        'Your first payment is on {{date}}. Tap to keep or cancel your subscription.',
+      trial_ending_body_price:
+        'Your first payment of {{price}} is on {{date}}. Tap to keep or cancel your subscription.',
       daily_title: 'How did today go?',
       daily_body: "Take 30 seconds to log today's spending while it's still fresh.",
       recurring_title: '{{name}} · {{amount}}',

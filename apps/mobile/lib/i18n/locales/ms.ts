@@ -177,12 +177,8 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
-    free_scans_locations: {
-      title: 'Lebih imbasan percuma dan lokasi',
-      freeScans: {
-        title: '%{count} imbasan resit percuma sebulan',
-        body: 'Pengguna pelan percuma kini mendapat %{count} imbasan resit setiap bulan, diperbaharui setiap bulan. Ambil gambar atau pilih resit dari album melalui Imbas resit, dan Money2Time mengisi peniaga, jumlah, tarikh dan kategori untuk anda. Pro kekal tanpa had.',
-      },
+    location_tagging: {
+      title: 'Tag transaksi dengan lokasi',
       locations: {
         title: 'Tag transaksi dengan lokasi',
         body: 'Hidupkan Lokasi di Tetapan > Penyesuaian untuk menambah tempat pada perbelanjaan dan pendapatan. Perbelanjaan baharu boleh ditag dengan lokasi semasa anda secara automatik, atau pilih tempat daripada carian dan lokasi terkini. Buka Peta perbelanjaan dari Kalendar untuk melihat ke mana wang anda dibelanjakan.',
@@ -2392,7 +2388,7 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk imbasan tanpa had.',
+      'Pelan percuma termasuk {{count}} imbasan resit secara keseluruhan. Naik taraf ke Pro untuk imbasan tanpa had.',
     limit_autolog:
       'Anda telah menggunakan kesemua {{count}} automasi Apple Pay percuma, jadi pembayaran terkini anda tidak direkodkan. Naik taraf ke Pro untuk tanpa had.',
     custom_logos_label: 'Logo akaun tersuai',
@@ -2510,6 +2506,15 @@ const ms = {
     buy_lifetime: 'Beli Seumur Hidup',
     maybe_later: 'Mungkin nanti',
     trial_terms: 'Percuma selama {{duration}}, kemudian {{price}}.',
+    trial_timeline_title: 'Cara percubaan percuma anda berfungsi',
+    trial_timeline_today_body: 'Buka semua ciri Pro. Anda tidak membayar apa-apa hari ini.',
+    trial_timeline_reminder_body:
+      'Kami akan mengingatkan anda {{count}} hari sebelum percubaan anda tamat.',
+    trial_reminder_settings_title: 'Hidupkan pemberitahuan untuk peringatan anda',
+    trial_reminder_settings_body:
+      'Pemberitahuan dimatikan untuk Money2Time. Hidupkannya dalam Tetapan dan kami akan mengingatkan anda {{count}} hari sebelum percubaan percuma anda tamat.',
+    trial_timeline_end_body:
+      'Percubaan anda tamat dan {{price}} bermula. Batalkan bila-bila masa sebelum itu.',
     plans_heading: 'Pilih pelan anda',
     save_percent: 'Jimat {{percent}}%',
     per_month_short: '/bln',
@@ -2734,6 +2739,11 @@ const ms = {
         'Tiada teks pemberitahuan disertakan dalam larian ini, perkara biasa untuk ujian. Pemberitahuan bank akan muncul dalam Money2Time untuk disemak.',
       autolog_limit_body:
         'Anda telah menggunakan kesemua {{count}} automasi percuma. Naik taraf ke Pro dalam Money2Time untuk tanpa had.',
+      trial_ending_title: 'Percubaan percuma anda tamat dalam {{count}} hari',
+      trial_ending_body:
+        'Bayaran pertama anda pada {{date}}. Ketik untuk meneruskan atau membatalkan langganan anda.',
+      trial_ending_body_price:
+        'Bayaran pertama anda sebanyak {{price}} pada {{date}}. Ketik untuk meneruskan atau membatalkan langganan anda.',
       daily_title: 'Bagaimana hari anda?',
       daily_body: 'Luangkan 30 saat untuk rekod perbelanjaan hari ini selagi masih segar.',
       recurring_title: '{{name}} · {{amount}}',

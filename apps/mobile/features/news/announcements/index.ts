@@ -24,7 +24,7 @@ import { autoReviewInsightsInstalmentsAnnouncement } from './023_auto_review_ins
 import { cloudSyncSharedLedgersAnnouncement } from './024_cloud_sync_shared_ledgers';
 import { budgetsSplitsScansArchiveAnnouncement } from './025_budgets_splits_scans_archive';
 import { splitBillsAlbumIconsAnnouncement } from './026_split_bills_album_icons';
-import { freeScansLocationsAnnouncement } from './027_free_scans_locations';
+import { locationTaggingAnnouncement } from './027_location_tagging';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -53,5 +53,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   cloudSyncSharedLedgersAnnouncement,
   budgetsSplitsScansArchiveAnnouncement,
   splitBillsAlbumIconsAnnouncement,
-  freeScansLocationsAnnouncement,
+  locationTaggingAnnouncement,
 ] as const;

@@ -4,8 +4,6 @@ import { View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
-import { ClayIcon } from '~/components/ui/ClayIcon';
-import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
 import { money } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -29,73 +27,6 @@ function DrawnSwitch({ on }: { on: boolean }) {
       style={{ backgroundColor: on ? colors.primary : withColorAlpha(colors.border, 0.5) }}
     >
       <View className={`h-5 w-5 rounded-full bg-white ${on ? 'self-end' : 'self-start'}`} />
-    </View>
-  );
-}
-
-const SAMPLE_SCANNED_ROWS = [
-  { emoji: 'coffee', merchant: 'Kopi Kita', amount: 18.5 },
-  { emoji: 'grocery-basket', merchant: 'FreshMart', amount: 64.2 },
-] as const;
-
-/** Free plan monthly scan allowance (from PRO_LIMITS) above two sample scanned
- *  expenses, mirroring the receipt scan result rows. */
-export function FreeScansShowcase({ width }: ShowcaseProps) {
-  const colors = useThemeColors();
-  const { settings } = useApp();
-  const amount = (value: number) => money(value, settings);
-
-  return (
-    <View className="gap-2.5" style={{ width }}>
-      <View className="flex-row items-center justify-between gap-3 rounded-[20px] border border-border/30 bg-card px-4 py-3.5 shadow-soft">
-        <View className="min-w-0 flex-1">
-          <View className="flex-row items-center gap-2">
-            <View className="rounded-full bg-success/15 px-2.5 py-0.5">
-              <Text variant="label" tone="success" numberOfLines={1}>
-                {I18n.t('pro.free_title')}
-              </Text>
-            </View>
-            <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
-              {I18n.t('pro.receipt_scans_label')}
-            </Text>
-          </View>
-          <View className="mt-1.5 flex-row items-baseline gap-1">
-            <Text variant="display" tone="success">
-              {PRO_LIMITS.FREE_MAX_RECEIPT_SCANS}
-            </Text>
-            <Text variant="bodyStrong" tone="muted" numberOfLines={1}>
-              {I18n.t('pro.per_month_short')}
-            </Text>
-          </View>
-        </View>
-        <View
-          className="h-14 w-14 items-center justify-center rounded-2xl border"
-          style={{
-            backgroundColor: withColorAlpha(colors.success, 0.1),
-            borderColor: withColorAlpha(colors.success, 0.2),
-          }}
-        >
-          <ClayIcon name="money-time/receipt" size={34} flatSize={22} />
-        </View>
-      </View>
-
-      <View className="rounded-[18px] border border-border/30 bg-card px-3.5 py-1.5">
-        {SAMPLE_SCANNED_ROWS.map((row, index) => (
-          <View
-            key={row.merchant}
-            className={`flex-row items-center gap-2.5 py-2 ${index > 0 ? 'border-t border-border/15' : ''}`}
-          >
-            <ClayIcon name="status/success" size={18} flatSize={14} />
-            <CategoryEmoji icon={row.emoji} size={18} />
-            <Text variant="body" className="flex-1 text-foreground" numberOfLines={1}>
-              {row.merchant}
-            </Text>
-            <Text variant="bodyStrong" className="text-foreground" numberOfLines={1}>
-              {amount(row.amount)}
-            </Text>
-          </View>
-        ))}
-      </View>
     </View>
   );
 }

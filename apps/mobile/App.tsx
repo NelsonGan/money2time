@@ -127,6 +127,7 @@ import { ReimbursementsScreen } from '~/features/reimbursements/screens/Reimburs
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
 import { CloudBackupPromptModal } from '~/features/settings/components/CloudBackupPromptModal';
+import { PaywallRepromptHost } from '~/features/settings/components/PaywallRepromptHost';
 import {
   consumePendingAccountLogoPicker,
   setPendingAccountLogoPicker,
@@ -3593,6 +3594,15 @@ function AppContent() {
       <LocationsOfferHost allowed={!biometricLocked && rootPromptsAllowed} />
       <AutomationTagHost />
       <AutoLogLimitPrompt
+        allowed={
+          navigationReady &&
+          !biometricLocked &&
+          rootPromptsAllowed &&
+          !featureAnnouncementVisible &&
+          !cloudBackupPromptVisible
+        }
+      />
+      <PaywallRepromptHost
         allowed={
           navigationReady &&
           !biometricLocked &&

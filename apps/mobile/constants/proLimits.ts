@@ -24,8 +24,9 @@ export const PRO_LIMITS = {
   /** Free users can attach this many receipt images in total (across all transactions). */
   FREE_MAX_RECEIPTS: 30,
   /**
-   * Free users can scan this many receipts per calendar month (UTC), enforced
-   * by the receipt-scanner Worker (`FREE_LIMIT` / `FREE_INTERVAL`).
+   * Free users can scan this many receipts in total, for life (it was per
+   * calendar month from 2026-11-20 to 2026-11-27), enforced by the
+   * receipt-scanner Worker (`FREE_LIMIT` / `FREE_INTERVAL`).
    */
   FREE_MAX_RECEIPT_SCANS: 20,
   /**

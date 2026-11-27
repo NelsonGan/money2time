@@ -149,12 +149,8 @@ const zhHant = {
     },
   },
   news: {
-    free_scans_locations: {
-      title: '更多免費掃描與位置標記',
-      freeScans: {
-        title: '每月 %{count} 次免費收據掃描',
-        body: '免費版使用者現在每月享有 %{count} 次收據掃描，每月自動重設。在「掃描收據」中拍照或從相簿選取收據，Money2Time 會自動填入商家、金額、日期與分類。Pro 版依然不限次數。',
-      },
+    location_tagging: {
+      title: '為交易標記消費地點',
       locations: {
         title: '為交易標記消費地點',
         body: '在「設定 > 個人化」中開啟位置，即可為支出與收入記錄消費地點。新增支出時可自動標記目前位置，也可搜尋或選擇最近地點。在日曆中開啟消費地圖，一眼看清錢都花在哪裡。',
@@ -2280,7 +2276,7 @@ const zhHant = {
     add_extra: '加入通勤等時間',
   },
   pro: {
-    limit_receipt_scans: '免費方案每月包含 {{count}} 次收據掃描。升級到 Pro 即可無限掃描。',
+    limit_receipt_scans: '免費方案總共包含 {{count}} 次收據掃描。升級到 Pro 即可無限掃描。',
     limit_autolog:
       '你已用完 {{count}} 次免費 Apple Pay 自動化，最近的付款沒有被記錄。升級到 Pro 即可無限使用。',
     custom_logos_label: '自訂帳戶標誌',
@@ -2389,6 +2385,13 @@ const zhHant = {
     buy_lifetime: '購買終身版',
     maybe_later: '稍後再說',
     trial_terms: '前 {{duration}} 免費，之後 {{price}}。',
+    trial_timeline_title: '免費試用怎麼運作',
+    trial_timeline_today_body: '解鎖 Pro 的全部功能，今天不用付費。',
+    trial_timeline_reminder_body: '我們會在試用結束前 {{count}} 天提醒你。',
+    trial_reminder_settings_title: '開啟通知以收到提醒',
+    trial_reminder_settings_body:
+      'Money2Time 的通知已關閉。在設定中開啟後，我們會在免費試用結束前 {{count}} 天提醒你。',
+    trial_timeline_end_body: '試用結束，開始收取 {{price}}。在此之前可隨時取消。',
     plans_heading: '選擇你的方案',
     save_percent: '省 {{percent}}%',
     per_month_short: '/月',
@@ -2589,6 +2592,10 @@ const zhHant = {
         '這次執行沒有收到通知內容，測試時屬於正常。銀行通知會顯示在 Money2Time 中供你檢視。',
       autolog_limit_body:
         '你已用完 {{count}} 次免費自動化。在 Money2Time 升級到 Pro 即可無限使用。',
+      trial_ending_title: '你的免費試用將在 {{count}} 天後結束',
+      trial_ending_body: '你的首次付款日期是 {{date}}。點一下即可保留或取消訂閱。',
+      trial_ending_body_price:
+        '你的首次付款 {{price}} 將在 {{date}} 收取。點一下即可保留或取消訂閱。',
       daily_title: '今天過得怎麼樣？',
       daily_body: '趁記憶還新鮮，花 30 秒記錄一下今天的支出吧。',
       recurring_title: '{{name}} · {{amount}}',

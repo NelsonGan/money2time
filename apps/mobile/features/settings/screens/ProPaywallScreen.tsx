@@ -25,6 +25,7 @@ import { usePackagesByType, usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import { requestCloudSyncPrompt } from '~/features/cloudSync/lib/promptRequest';
+import { TrialTimeline } from '~/features/settings/components/TrialTimeline';
 import {
   buildPurchaseAnalytics,
   resolvePaywallVariant,
@@ -35,12 +36,22 @@ import {
   type PaywallPlanKind,
   resolveSelectedPaywallPlan,
 } from '~/features/settings/lib/paywallPresentation';
+import {
+  buildTrialTimeline,
+  trialReminderPermissionStep,
+} from '~/features/settings/lib/trialTimeline';
+import { markPaywallShown } from '~/features/settings/paywallReprompt';
+import { rememberTrialPrice, syncTrialReminder } from '~/features/settings/trialReminder';
+import { ensureTrialReminderPermission } from '~/features/settings/trialReminderPermission';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { reportError } from '~/services/errorReporting';
+import { getPermissionState } from '~/services/notifications';
 import {
   isRevenueCatCustomerStateActive,
   isRevenueCatCustomerStateSubscriber,
+  type RevenueCatCustomerState,
   type RevenueCatPackage,
 } from '~/services/revenueCat';
 import { recordProPurchase } from '~/services/reviewPrompt';
@@ -515,10 +526,10 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
-        // Free scans reset each calendar month ("20/mo"); Pro is advertised as
-        // unlimited (the server-side fair-use cap stays out of the paywall).
+        // Free scans are a lifetime total, like the other counted rows; Pro is
+        // advertised as unlimited (the server-side fair-use cap stays out).
         label: I18n.t('pro.receipt_scans_label'),
-        free: `${PRO_LIMITS.FREE_MAX_RECEIPT_SCANS}${I18n.t('pro.per_month_short')}`,
+        free: String(PRO_LIMITS.FREE_MAX_RECEIPT_SCANS),
         pro: UNLIMITED,
       },
       {
@@ -817,6 +828,29 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     });
   }, [paywallSource, viewVariant]);
 
+  // Any paywall restarts the clock for the periodic one (PaywallRepromptHost).
+  useEffect(() => {
+    void markPaywallShown();
+  }, []);
+
+  // The trial timeline promises a reminder only where the phone can show one:
+  // a permission that can still be asked for is asked once the trial starts,
+  // and one refused for good is offered Settings then (trialReminderPermission).
+  const [notificationsDenied, setNotificationsDenied] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void getPermissionState()
+      .then((permission) => {
+        // Refused for good: only Settings can allow it, so promise nothing.
+        if (!cancelled)
+          setNotificationsDenied(trialReminderPermissionStep(permission) === 'settings');
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (!flashMessage) {
       setVisibleFlashMessage(null);
@@ -952,9 +986,21 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const selectedPresentation = selectedPlan
     ? buildPaywallPlanPresentation(selectedPlan, translatePaywall, I18n.locale)
     : null;
+  // Only for a plan the paywall advertises a trial on: the same rule as the
+  // "Start free trial" button and its terms.
+  const trialTimeline =
+    selectedPlan?.freeTrial && selectedPresentation?.trialDurationLabel
+      ? buildTrialTimeline(selectedPlan.freeTrial, new Date(), {
+          canRemind: !notificationsDenied,
+        })
+      : null;
 
   const handlePurchasePackage = useCallback(
-    async (pkg: RevenueCatPackage, planSelection?: 'default' | 'changed') => {
+    async (
+      pkg: RevenueCatPackage,
+      planSelection?: 'default' | 'changed',
+      priceLabel?: string | null,
+    ) => {
       if (storeActionInFlightRef.current) return;
       storeActionInFlightRef.current = true;
       const pkgId = pkg.identifier;
@@ -996,8 +1042,16 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             period_type: result.customerState?.periodType ?? null,
           });
           recordProPurchase();
-          // Offers Cloud Sync once the paywall has closed (features/cloudSync).
-          requestCloudSyncPrompt();
+          // Offers Cloud Sync once the paywall has closed (features/cloudSync),
+          // after a trial's notification permission is settled so the two
+          // never stack.
+          if (result.customerState?.periodType === 'trial') {
+            void setUpTrialReminder(result.customerState, priceLabel).finally(
+              requestCloudSyncPrompt,
+            );
+          } else {
+            requestCloudSyncPrompt();
+          }
           onClose();
           if (wasSubscriber && boughtLifetime) promptToCancelRedundantSubscription();
         } else if (result.status === 'pending') {
@@ -1033,12 +1087,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
   const defaultPlanId = getDefaultPaywallPlanId(planOptions);
   const handleBuyPlan = useCallback(
-    (pkg: RevenueCatPackage) => {
+    (pkg: RevenueCatPackage, priceLabel: string | null) => {
       if (storeActionInFlightRef.current) return;
       setPurchasingId(pkg.identifier);
       void handlePurchasePackage(
         pkg,
         pkg.identifier === defaultPlanId ? 'default' : 'changed',
+        priceLabel,
       ).finally(() => setPurchasingId(null));
     },
     [defaultPlanId, handlePurchasePackage],
@@ -1263,6 +1318,14 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
                 />
               ))}
             </View>
+            {trialTimeline && selectedPlan?.priceLabel ? (
+              <TrialTimeline
+                timeline={trialTimeline}
+                priceLabel={selectedPlan.priceLabel}
+                primary={colors.primary}
+                onPrimary={colors.isDark ? colors.bg : colors.cardBg}
+              />
+            ) : null}
           </View>
 
           <Hero
@@ -1306,7 +1369,9 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
                 {selectedPresentation?.detailLabel}
               </Text>
               <Button
-                onPress={() => selectedPlan.pkg && handleBuyPlan(selectedPlan.pkg)}
+                onPress={() =>
+                  selectedPlan.pkg && handleBuyPlan(selectedPlan.pkg, selectedPlan.priceLabel)
+                }
                 // Until Pro status is known for this user, isPro is a false
                 // placeholder: a Pro owner could buy a plan on top of it.
                 disabled={isPurchasing || isRestoring || isLoading || !isStatusKnown}
@@ -1357,6 +1422,26 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       </View>
     </View>
   );
+}
+
+/**
+ * After a free trial starts: keep the price for the reminder's copy, make sure
+ * notifications are allowed (the system prompt, or Settings when that can no
+ * longer show), then schedule the reminder. A refusal just leaves it out.
+ */
+async function setUpTrialReminder(
+  customerState: RevenueCatCustomerState,
+  priceLabel: string | null | undefined,
+): Promise<void> {
+  try {
+    if (customerState.activeProductIdentifier && priceLabel) {
+      await rememberTrialPrice(customerState.activeProductIdentifier, priceLabel);
+    }
+    await ensureTrialReminderPermission();
+    await syncTrialReminder(customerState);
+  } catch (error) {
+    reportError(error, { scope: 'trial_reminder' });
+  }
 }
 
 function PlanRow({
