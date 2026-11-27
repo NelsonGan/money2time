@@ -28,11 +28,13 @@ const PROMPT_DELAY_MS = 2500;
  */
 export function PaywallRepromptHost({ allowed }: { allowed: boolean }) {
   const { settings } = useApp();
-  const { isPro, isStatusKnown } = usePro();
+  const { isPro, isStatusKnown, customerState } = usePro();
   const onboardingCompleted = !!settings.onboardingCompleted;
-  const ready = allowed && isStatusKnown && !isPro && onboardingCompleted;
-  const latest = useRef({ isPro, isStatusKnown, onboardingCompleted });
-  latest.current = { isPro, isStatusKnown, onboardingCompleted };
+  const hasRenewingSubscription = !!customerState?.hasRenewingSubscription;
+  const ready =
+    allowed && isStatusKnown && !isPro && !hasRenewingSubscription && onboardingCompleted;
+  const latest = useRef({ isPro, hasRenewingSubscription, isStatusKnown, onboardingCompleted });
+  latest.current = { isPro, hasRenewingSubscription, isStatusKnown, onboardingCompleted };
   const runningRef = useRef(false);
 
   useEffect(() => {

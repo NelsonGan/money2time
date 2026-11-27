@@ -124,6 +124,7 @@ import {
   countsTowardSpending,
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
+import { forgetScheduledTrialReminder } from '~/features/settings/trialReminder';
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import {
   albumNamesFor,
@@ -8340,6 +8341,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runUserAssetGc();
     });
     resetAutomationCaptureData(historyUserId);
+    // Cancels the trial reminder too: forget it so the next Pro sync puts it back.
+    forgetScheduledTrialReminder();
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();

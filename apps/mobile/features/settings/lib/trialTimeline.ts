@@ -13,25 +13,40 @@ import type { RevenueCatCustomerState, RevenueCatFreeTrial } from '~/services/re
 export const TRIAL_REMINDER_LEAD_DAYS = 2;
 export const TRIAL_REMINDER_HOUR = 10;
 
+/**
+ * `date` moved by whole months, kept on the same day of the month or the last
+ * day of a shorter one (Jan 31 + 1 month is Feb 28, not Mar 3).
+ */
+function addCalendarMonths(date: Date, months: number): Date {
+  const end = new Date(date);
+  const day = end.getDate();
+  end.setDate(1);
+  end.setMonth(end.getMonth() + months);
+  const lastDay = new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate();
+  end.setDate(Math.min(day, lastDay));
+  return end;
+}
+
 /** When a trial of this length, started at `start`, ends (calendar arithmetic). */
 export function trialEndDate(start: Date, trial: RevenueCatFreeTrial): Date {
-  const end = new Date(start);
   const count = trial.durationCount;
   switch (trial.durationUnit) {
-    case 'day':
+    case 'day': {
+      const end = new Date(start);
       end.setDate(end.getDate() + count);
-      break;
-    case 'week':
+      return end;
+    }
+    case 'week': {
+      const end = new Date(start);
       end.setDate(end.getDate() + count * 7);
-      break;
+      return end;
+    }
     case 'month':
-      end.setMonth(end.getMonth() + count);
-      break;
+      return addCalendarMonths(start, count);
     case 'year':
-      end.setFullYear(end.getFullYear() + count);
-      break;
+      return addCalendarMonths(start, count * 12);
   }
-  return end;
+  return new Date(start);
 }
 
 /**

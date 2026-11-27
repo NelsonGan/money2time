@@ -28,7 +28,12 @@ export async function markPaywallShown(now = Date.now()): Promise<void> {
  * every foreground once app-level prompts are allowed.
  */
 export async function promptPaywallIfDue(
-  input: { isPro: boolean; isStatusKnown: boolean; onboardingCompleted: boolean },
+  input: {
+    isPro: boolean;
+    hasRenewingSubscription: boolean;
+    isStatusKnown: boolean;
+    onboardingCompleted: boolean;
+  },
   now = Date.now(),
 ): Promise<void> {
   const decision = decidePaywallReprompt({ ...input, lastShownAt: await readLastShownAt(), now });

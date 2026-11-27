@@ -20,6 +20,8 @@ describe('decidePaywallReprompt', () => {
 
   it('never shows it to Pro, before Pro status is known or before onboarding ends', () => {
     expect(decidePaywallReprompt({ ...base, isPro: true })).toBe('none');
+    // Pro reads false for a moment around a renewal; the renewing subscription still counts.
+    expect(decidePaywallReprompt({ ...base, hasRenewingSubscription: true })).toBe('none');
     expect(decidePaywallReprompt({ ...base, isStatusKnown: false })).toBe('none');
     expect(decidePaywallReprompt({ ...base, onboardingCompleted: false })).toBe('none');
   });

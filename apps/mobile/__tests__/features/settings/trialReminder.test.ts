@@ -86,4 +86,12 @@ describe('syncTrialReminder', () => {
     await syncTrialReminder(trial, NOW);
     expect(mockSchedule).not.toHaveBeenCalled();
   });
+
+  it('schedules it again after a data reset cancelled every notification', async () => {
+    const { forgetScheduledTrialReminder, syncTrialReminder } = load();
+    await syncTrialReminder(trial, NOW);
+    forgetScheduledTrialReminder();
+    await syncTrialReminder({ ...trial }, NOW);
+    expect(mockSchedule).toHaveBeenCalledTimes(2);
+  });
 });

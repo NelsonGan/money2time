@@ -19,6 +19,17 @@ describe('trial timeline', () => {
     expect(
       trialEndDate(start, { durationIso8601: 'P3D', durationCount: 3, durationUnit: 'day' }),
     ).toEqual(new Date(2026, 1, 3, 9, 0));
+    // A month from Jan 31 is the last day of February, not March 3.
+    expect(
+      trialEndDate(start, { durationIso8601: 'P1M', durationCount: 1, durationUnit: 'month' }),
+    ).toEqual(new Date(2026, 1, 28, 9, 0));
+    expect(
+      trialEndDate(new Date(2028, 1, 29, 9, 0), {
+        durationIso8601: 'P1Y',
+        durationCount: 1,
+        durationUnit: 'year',
+      }),
+    ).toEqual(new Date(2029, 1, 28, 9, 0));
     expect(
       trialEndDate(start, { durationIso8601: 'P1Y', durationCount: 1, durationUnit: 'year' }),
     ).toEqual(new Date(2027, 0, 31, 9, 0));

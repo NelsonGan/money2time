@@ -18,7 +18,12 @@ import { PAYWALL_REPROMPT_INTERVAL_MS } from '~/features/settings/lib/paywallRep
 import { markPaywallShown, promptPaywallIfDue } from '~/features/settings/paywallReprompt';
 
 const NOW = Date.parse('2026-11-27T09:00:00.000Z');
-const free = { isPro: false, isStatusKnown: true, onboardingCompleted: true };
+const free = {
+  isPro: false,
+  hasRenewingSubscription: false,
+  isStatusKnown: true,
+  onboardingCompleted: true,
+};
 
 beforeEach(() => {
   mockStore.clear();

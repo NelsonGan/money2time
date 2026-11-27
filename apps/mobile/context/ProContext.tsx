@@ -245,13 +245,18 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   // Keep the reminder before a free trial's first charge in step with the
   // store: scheduled while a trial is set to renew, cancelled once it is not.
   // Waits for a settled status, so the empty placeholder state cannot cancel a
-  // reminder a trial still needs.
+  // reminder a trial still needs. A null state once settled is a failed read
+  // (offline, store unavailable), not a confirmed absence of a trial, so it
+  // leaves the reminder alone too; an identity reset is followed by a real read.
+  // The language is a dependency so a scheduled reminder is rewritten in the
+  // new one.
+  const locale = settings.locale;
   useEffect(() => {
-    if (!isStatusKnown) return;
+    if (!isStatusKnown || !customerState) return;
     void syncTrialReminder(customerState).catch((error: unknown) =>
       reportError(error, { scope: 'trial_reminder' }),
     );
-  }, [customerState, isStatusKnown]);
+  }, [customerState, isStatusKnown, locale]);
 
   // Mirror Pro state onto the PostHog person profile and super-properties, so
   // "is this user Pro" is answerable both per-user and per-event.

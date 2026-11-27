@@ -54,6 +54,14 @@ async function readTrialPrice(productIdentifier: string | null): Promise<string 
 /** What was last scheduled, so an unchanged state does not reschedule. */
 let scheduledKey: string | null = null;
 
+/**
+ * Forget what was scheduled, for a caller that cancelled every notification
+ * (a full data reset), so the next sync schedules the reminder again.
+ */
+export function forgetScheduledTrialReminder(): void {
+  scheduledKey = null;
+}
+
 export async function syncTrialReminder(
   state: RevenueCatCustomerState | null,
   now = new Date(),
