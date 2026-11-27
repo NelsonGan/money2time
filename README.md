@@ -7429,9 +7429,26 @@ view exists to upload it. See [Play keeps the icon per listing](#play-keeps-the-
 
 Localized copy lives in `src/scenes/locales/` (23 locales); store listing text,
 including each release's What's New, lives in `src/data/appDescriptions.ts`
-(the `update-whats-new` skill writes it). `public/logos/` (with its
-`manifest.json`) is also the source of the app's bundled account logos:
+(the `update-whats-new` skill writes it). The short listing fields (the app
+name, the iOS subtitle and keyword field, and Play's short description) live in
+`src/data/listingCopy.mjs`, which `tests/listing-copy.test.mjs` checks against
+each store's limits. `public/logos/` (with its `manifest.json`) is also the
+source of the app's bundled account logos:
 `apps/mobile/scripts/generate-account-logos.mjs` reads it.
+
+**One App Studio language writes several store locales, and the storefronts
+index them differently.** `zh` goes to the App Store's zh-Hans and zh-Hant and
+to Play's zh-CN, zh-TW and zh-HK, and `en` goes to four English App Store
+locales. The copy is the same for all of them unless `listingCopy.mjs` gives a
+store locale its own (`IOS_STORE_LOCALE_COPY`, `PLAY_STORE_LOCALE_COPY`): zh-Hant,
+zh-TW and zh-HK get a Traditional subtitle or short description and Traditional
+keywords, because those storefronts search in Traditional characters. Which
+locales a storefront searches is Apple's table ("App Store localizations" in
+the App Store Connect help): Malaysia, where most of the app's users are,
+searches only English (U.K.) and Malay, and shows a Chinese-language phone the
+English (U.K.) page. So the Malay keyword field carries the Chinese terms
+(记账, 记账本 …) as well as the Malay ones; the zh-Hans keywords reach Singapore,
+China and the US but never Malaysia.
 
 ### App Studio screenshots
 

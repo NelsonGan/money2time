@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import { APP_DESCRIPTIONS, DESCRIPTION_LOCALE_CODES } from '../data/appDescriptions';
 import { LOCALE_META } from '../scenes/locales';
+import {
+  APP_NAME, IOS_KEYWORDS, IOS_STORE_LOCALE_COPY, IOS_SUBTITLES,
+  PLAY_SHORT_DESCRIPTIONS, PLAY_STORE_LOCALE_COPY,
+} from '../data/listingCopy.mjs';
 
 type UploadPlatform = 'ios' | 'android';
 type LogType = 'info' | 'success' | 'error';
@@ -21,110 +25,10 @@ interface IOSMetadata {
   whatsNew: string;
 }
 
-/**
- * The one name the app goes by, on both stores and in every locale. Play let a
- * localized zh-CN title in at some point; sending this for every locale is what
- * takes it back out.
- */
-const APP_NAME = 'Money2Time: Expense Tracker';
 const IOS_PRIVACY_POLICY_URL = 'https://money2time.com/privacy';
 const IOS_PRIVACY_CHOICES_URL = IOS_PRIVACY_POLICY_URL;
 const IOS_SUPPORT_URL = 'https://www.money2time.com/';
 const IOS_MARKETING_URL = 'https://www.money2time.com/';
-
-/**
- * The iOS subtitle, 30 characters. It says the category plainly, because that
- * is the phrase people actually type. It repeats expense and tracker from the
- * app name on purpose: the pooled index could already form the phrase from the
- * two fields separately, but having it whole in one field is what ranks for it.
- */
-const IOS_SUBTITLES: Record<string, string> = {
-  en: 'Offline expense tracker',
-  zh: '离线记账应用',
-  de: 'Offline-Ausgaben-Tracker',
-  fr: 'Suivi de dépenses hors ligne',
-  es: 'Control de gastos offline',
-  pt: 'Controle de gastos offline',
-  it: 'App spese offline',
-  nl: 'Offline uitgaven-tracker',
-  ru: 'Офлайн-учёт расходов',
-  ja: 'オフライン家計簿',
-  ko: '오프라인 가계부',
-  hi: 'ऑफलाइन खर्च ट्रैकर',
-  id: 'Pelacak pengeluaran offline',
-  tr: 'Çevrimdışı gider takibi',
-  vi: 'Theo dõi chi tiêu ngoại tuyến',
-  th: 'แอปบันทึกรายจ่ายออฟไลน์',
-  pl: 'Śledzenie wydatków offline',
-  uk: 'Офлайн-облік витрат',
-  sv: 'Utgiftsapp offline',
-  nb: 'Utgiftsapp offline',
-  da: 'Udgiftsapp offline',
-  ms: 'Penjejak perbelanjaan offline',
-};
-
-/**
- * Play's short description, 80 characters. Play has no keyword field, so this
- * is the one indexed line it gets, and it shows under the title on the listing.
- * Every locale is written here. They used to inherit the English line, which
- * left an English tagline on the German and Thai listings.
- */
-const PLAY_SHORT_DESCRIPTIONS: Record<string, string> = {
-  en: 'Offline expense tracker. See what your spending costs in hours of work.',
-  zh: '离线记账应用。看清每一笔消费花掉你多少小时。',
-  de: 'Offline-Ausgaben-Tracker. Sieh, wie viele Arbeitsstunden dein Geld kostet.',
-  fr: 'Suivi de dépenses hors ligne. Voyez vos achats en heures de travail.',
-  es: 'Control de gastos offline. Mira lo que gastas en horas de trabajo.',
-  pt: 'Controle de gastos offline. Veja seus gastos em horas de trabalho.',
-  it: 'App spese offline. Guarda quanto costano le tue spese in ore di lavoro.',
-  nl: 'Offline uitgaven-tracker. Zie wat je uitgaven kosten in werkuren.',
-  ru: 'Офлайн-учёт расходов. Смотрите, во сколько часов работы обходятся траты.',
-  ja: 'オフライン家計簿。支出が何時間の労働にあたるかがわかります。',
-  ko: '오프라인 가계부. 지출이 몇 시간의 노동인지 보여줍니다.',
-  hi: 'ऑफलाइन खर्च ट्रैकर। देखें कि आपका खर्च कितने घंटों के काम के बराबर है।',
-  id: 'Pelacak pengeluaran offline. Lihat belanja Anda dalam jam kerja.',
-  tr: 'Çevrimdışı gider takibi. Harcamalarınızın kaç saatlik iş olduğunu görün.',
-  vi: 'Theo dõi chi tiêu ngoại tuyến. Xem chi tiêu của bạn bằng số giờ làm việc.',
-  th: 'แอปบันทึกรายจ่ายออฟไลน์ ดูว่ารายจ่ายของคุณเท่ากับการทำงานกี่ชั่วโมง',
-  pl: 'Śledzenie wydatków offline. Zobacz swoje wydatki w godzinach pracy.',
-  uk: 'Офлайн-облік витрат. Дивіться свої витрати в годинах роботи.',
-  sv: 'Utgiftsapp offline. Se vad dina utgifter kostar i arbetstimmar.',
-  nb: 'Utgiftsapp offline. Se hva utgiftene dine koster i arbeidstimer.',
-  da: 'Udgiftsapp offline. Se hvad dine udgifter koster i arbejdstimer.',
-  ms: 'Penjejak perbelanjaan offline. Lihat belanja anda dalam jam kerja.',
-};
-
-/**
- * The iOS keyword field: 100 characters per locale, comma separated, no spaces
- * after the commas. Apple searches name + subtitle + keywords as one pool, so
- * nothing here repeats a word from either. This is where receipts, scanning and
- * budgeting are indexed, which is why the listing copy never has to name them.
- */
-const IOS_KEYWORDS: Record<string, string> = {
-  en: 'budget,receipts,scan,spending,money,finance,bills,subscriptions,savings,hourly,wage,manager,planner',
-  zh: '预算,收据,扫描,支出,消费,理财,交易,时薪,储蓄,账单,订阅,省钱,分析,账本,记账本,消费记录,理财规划,时间管理',
-  de: 'budget,belege,scannen,kosten,finanzen,haushaltsbuch,geld,stundensatz,sparen,abo,rechnung',
-  fr: 'budget,recu,scan,finance,argent,transaction,horaire,taux,epargne,abonnement,facture',
-  es: 'presupuesto,recibo,escanear,finanzas,dinero,transaccion,hora,tarifa,ahorro,suscripcion,factura',
-  pt: 'orcamento,recibo,escanear,financas,dinheiro,transacao,hora,taxa,poupanca,assinatura,conta',
-  it: 'budget,scontrino,scansione,contabilita,finanza,soldi,transazione,orario,tariffa,risparmio',
-  nl: 'budget,bon,scannen,huishoudboekje,financien,geld,transactie,uurloon,sparen,abonnement',
-  ru: 'бюджет,чек,сканер,траты,финансы,деньги,транзакции,ставка,сбережения,подписки,счета',
-  ja: '予算,レシート,スキャン,支出,出費,節約,財務,取引,時給,貯金,サブスク,請求,分析,お金,家計管理,支出管理,節約術',
-  ko: '예산,영수증,스캔,지출,소비,절약,재정,거래,시급,저축,구독,청구서,분석,돈,가계부앱,소비관리,자산관리',
-  hi: 'बजट,रसीद,स्कैन,वित्त,पैसा,लेनदेन,घंटा,दर,बचत,सदस्यता,बिल,विश्लेषण,बजट प्लानर',
-  id: 'anggaran,struk,scan,belanja,keuangan,uang,transaksi,jam,tarif,tabungan,langganan,tagihan',
-  tr: 'butce,fis,tarama,harcama,finans,para,islem,saatlik,tasarruf,abonelik,fatura,analiz',
-  vi: 'ngân sách,hóa đơn,quét,tài chính,tiền,giao dịch,giờ,lương,tiết kiệm,đăng ký,quản lý tiền',
-  th: 'งบประมาณ,ใบเสร็จ,สแกน,การใช้จ่าย,การเงิน,เงิน,ธุรกรรม,รายชั่วโมง,ออม,บิล,วางแผนการเงิน',
-  pl: 'budzet,paragon,skan,finanse,pieniadze,transakcje,godzina,stawka,oszczednosci,subskrypcje',
-  uk: 'бюджет,чек,сканер,фінанси,гроші,транзакції,години,ставка,заощадження,підписки,рахунки',
-  sv: 'budget,kvitto,skanna,ekonomi,pengar,transaktion,timlon,sparande,prenumeration,rakningar',
-  nb: 'budsjett,kvittering,skanne,forbruk,okonomi,penger,transaksjon,timelonn,sparing,abonnement',
-  da: 'budget,kvittering,scanne,forbrug,okonomi,penge,transaktion,timelon,opsparing,abonnement',
-  ms: 'bajet,resit,imbas,belanja,kewangan,duit,transaksi,jam,kadar,simpanan,langganan,bil',
-};
-
 
 function getPrivacyPolicyText(description: string): string {
   return description
@@ -262,6 +166,7 @@ export function DescriptionsView() {
       marketingUrl?: string;
       whatsNew?: string;
       description: string;
+      storeLocales?: Record<string, { subtitle?: string; keywords?: string }>;
     }> = {};
     for (const locale of DESCRIPTION_LOCALE_CODES) {
       const description = APP_DESCRIPTIONS[locale].description;
@@ -279,6 +184,7 @@ export function DescriptionsView() {
           marketingUrl: ios.marketingUrl,
           whatsNew: ios.whatsNew,
         } : {}),
+        storeLocales: platform === 'ios' ? IOS_STORE_LOCALE_COPY[locale] : PLAY_STORE_LOCALE_COPY[locale],
       };
     }
 
@@ -543,6 +449,14 @@ export function DescriptionsView() {
                           className={inputClass}
                         />
                       </label>
+
+                      {Object.entries(IOS_STORE_LOCALE_COPY[locale] ?? {}).map(([storeLocale, own]) => (
+                        <div key={storeLocale} className="col-span-2 flex flex-col gap-1 text-[11px] text-white/45">
+                          <span className={labelClass}>{storeLocale} gets its own copy (listingCopy.mjs)</span>
+                          {own.subtitle && <span>Subtitle: {own.subtitle}</span>}
+                          {own.keywords && <span>Keywords ({own.keywords.length}/100): {own.keywords}</span>}
+                        </div>
+                      ))}
 
                       <label className="col-span-2 flex flex-col gap-1.5">
                         <span className={labelClass}>What's New in This Version</span>

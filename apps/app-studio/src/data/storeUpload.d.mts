@@ -73,12 +73,16 @@ export interface IOSDescriptionCopy {
   privacyPolicyUrl?: string;
   privacyChoicesUrl?: string;
   privacyPolicyText?: string;
+  /** Fields that differ for one store locale, keyed by that locale (`listingCopy.mjs`). */
+  storeLocales?: Record<string, { subtitle?: string; keywords?: string }>;
 }
 
 export interface AndroidDescriptionCopy {
   name?: string;
   subtitle?: string;
   description?: string;
+  /** Fields that differ for one Play locale, keyed by that locale (`listingCopy.mjs`). */
+  storeLocales?: Record<string, { subtitle?: string }>;
 }
 
 export interface Screenshot {

@@ -7,6 +7,8 @@ interface DescriptionPayload {
   /** Play's short description, which is the App Store subtitle. */
   subtitle?: string;
   description?: string;
+  /** A short description that differs for one Play locale, keyed by it. */
+  storeLocales?: Record<string, { subtitle?: string }>;
 }
 
 /**
