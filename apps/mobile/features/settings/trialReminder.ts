@@ -10,7 +10,11 @@ import {
 import type { RevenueCatCustomerState } from '~/services/revenueCat';
 import { formatWeekdayMonthDay } from '~/utils/formatters';
 
-import { TRIAL_REMINDER_LEAD_DAYS, trialReminderDateForCustomer } from './lib/trialTimeline';
+import {
+  TRIAL_REMINDER_LEAD_DAYS,
+  trialReminderDateForCustomer,
+  withoutDoubledStop,
+} from './lib/trialTimeline';
 
 /**
  * Keeps the one reminder before a free trial's first charge in step with what
@@ -82,9 +86,12 @@ export async function syncTrialReminder(
   if (key === scheduledKey) return;
   await scheduleTrialReminder(remindAt, {
     title: I18n.t('notifications.content.trial_ending_title', { count: TRIAL_REMINDER_LEAD_DAYS }),
-    body: price
-      ? I18n.t('notifications.content.trial_ending_body_price', { date, price })
-      : I18n.t('notifications.content.trial_ending_body', { date }),
+    body: withoutDoubledStop(
+      price
+        ? I18n.t('notifications.content.trial_ending_body_price', { date, price })
+        : I18n.t('notifications.content.trial_ending_body', { date }),
+      date,
+    ),
     url: PRO_MANAGEMENT_URL,
   });
   scheduledKey = key;

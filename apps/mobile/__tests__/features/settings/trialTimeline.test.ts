@@ -4,7 +4,9 @@ import {
   trialReminderDate,
   trialReminderDateForCustomer,
   trialReminderPermissionStep,
+  withoutDoubledStop,
 } from '~/features/settings/lib/trialTimeline';
+import { formatWeekdayMonthDay } from '~/utils/formatters';
 
 const WEEK = { durationIso8601: 'P1W', durationCount: 1, durationUnit: 'week' } as const;
 
@@ -78,5 +80,41 @@ describe('trial timeline', () => {
     expect(trialReminderPermissionStep({ status: 'denied', canAskAgain: true })).toBe('ask');
     // iOS asks only once.
     expect(trialReminderPermissionStep({ status: 'denied', canAskAgain: false })).toBe('settings');
+  });
+});
+
+describe('withoutDoubledStop', () => {
+  it('keeps one full stop when an abbreviated date ends the sentence', () => {
+    // German, French, Danish, Norwegian, Swedish, Portuguese, Russian and
+    // Ukrainian abbreviate the month with a period.
+    const date = 'Sa. 5. Dez.';
+    expect(
+      withoutDoubledStop(
+        `Deine erste Zahlung ist am ${date}. Tippe, um dein Abo zu behalten.`,
+        date,
+      ),
+    ).toBe('Deine erste Zahlung ist am Sa. 5. Dez. Tippe, um dein Abo zu behalten.');
+    expect(withoutDoubledStop('Первый платёж будет сб, 5 дек.. Нажмите.', 'сб, 5 дек.')).toBe(
+      'Первый платёж будет сб, 5 дек. Нажмите.',
+    );
+  });
+
+  it('fixes the date the app formats for each of those languages', () => {
+    // Node's ICU writes "Sa., 5. Dez."; Hermes on iOS wrote "Sa. 5. Dez.".
+    const day = new Date(2026, 11, 5, 20, 0);
+    for (const locale of ['da', 'de', 'fr', 'nb', 'pt', 'ru', 'sv', 'uk']) {
+      const date = formatWeekdayMonthDay(day, locale);
+      expect(date.endsWith('.')).toBe(true);
+      expect(withoutDoubledStop(`Pay on ${date}. Tap.`, date)).toBe(`Pay on ${date} Tap.`);
+    }
+  });
+
+  it('leaves a date without a trailing period, or one mid-sentence, alone', () => {
+    expect(withoutDoubledStop('Your first payment is on Sat, Dec 5. Tap.', 'Sat, Dec 5')).toBe(
+      'Your first payment is on Sat, Dec 5. Tap.',
+    );
+    expect(withoutDoubledStop('Am Sa. 5. Dez. zahlst du.', 'Sa. 5. Dez.')).toBe(
+      'Am Sa. 5. Dez. zahlst du.',
+    );
   });
 });
