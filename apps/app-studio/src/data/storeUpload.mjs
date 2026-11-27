@@ -20,6 +20,7 @@ import {
   ANDROID_MAX_SCREENSHOTS, ANDROID_MAX_IMAGES, IOS_MAX_SCREENSHOTS,
   ANDROID_ICON_FILE, UPLOAD_CONCURRENCY,
 } from './storeLocales.mjs';
+import { copyForStoreLocale } from './listingCopy.mjs';
 
 export { UPLOAD_CONCURRENCY };
 
@@ -303,7 +304,7 @@ export async function uploadIOSLocale({ device, locale, dir, dryRun = false, log
  * — it does not exist on a first release — and bundling it meant one rejected
  * attribute took the description and the keywords down with it.
  */
-export async function uploadIOSDescription({ locale, copy, dryRun = false, log = () => {} }) {
+export async function uploadIOSDescription({ locale, copy: localeCopy, dryRun = false, log = () => {} }) {
   const ascLocales = IOS_LOCALE_MAP[locale];
   if (!ascLocales?.length) return { skipped: true };
 
@@ -313,6 +314,8 @@ export async function uploadIOSDescription({ locale, copy, dryRun = false, log =
   const notes = [];
 
   for (const ascLocale of ascLocales) {
+    // A store locale can carry its own subtitle or keywords (zh-Hant does).
+    const copy = copyForStoreLocale(localeCopy, ascLocale);
     try {
       const { wouldCreate } = await iosLocalizationId(version.id, ascLocale, { create: !dryRun });
       if (dryRun) {
@@ -699,8 +702,10 @@ export async function uploadAndroidDescriptions({ root, localizations, dryRun = 
   /** @type {Record<string, string[]>} */
   const byLocale = {};
 
-  for (const [ourLocale, copy] of Object.entries(localizations)) {
+  for (const [ourLocale, localeCopy] of Object.entries(localizations)) {
     for (const playLocale of ANDROID_LOCALE_MAP[ourLocale] ?? []) {
+      // A store locale can carry its own short description (zh-TW and zh-HK do).
+      const copy = copyForStoreLocale(localeCopy, playLocale);
       const live = current[playLocale] ?? {};
       const title = copy.name ?? live.title ?? fallback.title;
       const shortDescription = copy.subtitle ?? live.shortDescription ?? fallback.shortDescription;

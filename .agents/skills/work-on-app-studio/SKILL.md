@@ -16,16 +16,17 @@ are relative to `apps/app-studio`.
 
 ## What lives where
 
-| You are changing…                                       | Look in                                                                                                              |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| a scene's headline or layout (iPhone, iPad, iPhone Duo) | `src/scenes/sceneData.tsx`, `ipadSceneData.tsx`, `duoSceneData.tsx`                                                  |
-| the scene copy, per language                            | `src/scenes/locales/<locale>.ts` (23 locales, `en.ts` is the source)                                                 |
-| the real app screens inside the scenes                  | `public/assets/screenshots-iphone/`, `screenshots-ipad/`, `screenshots-duo/` (`<locale>/`, 8 PNGs each)              |
-| the App Store header and search creatives               | `src/components/AppStoreCreative.tsx`, `src/data/searchAnimation.json`, `src/scenes/appStoreCreativeCopy.ts`         |
-| store listing text and each release's What's New        | `src/data/appDescriptions.ts` (the [update-whats-new](../update-whats-new/SKILL.md) skill writes What's New)         |
-| uploads                                                 | `src/data/storeUpload.mjs`, `src/data/storeCreativeUpload.mjs`, `scripts/upload-*.mjs`, `src/app/api/upload/`        |
-| bank and wallet logos                                   | `public/logos/` and its `manifest.json` (`scripts/fetch-brand-logos.mjs`, `normalize-logos.mjs`, `triage-logos.mjs`) |
-| the Play store icon                                     | `public/assets/icons/play_store_512.png`, copied from `apps/mobile`                                                  |
+| You are changing…                                               | Look in                                                                                                                                            |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a scene's headline or layout (iPhone, iPad, iPhone Duo)         | `src/scenes/sceneData.tsx`, `ipadSceneData.tsx`, `duoSceneData.tsx`                                                                                |
+| the scene copy, per language                                    | `src/scenes/locales/<locale>.ts` (23 locales, `en.ts` is the source)                                                                               |
+| the real app screens inside the scenes                          | `public/assets/screenshots-iphone/`, `screenshots-ipad/`, `screenshots-duo/` (`<locale>/`, 8 PNGs each)                                            |
+| the App Store header and search creatives                       | `src/components/AppStoreCreative.tsx`, `src/data/searchAnimation.json`, `src/scenes/appStoreCreativeCopy.ts`                                       |
+| store listing text and each release's What's New                | `src/data/appDescriptions.ts` (the [update-whats-new](../update-whats-new/SKILL.md) skill writes What's New)                                       |
+| the app name, iOS subtitle and keywords, Play short description | `src/data/listingCopy.mjs`, including the copy one store locale gets instead of its language's (`IOS_STORE_LOCALE_COPY`, `PLAY_STORE_LOCALE_COPY`) |
+| uploads                                                         | `src/data/storeUpload.mjs`, `src/data/storeCreativeUpload.mjs`, `scripts/upload-*.mjs`, `src/app/api/upload/`                                      |
+| bank and wallet logos                                           | `public/logos/` and its `manifest.json` (`scripts/fetch-brand-logos.mjs`, `normalize-logos.mjs`, `triage-logos.mjs`)                               |
+| the Play store icon                                             | `public/assets/icons/play_store_512.png`, copied from `apps/mobile`                                                                                |
 
 What other parts of the repo take from Studio:
 

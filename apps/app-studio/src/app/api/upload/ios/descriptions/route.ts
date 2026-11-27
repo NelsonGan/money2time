@@ -14,6 +14,8 @@ interface DescriptionPayload {
   keywords?: string;
   supportUrl?: string;
   marketingUrl?: string;
+  /** A subtitle or keywords that differ for one App Store locale, keyed by it. */
+  storeLocales?: Record<string, { subtitle?: string; keywords?: string }>;
 }
 
 /**
