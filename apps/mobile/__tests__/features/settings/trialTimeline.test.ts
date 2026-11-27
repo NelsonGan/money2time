@@ -6,6 +6,7 @@ import {
   trialReminderPermissionStep,
   withoutDoubledStop,
 } from '~/features/settings/lib/trialTimeline';
+import { formatWeekdayMonthDay } from '~/utils/formatters';
 
 const WEEK = { durationIso8601: 'P1W', durationCount: 1, durationUnit: 'week' } as const;
 
@@ -96,6 +97,16 @@ describe('withoutDoubledStop', () => {
     expect(withoutDoubledStop('Первый платёж будет сб, 5 дек.. Нажмите.', 'сб, 5 дек.')).toBe(
       'Первый платёж будет сб, 5 дек. Нажмите.',
     );
+  });
+
+  it('fixes the date the app formats for each of those languages', () => {
+    // Node's ICU writes "Sa., 5. Dez."; Hermes on iOS wrote "Sa. 5. Dez.".
+    const day = new Date(2026, 11, 5, 20, 0);
+    for (const locale of ['da', 'de', 'fr', 'nb', 'pt', 'ru', 'sv', 'uk']) {
+      const date = formatWeekdayMonthDay(day, locale);
+      expect(date.endsWith('.')).toBe(true);
+      expect(withoutDoubledStop(`Pay on ${date}. Tap.`, date)).toBe(`Pay on ${date} Tap.`);
+    }
   });
 
   it('leaves a date without a trailing period, or one mid-sentence, alone', () => {
