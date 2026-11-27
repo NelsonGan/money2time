@@ -26,13 +26,12 @@ Hopefully you'll always have control of your money and your life.
 Terms of Use: https://money2time.com/terms
 Privacy Policy: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Added the ability to pick your accounts during onboarding
-- Added location tags to automatically recorded expenses
-- Reduced Cloud Sync and shared album delays
-- Fixed payment alerts stopping on some phones
-- Fixed receipt scanning in mainland China
+    whatsNew: `- Added a free trial timeline with a reminder before the first charge
+- Fixed translations in every language
+- Fixed Google Drive backups stopping while photos upload
+- Fixed album tabs going off screen on narrow phones
 
-Know what you own, and know why you own it.`,
+Waste not, want not.`,
   },
 
   zh: {
@@ -49,13 +48,12 @@ Know what you own, and know why you own it.`,
 使用条款：https://money2time.com/terms
 隐私政策：https://money2time.com/privacy
 联系我们：https://www.money2time.com/contact`,
-    whatsNew: `- 新增了在新手引导中选择自己账户的功能
-- 新增了自动记录支出的位置标记
-- 减少了 Cloud Sync 和共享相册的延迟
-- 修复了部分手机上付款通知中断的问题
-- 修复了中国大陆的收据扫描问题
+    whatsNew: `- 新增了带扣费前提醒的免费试用时间线
+- 修复了所有语言的翻译问题
+- 修复了上传照片时 Google Drive 备份中断的问题
+- 修复了窄屏手机上相册标签超出屏幕的问题
 
-清楚自己拥有什么，也清楚为什么拥有它。`,
+常将有日思无日，莫待无时思有时。`,
   },
 
   de: {
@@ -72,13 +70,12 @@ Ich hoffe, du hast immer die Kontrolle über dein Geld und dein Leben.
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Auswahl eigener Konten in der Einführung hinzugefügt
-- Ortsmarkierung für automatisch erfasste Ausgaben hinzugefügt
-- Verzögerungen bei Cloud Sync und geteilten Alben reduziert
-- Ausbleibende Zahlungsbenachrichtigungen auf einigen Handys behoben
-- Probleme beim Belegscan in Festlandchina behoben
+    whatsNew: `- Zeitplan für die Testphase mit Erinnerung vor der ersten Abbuchung hinzugefügt
+- Übersetzungen in allen Sprachen korrigiert
+- Abbrechende Google Drive-Backups beim Hochladen von Fotos behoben
+- Über den Rand ragende Album-Tabs auf schmalen Handys behoben
 
-Wisse, was du besitzt, und warum du es besitzt.`,
+Spare in der Zeit, so hast du in der Not.`,
   },
 
   fr: {
@@ -95,13 +92,12 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout du choix de vos comptes lors de la configuration initiale
-- Ajout du marquage de lieu pour les dépenses enregistrées automatiquement
-- Réduction des délais de Cloud Sync et des albums partagés
-- Correction des alertes de paiement interrompues sur certains téléphones
-- Correction du scan de reçus en Chine continentale
+    whatsNew: `- Ajout d'un calendrier de l'essai gratuit avec un rappel avant le premier prélèvement
+- Correction des traductions dans toutes les langues
+- Correction des sauvegardes Google Drive interrompues pendant l'envoi de photos
+- Correction des onglets d'album qui débordaient sur les petits écrans
 
-Sachez ce que vous possédez, et pourquoi vous le possédez.`,
+Il n'y a pas de petites économies.`,
   },
 
   es: {
@@ -118,13 +114,12 @@ Ojalá siempre tengas el control de tu dinero y de tu vida.
 Condiciones de uso: https://money2time.com/terms
 Política de privacidad: https://money2time.com/privacy
 Contacto: https://www.money2time.com/contact`,
-    whatsNew: `- Se añadió la opción de elegir tus cuentas al empezar
-- Se añadió el etiquetado de ubicación en gastos registrados automáticamente
-- Se redujeron los retrasos de Cloud Sync y los álbumes compartidos
-- Se corrigieron las alertas de pago que dejaban de llegar en algunos teléfonos
-- Se corrigió el escaneo de recibos en China continental
+    whatsNew: `- Se añadió un calendario de la prueba gratuita con aviso antes del primer cobro
+- Se corrigieron las traducciones en todos los idiomas
+- Se corrigieron las copias de seguridad en Google Drive que se detenían al subir fotos
+- Se corrigieron las pestañas de álbumes que se salían en pantallas estrechas
 
-Conoce lo que tienes y por qué lo tienes.`,
+Quien guarda, siempre tiene.`,
   },
 
   pt: {
@@ -141,13 +136,12 @@ Que você sempre tenha controle do seu dinheiro e da sua vida.
 Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
-    whatsNew: `- Adicionada a escolha das suas contas no início
-- Adicionada marcação de local em despesas registradas automaticamente
-- Reduzidos os atrasos do Cloud Sync e dos álbuns compartilhados
-- Corrigidos os alertas de pagamento que paravam em alguns celulares
-- Corrigida a digitalização de recibos na China continental
+    whatsNew: `- Adicionada a linha do tempo do teste grátis com lembrete antes da primeira cobrança
+- Corrigidas as traduções em todos os idiomas
+- Corrigidos os backups no Google Drive que paravam ao enviar fotos
+- Corrigidas as abas de álbuns que saíam da tela em celulares estreitos
 
-Saiba o que você tem e por que tem.`,
+Quem poupa sempre tem.`,
   },
 
   it: {
@@ -164,13 +158,12 @@ Spero che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
 Contatto: https://www.money2time.com/contact`,
-    whatsNew: `- Aggiunta la scelta dei propri conti nella configurazione iniziale
-- Aggiunti i tag di posizione per le spese registrate automaticamente
-- Ridotti i ritardi di Cloud Sync e degli album condivisi
-- Risolti gli avvisi di pagamento che si interrompevano su alcuni telefoni
-- Risolta la scansione degli scontrini nella Cina continentale
+    whatsNew: `- Aggiunta la cronologia della prova gratuita con promemoria prima del primo addebito
+- Corrette le traduzioni in tutte le lingue
+- Risolti i backup su Google Drive che si interrompevano durante il caricamento delle foto
+- Risolte le schede degli album che uscivano dallo schermo sui telefoni stretti
 
-Sappi cosa possiedi e perché lo possiedi.`,
+Chi non spreca non resta mai senza.`,
   },
 
   nl: {
@@ -187,13 +180,12 @@ Hopelijk heb je altijd de controle over je geld en je leven.
 Gebruiksvoorwaarden: https://money2time.com/terms
 Privacybeleid: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Eigen rekeningen kiezen tijdens de introductie toegevoegd
-- Locatietags voor automatisch vastgelegde uitgaven toegevoegd
-- Vertraging bij Cloud Sync en gedeelde albums verminderd
-- Wegvallende betaalmeldingen op sommige telefoons opgelost
-- Problemen met bonscans op het Chinese vasteland opgelost
+    whatsNew: `- Tijdlijn voor de gratis proefperiode met herinnering vóór de eerste afschrijving toegevoegd
+- Vertalingen in alle talen gecorrigeerd
+- Afbrekende Google Drive-back-ups tijdens het uploaden van foto's opgelost
+- Albumtabbladen die op smalle telefoons buiten beeld vielen opgelost
 
-Weet wat je bezit, en waarom je het bezit.`,
+Wie wat bewaart, heeft wat.`,
   },
 
   ru: {
@@ -210,13 +202,12 @@ Weet wat je bezit, en waarom je het bezit.`,
 Условия использования: https://money2time.com/terms
 Политика конфиденциальности: https://money2time.com/privacy
 Контакты: https://www.money2time.com/contact`,
-    whatsNew: `- Добавлен выбор своих счетов при первом запуске
-- Добавлены метки мест для автоматически записанных расходов
-- Уменьшены задержки Cloud Sync и общих альбомов
-- Исправлена пропажа уведомлений о платежах на некоторых телефонах
-- Исправлено сканирование чеков в материковом Китае
+    whatsNew: `- Добавлена шкала пробного периода с напоминанием до первого списания
+- Исправлены переводы на всех языках
+- Исправлена остановка резервного копирования в Google Drive при загрузке фото
+- Исправлен выход вкладок альбомов за край экрана на узких телефонах
 
-Знайте, чем владеете, и зачем.`,
+Копейка рубль бережёт.`,
   },
 
   ja: {
@@ -233,13 +224,12 @@ Weet wat je bezit, en waarom je het bezit.`,
 利用規約: https://money2time.com/terms
 プライバシーポリシー: https://money2time.com/privacy
 お問い合わせ: https://www.money2time.com/contact`,
-    whatsNew: `- 初期設定で自分の口座を選べるようにしました
-- 自動記録された支出に場所タグを追加しました
-- Cloud Syncと共有アルバムの遅延を削減しました
-- 一部の端末で支払い通知が届かなくなる問題を修正しました
-- 中国本土でのレシートスキャンの問題を修正しました
+    whatsNew: `- 無料トライアルの流れと初回請求前のリマインダーを追加しました
+- すべての言語の翻訳を修正しました
+- 写真のアップロード中にGoogle Driveのバックアップが止まる問題を修正しました
+- 幅の狭い端末でアルバムのタブが画面外にはみ出る問題を修正しました
 
-自分が何を持ち、なぜ持つのかを知ろう。`,
+無駄をなくせば、不足もなくなる。`,
   },
 
   ko: {
@@ -256,13 +246,12 @@ Weet wat je bezit, en waarom je het bezit.`,
 이용 약관: https://money2time.com/terms
 개인정보 처리방침: https://money2time.com/privacy
 문의: https://www.money2time.com/contact`,
-    whatsNew: `- 첫 설정에서 내 계좌를 고를 수 있는 기능을 추가했습니다
-- 자동 기록된 지출에 위치 태그를 추가했습니다
-- Cloud Sync와 공유 앨범의 지연을 줄였습니다
-- 일부 휴대폰에서 결제 알림이 끊기는 문제를 수정했습니다
-- 중국 본토의 영수증 스캔 문제를 수정했습니다
+    whatsNew: `- 첫 결제 전 알림이 포함된 무료 체험 타임라인을 추가했습니다
+- 모든 언어의 번역을 수정했습니다
+- 사진 업로드 중 Google Drive 백업이 멈추는 문제를 수정했습니다
+- 좁은 휴대폰에서 앨범 탭이 화면 밖으로 나가는 문제를 수정했습니다
 
-무엇을 가졌는지, 왜 가졌는지 알아 두세요.`,
+아껴 쓰면 모자람이 없다.`,
   },
 
   hi: {
@@ -279,13 +268,12 @@ Weet wat je bezit, en waarom je het bezit.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- शुरुआती सेटअप में अपने खाते चुनने की सुविधा जोड़ी गई
-- अपने-आप दर्ज हुए खर्चों के लिए स्थान टैग जोड़े गए
-- Cloud Sync और साझा एल्बम की देरी कम की गई
-- कुछ फ़ोन पर भुगतान सूचनाएँ रुकने की समस्या ठीक की गई
-- मुख्य भूमि चीन में रसीद स्कैन की समस्या ठीक की गई
+    whatsNew: `- पहले शुल्क से पहले रिमाइंडर के साथ निःशुल्क ट्रायल टाइमलाइन जोड़ी गई
+- सभी भाषाओं के अनुवाद ठीक किए गए
+- फ़ोटो अपलोड होते समय Google Drive बैकअप रुकने की समस्या ठीक की गई
+- संकरे फ़ोन पर एल्बम टैब स्क्रीन से बाहर जाने की समस्या ठीक की गई
 
-जानें कि आपके पास क्या है और क्यों है।`,
+बर्बादी नहीं तो कमी नहीं।`,
   },
 
   id: {
@@ -302,13 +290,12 @@ Semoga Anda selalu punya kendali atas uang dan hidup Anda.
 Syarat Penggunaan: https://money2time.com/terms
 Kebijakan Privasi: https://money2time.com/privacy
 Kontak: https://www.money2time.com/contact`,
-    whatsNew: `- Menambahkan pilihan akun sendiri di panduan awal
-- Menambahkan tag lokasi untuk pengeluaran yang dicatat otomatis
-- Mengurangi jeda Cloud Sync dan album bersama
-- Memperbaiki notifikasi pembayaran yang berhenti di beberapa ponsel
-- Memperbaiki pemindaian struk di Tiongkok daratan
+    whatsNew: `- Menambahkan linimasa uji coba gratis dengan pengingat sebelum tagihan pertama
+- Memperbaiki terjemahan di semua bahasa
+- Memperbaiki cadangan Google Drive yang berhenti saat mengunggah foto
+- Memperbaiki tab album yang keluar layar di ponsel sempit
 
-Ketahuilah apa yang Anda miliki dan mengapa Anda memilikinya.`,
+Hemat pangkal kaya.`,
   },
 
   tr: {
@@ -325,13 +312,12 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- Kurulum sırasında hesaplarınızı seçme özelliği eklendi
-- Otomatik kaydedilen harcamalara konum etiketi eklendi
-- Cloud Sync ve paylaşılan albümlerdeki gecikmeler azaltıldı
-- Bazı telefonlarda kesilen ödeme bildirimleri düzeltildi
-- Çin anakarasında fiş taraması düzeltildi
+    whatsNew: `- İlk ödemeden önce hatırlatmalı ücretsiz deneme zaman çizelgesi eklendi
+- Tüm dillerdeki çeviriler düzeltildi
+- Fotoğraf yüklenirken duran Google Drive yedeklemeleri düzeltildi
+- Dar telefonlarda ekrandan taşan albüm sekmeleri düzeltildi
 
-Neye sahip olduğunuzu ve neden sahip olduğunuzu bilin.`,
+Sakla samanı, gelir zamanı.`,
   },
 
   vi: {
@@ -348,13 +334,12 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Giờ bạn có thể chọn tài khoản ngay khi thiết lập ban đầu
-- Thêm gắn vị trí cho các khoản chi được ghi tự động
-- Giảm độ trễ của Cloud Sync và album chung
-- Khắc phục lỗi thông báo thanh toán bị ngừng trên một số điện thoại
-- Khắc phục lỗi quét hóa đơn tại Trung Quốc đại lục
+    whatsNew: `- Thêm dòng thời gian dùng thử miễn phí kèm nhắc nhở trước lần thu phí đầu tiên
+- Khắc phục lỗi dịch ở mọi ngôn ngữ
+- Khắc phục lỗi sao lưu Google Drive bị dừng khi tải ảnh lên
+- Khắc phục lỗi thẻ album tràn khỏi màn hình trên điện thoại hẹp
 
-Hãy biết mình sở hữu gì và vì sao mình sở hữu nó.`,
+Không phung phí thì không thiếu thốn.`,
   },
 
   th: {
@@ -371,13 +356,12 @@ Hãy biết mình sở hữu gì và vì sao mình sở hữu nó.`,
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มการเลือกบัญชีของคุณเองระหว่างเริ่มต้นใช้งาน
-- เพิ่มแท็กตำแหน่งให้รายจ่ายที่บันทึกอัตโนมัติ
-- ลดความล่าช้าของ Cloud Sync และอัลบั้มที่แชร์
-- แก้ไขปัญหาการแจ้งเตือนการชำระเงินหยุดทำงานในบางเครื่อง
-- แก้ไขการสแกนใบเสร็จในจีนแผ่นดินใหญ่
+    whatsNew: `- เพิ่มไทม์ไลน์ทดลองใช้ฟรีพร้อมการแจ้งเตือนก่อนเรียกเก็บเงินครั้งแรก
+- แก้ไขคำแปลในทุกภาษา
+- แก้ไขการสำรองข้อมูล Google Drive ที่หยุดระหว่างอัปโหลดรูปภาพ
+- แก้ไขแท็บอัลบั้มที่ล้นหน้าจอบนโทรศัพท์จอแคบ
 
-จงรู้ว่าตนมีอะไร และมีไว้เพื่ออะไร`,
+ไม่ฟุ่มเฟือยก็ไม่ขัดสน`,
   },
 
   pl: {
@@ -394,13 +378,12 @@ Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swo
 Warunki korzystania: https://money2time.com/terms
 Polityka prywatności: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Dodano wybór własnych kont na ekranie powitalnym
-- Dodano oznaczanie lokalizacji automatycznie zapisanych wydatków
-- Zmniejszono opóźnienia Cloud Sync i wspólnych albumów
-- Naprawiono znikające powiadomienia o płatnościach na niektórych telefonach
-- Naprawiono skanowanie paragonów w Chinach kontynentalnych
+    whatsNew: `- Dodano oś czasu bezpłatnego okresu próbnego z przypomnieniem przed pierwszą płatnością
+- Poprawiono tłumaczenia we wszystkich językach
+- Naprawiono kopie zapasowe Google Drive przerywane podczas wysyłania zdjęć
+- Naprawiono karty albumów wychodzące poza ekran na wąskich telefonach
 
-Wiedz, co posiadasz i dlaczego to posiadasz.`,
+Kto oszczędza, ten ma.`,
   },
 
   uk: {
@@ -417,13 +400,12 @@ Wiedz, co posiadasz i dlaczego to posiadasz.`,
 Умови використання: https://money2time.com/terms
 Політика конфіденційності: https://money2time.com/privacy
 Контакт: https://www.money2time.com/contact`,
-    whatsNew: `- Додано вибір власних рахунків під час першого запуску
-- Додано позначки місць для автоматично записаних витрат
-- Зменшено затримки Cloud Sync і спільних альбомів
-- Виправлено зупинку сповіщень про платежі на деяких телефонах
-- Виправлено сканування чеків у материковому Китаї
+    whatsNew: `- Додано шкалу пробного періоду з нагадуванням до першого списання
+- Виправлено переклади всіма мовами
+- Виправлено зупинку резервного копіювання в Google Drive під час завантаження фото
+- Виправлено вихід вкладок альбомів за край екрана на вузьких телефонах
 
-Знай, чим володієш, і знай, навіщо.`,
+Хто не марнує, той не бідує.`,
   },
 
   sv: {
@@ -440,13 +422,12 @@ Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv.
 Användarvillkor: https://money2time.com/terms
 Integritetspolicy: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Lade till val av egna konton i introduktionen
-- Lade till platstaggning för automatiskt registrerade utgifter
-- Minskade fördröjningar i Cloud Sync och delade album
-- Åtgärdade betalningsaviseringar som slutade komma på vissa telefoner
-- Åtgärdade kvittoskanning i Fastlandskina
+    whatsNew: `- Lade till en tidslinje för gratisperioden med påminnelse före första debiteringen
+- Rättade översättningar på alla språk
+- Åtgärdade Google Drive-säkerhetskopior som stannade vid fotouppladdning
+- Åtgärdade albumflikar som hamnade utanför skärmen på smala telefoner
 
-Vet vad du äger och varför du äger det.`,
+Den som spar, han har.`,
   },
 
   nb: {
@@ -463,13 +444,12 @@ Forhåpentligvis vil du alltid ha kontroll over pengene dine og livet ditt.
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- La til valg av egne kontoer i oppstarten
-- La til stedsmerking for automatisk registrerte utgifter
-- Reduserte forsinkelser i Cloud Sync og delte album
-- Rettet betalingsvarsler som stoppet på enkelte telefoner
-- Rettet kvitteringsskanning i Fastlands-Kina
+    whatsNew: `- La til en tidslinje for gratisperioden med påminnelse før første trekk
+- Rettet oversettelser på alle språk
+- Rettet Google Drive-sikkerhetskopier som stoppet under bildeopplasting
+- Rettet albumfaner som havnet utenfor skjermen på smale telefoner
 
-Vit hva du eier, og hvorfor du eier det.`,
+Den som sparer, han har.`,
   },
 
   da: {
@@ -486,13 +466,12 @@ Forhåbentlig har du altid kontrol over dine penge og dit liv.
 Brugsbetingelser: https://money2time.com/terms
 Privatlivspolitik: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Tilføjede valg af egne konti i opstarten
-- Tilføjede stedsmærkning til automatisk registrerede udgifter
-- Reducerede forsinkelser i Cloud Sync og delte album
-- Rettede betalingsnotifikationer, der stoppede på nogle telefoner
-- Rettede kvitteringsscanning i Fastlandskina
+    whatsNew: `- Tilføjede en tidslinje for prøveperioden med påmindelse før første træk
+- Rettede oversættelser på alle sprog
+- Rettede Google Drive-sikkerhedskopier som stoppede under upload af fotos
+- Rettede albumfaner uden for skærmen på smalle telefoner
 
-Vid, hvad du ejer, og hvorfor du ejer det.`,
+Spar på skillingen, så har du daleren.`,
   },
 
   ms: {
@@ -509,13 +488,12 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah pilihan untuk memilih akaun anda semasa persediaan awal
-- Menambah tag lokasi pada perbelanjaan yang direkod secara automatik
-- Mengurangkan kelewatan Cloud Sync dan album kongsi
-- Membaiki pemberitahuan pembayaran yang terhenti pada sesetengah telefon
-- Membaiki imbasan resit di tanah besar China
+    whatsNew: `- Menambah garis masa percubaan percuma dengan peringatan sebelum caj pertama
+- Membaiki terjemahan dalam semua bahasa
+- Membaiki sandaran Google Drive yang terhenti semasa memuat naik foto
+- Membaiki tab album yang terkeluar dari skrin pada telefon sempit
 
-Ketahui apa yang anda miliki dan mengapa anda memilikinya.`,
+Berjimat cermat, hidup tidak melarat.`,
   },
 
   fil: {
@@ -532,13 +510,12 @@ Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 Mga Tuntunin ng Paggamit: https://money2time.com/terms
 Patakaran sa Privacy: https://money2time.com/privacy
 Makipag-ugnayan: https://www.money2time.com/contact`,
-    whatsNew: `- Nagdagdag ng pagpili ng sarili mong mga account sa onboarding
-- Nagdagdag ng location tag sa mga gastos na awtomatikong naitala
-- Binawasan ang pagkaantala ng Cloud Sync at mga shared album
-- Inayos ang mga payment alert na humihinto sa ilang telepono
-- Inayos ang pag-scan ng resibo sa mainland China
+    whatsNew: `- Nagdagdag ng timeline ng libreng trial na may paalala bago ang unang singil
+- Inayos ang mga salin sa lahat ng wika
+- Inayos ang mga Google Drive backup na humihinto habang nag-a-upload ng larawan
+- Inayos ang mga album tab na lumalampas sa screen sa makikitid na telepono
 
-Alamin kung ano ang pag-aari mo at kung bakit mo ito pag-aari.`,
+Kapag may isinuksok, may madudukot.`,
   },
 
 };
