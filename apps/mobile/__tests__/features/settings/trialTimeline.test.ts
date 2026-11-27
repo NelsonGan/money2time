@@ -4,6 +4,7 @@ import {
   trialReminderDate,
   trialReminderDateForCustomer,
   trialReminderPermissionStep,
+  withoutDoubledStop,
 } from '~/features/settings/lib/trialTimeline';
 
 const WEEK = { durationIso8601: 'P1W', durationCount: 1, durationUnit: 'week' } as const;
@@ -78,5 +79,31 @@ describe('trial timeline', () => {
     expect(trialReminderPermissionStep({ status: 'denied', canAskAgain: true })).toBe('ask');
     // iOS asks only once.
     expect(trialReminderPermissionStep({ status: 'denied', canAskAgain: false })).toBe('settings');
+  });
+});
+
+describe('withoutDoubledStop', () => {
+  it('keeps one full stop when an abbreviated date ends the sentence', () => {
+    // German, French, Danish, Norwegian, Swedish, Portuguese, Russian and
+    // Ukrainian abbreviate the month with a period.
+    const date = 'Sa. 5. Dez.';
+    expect(
+      withoutDoubledStop(
+        `Deine erste Zahlung ist am ${date}. Tippe, um dein Abo zu behalten.`,
+        date,
+      ),
+    ).toBe('Deine erste Zahlung ist am Sa. 5. Dez. Tippe, um dein Abo zu behalten.');
+    expect(withoutDoubledStop('Первый платёж будет сб, 5 дек.. Нажмите.', 'сб, 5 дек.')).toBe(
+      'Первый платёж будет сб, 5 дек. Нажмите.',
+    );
+  });
+
+  it('leaves a date without a trailing period, or one mid-sentence, alone', () => {
+    expect(withoutDoubledStop('Your first payment is on Sat, Dec 5. Tap.', 'Sat, Dec 5')).toBe(
+      'Your first payment is on Sat, Dec 5. Tap.',
+    );
+    expect(withoutDoubledStop('Am Sa. 5. Dez. zahlst du.', 'Sa. 5. Dez.')).toBe(
+      'Am Sa. 5. Dez. zahlst du.',
+    );
   });
 });

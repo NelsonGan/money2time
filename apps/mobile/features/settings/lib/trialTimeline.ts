@@ -112,3 +112,12 @@ export function trialReminderPermissionStep(permission: {
   if (permission.status === 'granted') return 'none';
   return permission.status === 'undetermined' || permission.canAskAgain ? 'ask' : 'settings';
 }
+
+/**
+ * `text` with one full stop after `date` where the sentence ends on it. Many
+ * languages abbreviate the month with a period ("Sa. 5. Dez.", "5 déc."), so
+ * a sentence that ends on the date would otherwise read "Dez.. Tippe".
+ */
+export function withoutDoubledStop(text: string, date: string): string {
+  return date.endsWith('.') ? text.split(`${date}.`).join(date) : text;
+}
