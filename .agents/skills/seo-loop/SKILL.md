@@ -41,10 +41,10 @@ before reading any total, and expect the apex rows to shrink, not grow. Check
 it against live data with `index_inspect` on both hosts before reading
 anything into a host split.
 
-The checker treats a canonical on another host as a **warning**, not a
-failure, and follows a redirect to audit the page at the end. It compares the
-hreflang self-reference against the page's declared canonical rather than the
-URL requested, so a run against the apex still audits cleanly.
+Run the checker against `www`. Pointed at the apex, it follows the `308` and
+audits the page at the end, and reports the canonical on another host as a
+**warning**, not a failure: it compares the hreflang self-reference against the
+page's declared canonical rather than the URL requested.
 
 ## Known, checked, and deliberately left alone
 

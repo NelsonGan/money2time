@@ -210,11 +210,11 @@ function albumHostResponse(request: NextRequest) {
 }
 
 /**
- * `www` serves the site and the bare domain only redirects to it, to
- * `SITE_URL`, the same origin every canonical, sitemap `<loc>` and hreflang
- * alternate names. Here rather than in `next.config.ts` because vinext's
- * config redirects drop the query string when the destination is another
- * host, and an apex link with UTM tags has to keep them.
+ * `www` serves the site, and the bare domain only redirects to `SITE_URL`, the
+ * origin every canonical, sitemap `<loc>` and hreflang alternate names. Here
+ * rather than in `next.config.ts` because vinext's config redirects drop the
+ * query string when the destination is another host, and an apex link with UTM
+ * tags has to keep them.
  */
 const APEX_HOST = "money2time.com";
 const WWW_ORIGIN = SITE_URL;

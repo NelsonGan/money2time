@@ -18,9 +18,9 @@
  *     node ../../.claude/skills/seo-loop/scripts/seo-check.mjs https://www.money2time.com --sitemap=40
  *
  * NOTE the host. `www.money2time.com` answers 200 and is `SITE_URL`; the apex
- * 308s to it. Run against the apex and the canonical on another host is a
- * warning here, not a failure — see the host section in `SKILL.md` before
- * deciding it needs fixing.
+ * 308s to it. Run against the apex, this follows the redirect and warns that
+ * the canonical is on another host, which is expected rather than a failure.
+ * The host section in `SKILL.md` explains why `www` is the canonical.
  *
  * FAIL blocks a deploy. WARN is a judgement call — read it, then decide.
  * Exit code is 1 if anything failed, so it can gate a script or a CI step.
