@@ -2508,6 +2508,9 @@ const id = {
     trial_timeline_today_body: 'Buka semua fitur Pro. Hari ini kamu tidak membayar apa pun.',
     trial_timeline_reminder_body:
       'Kami akan mengingatkanmu {{count}} hari sebelum uji cobamu berakhir.',
+    trial_reminder_settings_title: 'Aktifkan notifikasi untuk pengingatmu',
+    trial_reminder_settings_body:
+      'Notifikasi Money2Time sedang nonaktif. Aktifkan di Pengaturan dan kami akan mengingatkanmu {{count}} hari sebelum uji coba gratismu berakhir.',
     trial_timeline_end_body:
       'Uji cobamu berakhir dan {{price}} dimulai. Batalkan kapan saja sebelum itu.',
     plans_heading: 'Pilih paketmu',

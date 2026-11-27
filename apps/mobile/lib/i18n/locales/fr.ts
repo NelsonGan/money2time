@@ -2519,6 +2519,9 @@ const fr = {
     trial_timeline_today_body: 'Débloquez tout Pro. Vous ne payez rien aujourd’hui.',
     trial_timeline_reminder_body:
       'Nous vous préviendrons {{count}} jours avant la fin de votre essai.',
+    trial_reminder_settings_title: 'Activez les notifications pour votre rappel',
+    trial_reminder_settings_body:
+      'Les notifications sont désactivées pour Money2Time. Activez-les dans les Réglages et nous vous préviendrons {{count}} jours avant la fin de votre essai gratuit.',
     trial_timeline_end_body:
       'Votre essai se termine et {{price}} commence. Annulez à tout moment avant.',
     plans_heading: 'Choisissez votre formule',

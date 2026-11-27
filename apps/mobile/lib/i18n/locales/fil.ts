@@ -2524,6 +2524,9 @@ const fil = {
     trial_timeline_today_body: 'I-unlock ang lahat ng Pro. Wala kang babayaran ngayon.',
     trial_timeline_reminder_body:
       'Paaalalahanan ka namin {{count}} araw bago matapos ang iyong trial.',
+    trial_reminder_settings_title: 'I-on ang notifications para sa paalala mo',
+    trial_reminder_settings_body:
+      'Naka-off ang notifications para sa Money2Time. I-on ito sa Settings at paaalalahanan ka namin {{count}} araw bago matapos ang iyong libreng trial.',
     trial_timeline_end_body:
       'Matatapos ang iyong trial at magsisimula ang {{price}}. Puwede kang mag-cancel anumang oras bago iyon.',
     plans_heading: 'Piliin ang iyong plano',

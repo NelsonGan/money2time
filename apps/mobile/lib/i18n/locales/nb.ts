@@ -2496,6 +2496,9 @@ const nb = {
     trial_timeline_title: 'Slik fungerer den gratis prøveperioden',
     trial_timeline_today_body: 'Lås opp alt i Pro. Du betaler ingenting i dag.',
     trial_timeline_reminder_body: 'Vi minner deg på det {{count}} dager før prøveperioden slutter.',
+    trial_reminder_settings_title: 'Slå på varsler for påminnelsen',
+    trial_reminder_settings_body:
+      'Varsler er slått av for Money2Time. Slå dem på i Innstillinger, så minner vi deg på det {{count}} dager før den gratis prøveperioden slutter.',
     trial_timeline_end_body:
       'Prøveperioden slutter, og {{price}} starter. Avbryt når som helst før det.',
     plans_heading: 'Velg planen din',

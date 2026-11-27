@@ -2506,6 +2506,9 @@ const pt = {
     trial_timeline_title: 'Como funciona seu teste grátis',
     trial_timeline_today_body: 'Desbloqueie tudo no Pro. Hoje você não paga nada.',
     trial_timeline_reminder_body: 'Vamos lembrar você {{count}} dias antes de o teste terminar.',
+    trial_reminder_settings_title: 'Ative as notificações para o lembrete',
+    trial_reminder_settings_body:
+      'As notificações do Money2Time estão desativadas. Ative-as nos Ajustes e vamos lembrar você {{count}} dias antes de o teste grátis terminar.',
     trial_timeline_end_body:
       'Seu teste termina e {{price}} começa. Cancele quando quiser antes disso.',
     plans_heading: 'Escolha seu plano',

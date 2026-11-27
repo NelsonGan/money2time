@@ -2388,6 +2388,9 @@ const zh = {
     trial_timeline_title: '免费试用怎么运作',
     trial_timeline_today_body: '解锁 Pro 的全部功能，今天无需付费。',
     trial_timeline_reminder_body: '我们会在试用结束前 {{count}} 天提醒你。',
+    trial_reminder_settings_title: '开启通知以收到提醒',
+    trial_reminder_settings_body:
+      'Money2Time 的通知已关闭。在设置中开启后，我们会在免费试用结束前 {{count}} 天提醒你。',
     trial_timeline_end_body: '试用结束，开始收取 {{price}}。在此之前可随时取消。',
     plans_heading: '选择你的方案',
     save_percent: '省 {{percent}}%',

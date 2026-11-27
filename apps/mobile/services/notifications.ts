@@ -18,6 +18,13 @@ export async function requestPermissions(): Promise<'granted' | 'denied' | 'unde
   return 'denied';
 }
 
+export async function getPermissionState(): Promise<{
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+}> {
+  return { status: 'denied', canAskAgain: false };
+}
+
 export async function getPermissionStatus(): Promise<'granted' | 'denied' | 'undetermined'> {
   return 'denied';
 }

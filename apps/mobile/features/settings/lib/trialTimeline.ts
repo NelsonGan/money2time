@@ -80,3 +80,20 @@ export function trialReminderDateForCustomer(
   if (!state.expirationDate) return null;
   return trialReminderDate(new Date(state.expirationDate), now);
 }
+
+export type TrialReminderPermissionStep =
+  /** Allowed already: schedule it. */
+  | 'none'
+  /** The system prompt can still be shown (never answered, or Android allows asking again). */
+  | 'ask'
+  /** Refused for good: only Settings can turn it on. */
+  | 'settings';
+
+/** What to do about notification permission once a free trial starts. */
+export function trialReminderPermissionStep(permission: {
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+}): TrialReminderPermissionStep {
+  if (permission.status === 'granted') return 'none';
+  return permission.status === 'undetermined' || permission.canAskAgain ? 'ask' : 'settings';
+}

@@ -2466,6 +2466,9 @@ const en = {
     trial_timeline_title: 'How your free trial works',
     trial_timeline_today_body: 'Unlock everything in Pro. You pay nothing today.',
     trial_timeline_reminder_body: "We'll remind you {{count}} days before your trial ends.",
+    trial_reminder_settings_title: 'Turn on notifications for your reminder',
+    trial_reminder_settings_body:
+      "Notifications are off for Money2Time. Turn them on in Settings and we'll remind you {{count}} days before your free trial ends.",
     trial_timeline_end_body: 'Your trial ends and {{price}} starts. Cancel any time before.',
     save_percent: 'Save {{percent}}%',
     per_month_short: '/mo',

@@ -3,6 +3,7 @@ import {
   trialEndDate,
   trialReminderDate,
   trialReminderDateForCustomer,
+  trialReminderPermissionStep,
 } from '~/features/settings/lib/trialTimeline';
 
 const WEEK = { durationIso8601: 'P1W', durationCount: 1, durationUnit: 'week' } as const;
@@ -57,5 +58,14 @@ describe('trial timeline', () => {
     expect(trialReminderDateForCustomer({ ...trial, periodType: 'normal' }, now)).toBeNull();
     expect(trialReminderDateForCustomer({ ...trial, expirationDate: null }, now)).toBeNull();
     expect(trialReminderDateForCustomer(null, now)).toBeNull();
+  });
+
+  it('asks with the system prompt while it can still show, and offers Settings once it cannot', () => {
+    expect(trialReminderPermissionStep({ status: 'granted', canAskAgain: true })).toBe('none');
+    expect(trialReminderPermissionStep({ status: 'undetermined', canAskAgain: true })).toBe('ask');
+    // Android lets the app ask again after a single refusal.
+    expect(trialReminderPermissionStep({ status: 'denied', canAskAgain: true })).toBe('ask');
+    // iOS asks only once.
+    expect(trialReminderPermissionStep({ status: 'denied', canAskAgain: false })).toBe('settings');
   });
 });

@@ -2480,6 +2480,9 @@ const ja = {
     trial_timeline_title: '無料トライアルの流れ',
     trial_timeline_today_body: 'Proのすべてを解放。今日のお支払いはありません。',
     trial_timeline_reminder_body: 'トライアル終了の{{count}}日前にお知らせします。',
+    trial_reminder_settings_title: 'リマインダーのために通知をオンに',
+    trial_reminder_settings_body:
+      'Money2Timeの通知がオフになっています。設定でオンにすると、無料トライアル終了の{{count}}日前にお知らせします。',
     trial_timeline_end_body:
       'トライアルが終わり、{{price}}が始まります。それまでならいつでも解約できます。',
     plans_heading: 'プランを選択',

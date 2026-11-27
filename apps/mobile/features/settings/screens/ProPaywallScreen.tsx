@@ -36,14 +36,18 @@ import {
   type PaywallPlanKind,
   resolveSelectedPaywallPlan,
 } from '~/features/settings/lib/paywallPresentation';
-import { buildTrialTimeline } from '~/features/settings/lib/trialTimeline';
+import {
+  buildTrialTimeline,
+  trialReminderPermissionStep,
+} from '~/features/settings/lib/trialTimeline';
 import { markPaywallShown } from '~/features/settings/paywallReprompt';
 import { rememberTrialPrice, syncTrialReminder } from '~/features/settings/trialReminder';
+import { ensureTrialReminderPermission } from '~/features/settings/trialReminderPermission';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
-import { getPermissionStatus, requestPermissions } from '~/services/notifications';
+import { getPermissionState } from '~/services/notifications';
 import {
   isRevenueCatCustomerStateActive,
   isRevenueCatCustomerStateSubscriber,
@@ -830,13 +834,16 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   }, []);
 
   // The trial timeline promises a reminder only where the phone can show one:
-  // an undecided permission is asked for once the trial starts.
+  // a permission that can still be asked for is asked once the trial starts,
+  // and one refused for good is offered Settings then (trialReminderPermission).
   const [notificationsDenied, setNotificationsDenied] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    void getPermissionStatus()
-      .then((status) => {
-        if (!cancelled) setNotificationsDenied(status === 'denied');
+    void getPermissionState()
+      .then((permission) => {
+        // Refused for good: only Settings can allow it, so promise nothing.
+        if (!cancelled)
+          setNotificationsDenied(trialReminderPermissionStep(permission) === 'settings');
       })
       .catch(() => undefined);
     return () => {
@@ -1035,11 +1042,16 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             period_type: result.customerState?.periodType ?? null,
           });
           recordProPurchase();
+          // Offers Cloud Sync once the paywall has closed (features/cloudSync),
+          // after a trial's notification permission is settled so the two
+          // never stack.
           if (result.customerState?.periodType === 'trial') {
-            void setUpTrialReminder(result.customerState, priceLabel);
+            void setUpTrialReminder(result.customerState, priceLabel).finally(
+              requestCloudSyncPrompt,
+            );
+          } else {
+            requestCloudSyncPrompt();
           }
-          // Offers Cloud Sync once the paywall has closed (features/cloudSync).
-          requestCloudSyncPrompt();
           onClose();
           if (wasSubscriber && boughtLifetime) promptToCancelRedundantSubscription();
         } else if (result.status === 'pending') {
@@ -1413,9 +1425,9 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 }
 
 /**
- * After a free trial starts: keep the price for the reminder's copy, ask for
- * notification permission if the member has not decided yet (the timeline
- * promised a reminder), then schedule it. A refusal just leaves it out.
+ * After a free trial starts: keep the price for the reminder's copy, make sure
+ * notifications are allowed (the system prompt, or Settings when that can no
+ * longer show), then schedule the reminder. A refusal just leaves it out.
  */
 async function setUpTrialReminder(
   customerState: RevenueCatCustomerState,
@@ -1425,7 +1437,7 @@ async function setUpTrialReminder(
     if (customerState.activeProductIdentifier && priceLabel) {
       await rememberTrialPrice(customerState.activeProductIdentifier, priceLabel);
     }
-    if ((await getPermissionStatus()) === 'undetermined') await requestPermissions();
+    await ensureTrialReminderPermission();
     await syncTrialReminder(customerState);
   } catch (error) {
     reportError(error, { scope: 'trial_reminder' });

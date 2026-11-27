@@ -38,6 +38,21 @@ export async function requestPermissions(): Promise<'granted' | 'denied' | 'unde
   return status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined';
 }
 
+/**
+ * The permission and whether the system prompt can still be shown: false once
+ * iOS (or Android after repeated refusals) only lets Settings turn it on.
+ */
+export async function getPermissionState(): Promise<{
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+}> {
+  const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+  return {
+    status: status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined',
+    canAskAgain,
+  };
+}
+
 export async function getPermissionStatus(): Promise<'granted' | 'denied' | 'undetermined'> {
   const { status } = await Notifications.getPermissionsAsync();
   return status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined';

@@ -2520,6 +2520,9 @@ const nl = {
     trial_timeline_today_body: 'Ontgrendel alles in Pro. Vandaag betaal je niets.',
     trial_timeline_reminder_body:
       'We herinneren je {{count}} dagen voordat je proefperiode afloopt.',
+    trial_reminder_settings_title: 'Zet meldingen aan voor je herinnering',
+    trial_reminder_settings_body:
+      'Meldingen staan uit voor Money2Time. Zet ze aan in Instellingen en we herinneren je {{count}} dagen voordat je gratis proefperiode afloopt.',
     trial_timeline_end_body:
       'Je proefperiode loopt af en {{price}} gaat in. Je kunt daarvoor altijd opzeggen.',
     plans_heading: 'Kies je abonnement',

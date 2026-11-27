@@ -2501,6 +2501,9 @@ const ru = {
     trial_timeline_title: 'Как работает бесплатный пробный период',
     trial_timeline_today_body: 'Откройте все возможности Pro. Сегодня вы ничего не платите.',
     trial_timeline_reminder_body: 'Мы напомним вам за {{count}} дня до конца пробного периода.',
+    trial_reminder_settings_title: 'Включите уведомления для напоминания',
+    trial_reminder_settings_body:
+      'Уведомления Money2Time выключены. Включите их в Настройках, и мы напомним вам за {{count}} дня до конца бесплатного пробного периода.',
     trial_timeline_end_body:
       'Пробный период закончится, и начнётся {{price}}. До этого можно отменить в любой момент.',
     plans_heading: 'Выберите свой план',

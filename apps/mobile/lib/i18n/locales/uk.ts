@@ -2498,6 +2498,9 @@ const uk = {
     trial_timeline_title: 'Як працює безкоштовний пробний період',
     trial_timeline_today_body: 'Відкрийте все в Pro. Сьогодні ви нічого не платите.',
     trial_timeline_reminder_body: 'Ми нагадаємо вам за {{count}} дні до кінця пробного періоду.',
+    trial_reminder_settings_title: 'Увімкніть сповіщення для нагадування',
+    trial_reminder_settings_body:
+      'Сповіщення Money2Time вимкнено. Увімкніть їх у Налаштуваннях, і ми нагадаємо вам за {{count}} дні до кінця безкоштовного пробного періоду.',
     trial_timeline_end_body:
       'Пробний період закінчиться, і почнеться {{price}}. До цього можна скасувати будь-коли.',
     plans_heading: 'Оберіть свій план',

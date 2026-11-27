@@ -2460,6 +2460,9 @@ const th = {
     trial_timeline_title: 'การทดลองใช้ฟรีทำงานอย่างไร',
     trial_timeline_today_body: 'ปลดล็อกทุกอย่างใน Pro วันนี้ยังไม่ต้องจ่ายอะไร',
     trial_timeline_reminder_body: 'เราจะเตือนคุณ {{count}} วันก่อนช่วงทดลองใช้สิ้นสุด',
+    trial_reminder_settings_title: 'เปิดการแจ้งเตือนเพื่อรับการเตือน',
+    trial_reminder_settings_body:
+      'การแจ้งเตือนของ Money2Time ปิดอยู่ เปิดได้ในการตั้งค่า แล้วเราจะเตือนคุณ {{count}} วันก่อนช่วงทดลองใช้ฟรีสิ้นสุด',
     trial_timeline_end_body:
       'ช่วงทดลองใช้สิ้นสุดและเริ่มเรียกเก็บ {{price}} ยกเลิกได้ทุกเมื่อก่อนถึงวันนั้น',
     plans_heading: 'เลือกแพ็กเกจของคุณ',

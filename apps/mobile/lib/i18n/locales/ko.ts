@@ -2466,6 +2466,9 @@ const ko = {
     trial_timeline_title: '무료 체험 진행 방식',
     trial_timeline_today_body: 'Pro의 모든 기능을 이용하세요. 오늘은 결제되지 않아요.',
     trial_timeline_reminder_body: '체험이 끝나기 {{count}}일 전에 알려드려요.',
+    trial_reminder_settings_title: '알림을 켜고 미리 알림을 받으세요',
+    trial_reminder_settings_body:
+      'Money2Time 알림이 꺼져 있어요. 설정에서 켜면 무료 체험이 끝나기 {{count}}일 전에 알려드려요.',
     trial_timeline_end_body:
       '체험이 끝나고 {{price}} 결제가 시작돼요. 그 전에는 언제든 취소할 수 있어요.',
     plans_heading: '플랜을 선택하세요',

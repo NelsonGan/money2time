@@ -2510,6 +2510,9 @@ const ms = {
     trial_timeline_today_body: 'Buka semua ciri Pro. Anda tidak membayar apa-apa hari ini.',
     trial_timeline_reminder_body:
       'Kami akan mengingatkan anda {{count}} hari sebelum percubaan anda tamat.',
+    trial_reminder_settings_title: 'Hidupkan pemberitahuan untuk peringatan anda',
+    trial_reminder_settings_body:
+      'Pemberitahuan dimatikan untuk Money2Time. Hidupkannya dalam Tetapan dan kami akan mengingatkan anda {{count}} hari sebelum percubaan percuma anda tamat.',
     trial_timeline_end_body:
       'Percubaan anda tamat dan {{price}} bermula. Batalkan bila-bila masa sebelum itu.',
     plans_heading: 'Pilih pelan anda',

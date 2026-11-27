@@ -2501,6 +2501,9 @@ const da = {
     trial_timeline_today_body: 'Lås op for alt i Pro. Du betaler intet i dag.',
     trial_timeline_reminder_body:
       'Vi minder dig om det {{count}} dage før din prøveperiode slutter.',
+    trial_reminder_settings_title: 'Slå notifikationer til for din påmindelse',
+    trial_reminder_settings_body:
+      'Notifikationer er slået fra for Money2Time. Slå dem til i Indstillinger, så minder vi dig om det {{count}} dage før din gratis prøveperiode slutter.',
     trial_timeline_end_body:
       'Din prøveperiode slutter, og {{price}} begynder. Annuller når som helst inden da.',
     plans_heading: 'Vælg din plan',

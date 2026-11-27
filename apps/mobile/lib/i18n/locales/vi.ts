@@ -2481,6 +2481,9 @@ const vi = {
     trial_timeline_today_body: 'Mở khóa mọi thứ trong Pro. Hôm nay bạn không phải trả gì.',
     trial_timeline_reminder_body:
       'Chúng tôi sẽ nhắc bạn {{count}} ngày trước khi thời gian dùng thử kết thúc.',
+    trial_reminder_settings_title: 'Bật thông báo để nhận lời nhắc',
+    trial_reminder_settings_body:
+      'Thông báo của Money2Time đang tắt. Hãy bật trong Cài đặt và chúng tôi sẽ nhắc bạn {{count}} ngày trước khi thời gian dùng thử miễn phí kết thúc.',
     trial_timeline_end_body:
       'Thời gian dùng thử kết thúc và {{price}} bắt đầu. Bạn có thể hủy bất cứ lúc nào trước đó.',
     plans_heading: 'Chọn gói của bạn',

@@ -2483,6 +2483,9 @@ const hi = {
     trial_timeline_title: 'आपका मुफ़्त ट्रायल कैसे काम करता है',
     trial_timeline_today_body: 'Pro की हर सुविधा अनलॉक करें। आज आपको कुछ नहीं देना है।',
     trial_timeline_reminder_body: 'ट्रायल ख़त्म होने से {{count}} दिन पहले हम आपको याद दिलाएँगे।',
+    trial_reminder_settings_title: 'अपने रिमाइंडर के लिए सूचनाएँ चालू करें',
+    trial_reminder_settings_body:
+      'Money2Time के लिए सूचनाएँ बंद हैं। उन्हें सेटिंग्स में चालू करें, और हम आपका मुफ़्त ट्रायल ख़त्म होने से {{count}} दिन पहले आपको याद दिलाएँगे।',
     trial_timeline_end_body:
       'आपका ट्रायल ख़त्म होगा और {{price}} शुरू होगा। उससे पहले कभी भी रद्द करें।',
     plans_heading: 'अपना प्लान चुनें',

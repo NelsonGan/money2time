@@ -2505,6 +2505,9 @@ const pl = {
     trial_timeline_title: 'Jak działa bezpłatny okres próbny',
     trial_timeline_today_body: 'Odblokuj wszystko w Pro. Dziś nic nie płacisz.',
     trial_timeline_reminder_body: 'Przypomnimy Ci {{count}} dni przed końcem okresu próbnego.',
+    trial_reminder_settings_title: 'Włącz powiadomienia, aby dostać przypomnienie',
+    trial_reminder_settings_body:
+      'Powiadomienia Money2Time są wyłączone. Włącz je w Ustawieniach, a przypomnimy Ci {{count}} dni przed końcem bezpłatnego okresu próbnego.',
     trial_timeline_end_body:
       'Okres próbny się kończy i zaczyna się {{price}}. Możesz anulować w dowolnym momencie przed tym terminem.',
     plans_heading: 'Wybierz swój plan',

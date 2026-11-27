@@ -2527,6 +2527,9 @@ const de = {
     trial_timeline_title: 'So funktioniert deine kostenlose Testphase',
     trial_timeline_today_body: 'Schalte alles in Pro frei. Heute zahlst du nichts.',
     trial_timeline_reminder_body: 'Wir erinnern dich {{count}} Tage vor dem Ende deiner Testphase.',
+    trial_reminder_settings_title: 'Mitteilungen für deine Erinnerung einschalten',
+    trial_reminder_settings_body:
+      'Mitteilungen sind für Money2Time ausgeschaltet. Schalte sie in den Einstellungen ein, dann erinnern wir dich {{count}} Tage vor dem Ende deiner kostenlosen Testphase.',
     trial_timeline_end_body:
       'Deine Testphase endet und {{price}} beginnt. Du kannst vorher jederzeit kündigen.',
     plans_heading: 'Wähle deinen Tarif',

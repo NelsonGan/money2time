@@ -2506,6 +2506,9 @@ const tr = {
     trial_timeline_title: 'Ücretsiz deneme nasıl işler',
     trial_timeline_today_body: 'Pro’nun tamamının kilidini aç. Bugün hiçbir şey ödemezsin.',
     trial_timeline_reminder_body: 'Denemen bitmeden {{count}} gün önce sana hatırlatacağız.',
+    trial_reminder_settings_title: 'Hatırlatma için bildirimleri aç',
+    trial_reminder_settings_body:
+      'Money2Time bildirimleri kapalı. Ayarlar’dan açarsan ücretsiz denemen bitmeden {{count}} gün önce sana hatırlatırız.',
     trial_timeline_end_body:
       'Denemen biter ve {{price}} başlar. O zamana kadar istediğin an iptal edebilirsin.',
     plans_heading: 'Planını seç',
