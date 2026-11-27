@@ -180,12 +180,8 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
-    free_scans_locations: {
-      title: 'Mehr kostenlose Scans und Orte',
-      freeScans: {
-        title: '%{count} kostenlose Belegscans pro Monat',
-        body: 'Im kostenlosen Tarif gibt es jetzt %{count} Belegscans pro Monat, die jeden Monat erneuert werden. Mach ein Foto oder wähle Belege aus deinem Album unter Beleg scannen, und Money2Time füllt Händler, Betrag, Datum und Kategorie für dich aus. Pro bleibt unbegrenzt.',
-      },
+    location_tagging: {
+      title: 'Transaktionen mit Orten versehen',
       locations: {
         title: 'Transaktionen mit Orten versehen',
         body: 'Aktiviere Orte unter Einstellungen > Personalisierung, um Ausgaben und Einnahmen mit ihrem Ort zu versehen. Neue Ausgaben können automatisch deinen aktuellen Standort übernehmen, oder du wählst einen Ort über die Suche oder letzte Orte. Öffne die Ausgabenkarte im Kalender, um zu sehen, wo dein Geld bleibt.',
@@ -2410,7 +2406,7 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro für unbegrenztes Scannen.',
+      'Der kostenlose Plan umfasst insgesamt {{count}} Belegscans. Upgrade auf Pro für unbegrenztes Scannen.',
     limit_autolog:
       'Du hast alle {{count}} kostenlosen Apple Pay-Automationen verbraucht, deshalb wurden deine letzten Zahlungen nicht erfasst. Upgrade auf Pro für unbegrenzte Nutzung.',
     custom_logos_label: 'Eigene Kontologos',
@@ -2528,6 +2524,11 @@ const de = {
     buy_lifetime: 'Lifetime kaufen',
     maybe_later: 'Vielleicht später',
     trial_terms: '{{duration}} kostenlos, danach {{price}}.',
+    trial_timeline_title: 'So funktioniert deine kostenlose Testphase',
+    trial_timeline_today_body: 'Schalte alles in Pro frei. Heute zahlst du nichts.',
+    trial_timeline_reminder_body: 'Wir erinnern dich {{count}} Tage vor dem Ende deiner Testphase.',
+    trial_timeline_end_body:
+      'Deine Testphase endet und {{price}} beginnt. Du kannst vorher jederzeit kündigen.',
     plans_heading: 'Wähle deinen Tarif',
     save_percent: 'Spare {{percent}}%',
     per_month_short: '/Mon.',
@@ -2755,6 +2756,11 @@ const de = {
         'Bei diesem Durchlauf kam kein Mitteilungstext mit, das ist bei einem Test normal. Bankmitteilungen erscheinen zur Prüfung in Money2Time.',
       autolog_limit_body:
         'Du hast alle {{count}} kostenlosen Automationen verbraucht. Upgrade in Money2Time auf Pro für unbegrenzte Nutzung.',
+      trial_ending_title: 'Deine kostenlose Testphase endet in {{count}} Tagen',
+      trial_ending_body:
+        'Deine erste Zahlung ist am {{date}}. Tippe, um dein Abo zu behalten oder zu kündigen.',
+      trial_ending_body_price:
+        'Deine erste Zahlung von {{price}} ist am {{date}}. Tippe, um dein Abo zu behalten oder zu kündigen.',
       daily_title: 'Wie war dein Tag?',
       daily_body: 'Nimm dir 30 Sekunden, um die Ausgaben von heute festzuhalten.',
       recurring_title: '{{name}} · {{amount}}',

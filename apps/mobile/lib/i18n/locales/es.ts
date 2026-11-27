@@ -179,12 +179,8 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
-    free_scans_locations: {
-      title: 'Más escaneos gratis y ubicaciones',
-      freeScans: {
-        title: '%{count} escaneos de recibos gratis al mes',
-        body: 'El plan gratuito incluye ahora %{count} escaneos de recibos al mes, que se renuevan cada mes. Haz una foto o elige recibos de tu álbum en Escanear recibo, y Money2Time rellena el comercio, el importe, la fecha y la categoría por ti. Pro sigue siendo ilimitado.',
-      },
+    location_tagging: {
+      title: 'Etiqueta transacciones con lugares',
       locations: {
         title: 'Etiqueta transacciones con lugares',
         body: 'Activa Ubicaciones en Ajustes > Personalización para añadir el lugar a tus gastos e ingresos. Los gastos nuevos pueden etiquetar automáticamente tu ubicación actual, o puedes buscar o elegir lugares recientes. Abre el Mapa de gastos desde el Calendario para ver dónde gastas.',
@@ -2389,7 +2385,7 @@ const es = {
   },
   pro: {
     limit_receipt_scans:
-      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Actualiza a Pro para escanear sin límites.',
+      'El plan gratuito incluye {{count}} escaneos de recibos en total. Actualiza a Pro para escanear sin límites.',
     limit_autolog:
       'Has usado las {{count}} automatizaciones gratuitas de Apple Pay, así que tus últimos pagos no se registraron. Actualiza a Pro para tenerlas sin límites.',
     custom_logos_label: 'Logos de cuenta personalizados',
@@ -2508,6 +2504,11 @@ const es = {
     buy_lifetime: 'Comprar acceso de por vida',
     maybe_later: 'Quizás más tarde',
     trial_terms: 'Gratis durante {{duration}}; después, {{price}}.',
+    trial_timeline_title: 'Así funciona tu prueba gratuita',
+    trial_timeline_today_body: 'Desbloquea todo Pro. Hoy no pagas nada.',
+    trial_timeline_reminder_body: 'Te avisaremos {{count}} días antes de que termine tu prueba.',
+    trial_timeline_end_body:
+      'Tu prueba termina y empieza {{price}}. Cancela cuando quieras antes de esa fecha.',
     plans_heading: 'Elige tu plan',
     save_percent: 'Ahorra {{percent}}%',
     per_month_short: '/mes',
@@ -2733,6 +2734,11 @@ const es = {
         'Esta ejecución no incluyó texto de notificación, algo normal en una prueba. Las notificaciones del banco aparecerán en Money2Time para revisarlas.',
       autolog_limit_body:
         'Has usado las {{count}} automatizaciones gratuitas. Actualiza a Pro en Money2Time para tenerlas sin límites.',
+      trial_ending_title: 'Tu prueba gratuita termina en {{count}} días',
+      trial_ending_body:
+        'Tu primer pago es el {{date}}. Toca para mantener o cancelar tu suscripción.',
+      trial_ending_body_price:
+        'Tu primer pago de {{price}} es el {{date}}. Toca para mantener o cancelar tu suscripción.',
       daily_title: '¿Qué tal fue el día?',
       daily_body: 'Dedica 30 segundos a registrar los gastos de hoy antes de que se olviden.',
       recurring_title: '{{name}} · {{amount}}',

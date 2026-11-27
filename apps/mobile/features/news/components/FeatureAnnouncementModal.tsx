@@ -80,7 +80,6 @@ import {
 } from './EverydayPersonalizationShowcases';
 import { ExcelExportShowcase } from './ExcelExportShowcase';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
-import { FreeScansShowcase, LocationTaggingShowcase } from './FreeScansLocationsShowcases';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
@@ -88,6 +87,7 @@ import { LiveEarningsShowcase } from './LiveEarningsShowcase';
 import { LoanAccountShowcase } from './LoanAccountShowcase';
 import { LoanInstalmentShowcase } from './LoanInstalmentShowcase';
 import { LoanInterestShowcase } from './LoanInterestShowcase';
+import { LocationTaggingShowcase } from './LocationTaggingShowcase';
 import { MascotsShowcase } from './MascotsShowcase';
 import { MonthCycleShowcase } from './MonthCycleShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
@@ -459,9 +459,7 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'freeScans' ? (
-                <FreeScansShowcase width={Math.round(showcaseWidth * 0.92)} />
-              ) : page.visual === 'locationTagging' ? (
+              {page.visual === 'locationTagging' ? (
                 <LocationTaggingShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'sharedAlbums' ? (
                 <SharedAlbumsShowcase width={Math.round(showcaseWidth * 0.92)} />

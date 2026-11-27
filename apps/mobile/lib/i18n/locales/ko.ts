@@ -176,12 +176,8 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
-    free_scans_locations: {
-      title: '무료 스캔 확대 및 위치 태그',
-      freeScans: {
-        title: '매월 무료 영수증 스캔 %{count}회',
-        body: '무료 플랜에서도 이제 매월 %{count}회 영수증을 스캔할 수 있으며 매달 초기화됩니다. 영수증 스캔에서 사진을 찍거나 앨범에서 선택하면 Money2Time이 상호, 금액, 날짜, 카테고리를 자동으로 입력해 줍니다. Pro는 계속 무제한입니다.',
-      },
+    location_tagging: {
+      title: '거래에 위치 태그 추가',
       locations: {
         title: '거래에 위치 태그 추가',
         body: '설정 > 개인화에서 위치를 켜면 지출과 수입에 장소를 기록할 수 있습니다. 새 지출에 현재 위치를 자동으로 태그하거나 검색과 최근 장소에서 선택할 수 있습니다. 캘린더에서 지출 지도를 열어 어디서 돈을 썼는지 확인해 보세요.',
@@ -2349,7 +2345,7 @@ const ko = {
   },
   pro: {
     limit_receipt_scans:
-      '무료 플랜은 매월 {{count}}회 영수증 스캔을 포함합니다. 무제한 스캔을 위해 Pro로 업그레이드하세요.',
+      '무료 플랜은 총 {{count}}회 영수증 스캔을 포함합니다. 무제한 스캔을 위해 Pro로 업그레이드하세요.',
     limit_autolog:
       '무료 Apple Pay 자동화 {{count}}회를 모두 사용해서 최근 결제가 기록되지 않았습니다. Pro로 업그레이드하면 무제한으로 사용할 수 있습니다.',
     custom_logos_label: '사용자 지정 계좌 로고',
@@ -2467,6 +2463,11 @@ const ko = {
     buy_lifetime: '평생 이용권 구매',
     maybe_later: '나중에',
     trial_terms: '{{duration}} 동안 무료, 이후 {{price}}.',
+    trial_timeline_title: '무료 체험 진행 방식',
+    trial_timeline_today_body: 'Pro의 모든 기능을 이용하세요. 오늘은 결제되지 않아요.',
+    trial_timeline_reminder_body: '체험이 끝나기 {{count}}일 전에 알려드려요.',
+    trial_timeline_end_body:
+      '체험이 끝나고 {{price}} 결제가 시작돼요. 그 전에는 언제든 취소할 수 있어요.',
     plans_heading: '플랜을 선택하세요',
     save_percent: '{{percent}}% 절약',
     per_month_short: '/월',
@@ -2682,6 +2683,10 @@ const ko = {
         '이번 실행에는 알림 내용이 없었어요. 테스트에서는 정상이에요. 은행 알림은 Money2Time에 표시되어 검토할 수 있어요.',
       autolog_limit_body:
         '무료 자동화 {{count}}회를 모두 사용했습니다. Money2Time에서 Pro로 업그레이드하면 무제한으로 사용할 수 있습니다.',
+      trial_ending_title: '무료 체험이 {{count}}일 후에 끝나요',
+      trial_ending_body: '첫 결제일은 {{date}}이에요. 탭해서 구독을 유지하거나 취소하세요.',
+      trial_ending_body_price:
+        '{{price}}의 첫 결제일은 {{date}}이에요. 탭해서 구독을 유지하거나 취소하세요.',
       daily_title: '오늘 하루 어떠셨나요?',
       daily_body: '기억이 생생할 때 30초만 들여 오늘 지출을 기록해 보세요.',
       recurring_title: '{{name}} · {{amount}}',

@@ -28,6 +28,13 @@ export function subscribeNotificationResponses(_onDeepLink: (url: string) => voi
   return () => {};
 }
 
+export async function scheduleTrialReminder(
+  _date: Date,
+  _content: { title: string; body: string; url: string },
+): Promise<void> {}
+
+export async function cancelTrialReminder(): Promise<void> {}
+
 export async function scheduleDailyCheckin(_hour: number, _minute: number): Promise<void> {}
 
 export async function cancelDailyCheckin(): Promise<void> {}

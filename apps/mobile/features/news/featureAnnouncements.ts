@@ -78,7 +78,6 @@ export interface FeatureAnnouncementPage {
     | 'splitMethods'
     | 'albumIcons'
     | 'sharedAlbums'
-    | 'freeScans'
     | 'locationTagging';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
@@ -163,11 +162,7 @@ export function announcementPageTitle(
   announcement: FeatureAnnouncement,
   page: FeatureAnnouncementPage,
 ): string {
-  const key = `news.${announcement.i18nKey}.${page.key}.title`;
-  if (announcement.i18nKey === 'free_scans_locations' && page.key === 'freeScans') {
-    return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS });
-  }
-  return I18n.t(key);
+  return I18n.t(`news.${announcement.i18nKey}.${page.key}.title`);
 }
 
 /** Localized body copy for a single announcement page. */
@@ -191,10 +186,6 @@ export function announcementPageBody(
   if (announcement.i18nKey === 'budgets_splits_scans_archive' && page.key === 'batchScan') {
     // The album pick limit comes from the scan code, never from the copy.
     return I18n.t(key, { count: MAX_RECEIPT_BATCH });
-  }
-  if (announcement.i18nKey === 'free_scans_locations' && page.key === 'freeScans') {
-    // The monthly free scan limit comes from PRO_LIMITS, never from the copy.
-    return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS });
   }
   return I18n.t(key);
 }

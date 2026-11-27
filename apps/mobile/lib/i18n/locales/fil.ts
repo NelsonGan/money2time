@@ -178,12 +178,8 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
-    free_scans_locations: {
-      title: 'Mas maraming libreng scan at lokasyon',
-      freeScans: {
-        title: '%{count} libreng scan ng resibo bawat buwan',
-        body: 'May %{count} libreng scan ng resibo na bawat buwan ang libreng plano, na nagre-reset buwan-buwan. Kumuha ng larawan o pumili ng resibo sa album sa I-scan ang resibo, at pupunan ng Money2Time ang tindahan, halaga, petsa at kategorya para sa iyo. Walang limitasyon pa rin sa Pro.',
-      },
+    location_tagging: {
+      title: 'I-tag ang mga transaksyon ng lugar',
       locations: {
         title: 'I-tag ang mga transaksyon ng lugar',
         body: 'I-on ang Mga lokasyon sa Mga setting > Personalisasyon para malagyan ng lugar ang mga gastos at kita. Puwedeng awtomatikong i-tag ang kasalukuyan mong lokasyon sa bagong gastos, o pumili sa paghahanap at mga kamakailang lugar. Buksan ang Mapa ng gastos sa Kalendaryo para makita kung saan napupunta ang pera mo.',
@@ -2406,7 +2402,7 @@ const fil = {
   },
   pro: {
     limit_receipt_scans:
-      'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para sa walang limitasyong pag-scan.',
+      'Kasama sa libreng plan ang kabuuang {{count}} pag-scan ng resibo. Mag-upgrade sa Pro para sa walang limitasyong pag-scan.',
     limit_autolog:
       'Nagamit mo na ang lahat ng {{count}} libreng automation sa Apple Pay, kaya hindi na-log ang mga huli mong bayad. Mag-upgrade sa Pro para walang limitasyon.',
     custom_logos_label: 'Custom na logo ng account',
@@ -2524,6 +2520,12 @@ const fil = {
     buy_lifetime: 'Bilhin ang Habambuhay',
     maybe_later: 'Sa susunod na lang',
     trial_terms: 'Libre sa loob ng {{duration}}, pagkatapos ay {{price}}.',
+    trial_timeline_title: 'Paano gumagana ang iyong libreng trial',
+    trial_timeline_today_body: 'I-unlock ang lahat ng Pro. Wala kang babayaran ngayon.',
+    trial_timeline_reminder_body:
+      'Paaalalahanan ka namin {{count}} araw bago matapos ang iyong trial.',
+    trial_timeline_end_body:
+      'Matatapos ang iyong trial at magsisimula ang {{price}}. Puwede kang mag-cancel anumang oras bago iyon.',
     plans_heading: 'Piliin ang iyong plano',
     save_percent: 'Makatipid ng {{percent}}%',
     per_month_short: '/buwan',
@@ -2749,6 +2751,11 @@ const fil = {
         'Walang text ng notification na kasama sa run na ito, na normal sa test. Lalabas sa Money2Time ang mga notification ng bangko para masuri.',
       autolog_limit_body:
         'Nagamit mo na ang lahat ng {{count}} libreng automation. Mag-upgrade sa Pro sa Money2Time para sa walang limitasyon.',
+      trial_ending_title: 'Matatapos ang iyong libreng trial sa loob ng {{count}} araw',
+      trial_ending_body:
+        'Ang una mong bayad ay sa {{date}}. I-tap para ituloy o i-cancel ang iyong subscription.',
+      trial_ending_body_price:
+        'Ang una mong bayad na {{price}} ay sa {{date}}. I-tap para ituloy o i-cancel ang iyong subscription.',
       daily_title: 'Kumusta ang araw mo?',
       daily_body: 'Maglaan ng 30 segundo para i-log ang gastos mo ngayon habang sariwa pa.',
       recurring_title: '{{name}} · {{amount}}',

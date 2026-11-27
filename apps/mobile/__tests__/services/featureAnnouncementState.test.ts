@@ -5,7 +5,6 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import {
   announcementPageBody,
   announcementPagesForPlatform,
-  announcementPageTitle,
   getFeatureAnnouncementById,
   getFeatureAnnouncementsNewestFirst,
   getLatestFeatureAnnouncement,
@@ -53,52 +52,36 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces 20 free monthly scans and location tagging on both platforms', () => {
+  it('announces location tagging, without the withdrawn monthly free scans, on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
     expect(latest).toMatchObject({
+      // The id is unchanged so the trimmed announcement never shows twice.
       id: 'free_scans_locations_2026_11',
+      i18nKey: 'location_tagging',
       announcementNumber: 27,
-      pages: [
-        { key: 'freeScans', visual: 'freeScans', cta: 'openScanReceipt' },
-        { key: 'locations', visual: 'locationTagging', cta: 'openLocations' },
-      ],
+      pages: [{ key: 'locations', visual: 'locationTagging', cta: 'openLocations' }],
     });
     expect(latest.requiresCapability).toBeUndefined();
-    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(2);
-    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(2);
-  });
-
-  it('takes the monthly free scan limit in the new announcement from PRO_LIMITS', () => {
-    const latest = getFeatureAnnouncementById('free_scans_locations_2026_11')!;
-    const freeScans = latest.pages.find((page) => page.key === 'freeScans')!;
-    const t = jest.spyOn(I18n, 't');
-    announcementPageTitle(latest, freeScans);
-    announcementPageBody(latest, freeScans);
-    expect(t).toHaveBeenCalledWith('news.free_scans_locations.freeScans.title', {
-      count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS,
-    });
-    expect(t).toHaveBeenCalledWith('news.free_scans_locations.freeScans.body', {
-      count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS,
-    });
-    t.mockRestore();
-    // Every language takes the number as a placeholder, never as written text,
-    // and writes the new announcement without dashes.
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(1);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(1);
     for (const locale of SUPPORTED_LOCALE_FILES) {
-      const news = loadLocale(locale).news.free_scans_locations;
-      expect([locale, news.freeScans.title]).toEqual([locale, expect.stringContaining('%{count}')]);
-      expect([locale, news.freeScans.body]).toEqual([locale, expect.stringContaining('%{count}')]);
-      expect([locale, JSON.stringify(news)]).toEqual([locale, expect.not.stringMatching(/[–—]/)]);
+      const news = loadLocale(locale).news;
+      expect([locale, news.free_scans_locations]).toEqual([locale, undefined]);
+      expect([locale, Object.keys(news.location_tagging).sort()]).toEqual([
+        locale,
+        ['locations', 'title'],
+      ]);
+      expect([locale, JSON.stringify(news.location_tagging)]).toEqual([
+        locale,
+        expect.not.stringMatching(/[–—]/),
+      ]);
     }
   });
 
-  it('names the real Scan receipt, Locations, Personalize and Spending map labels in every language', () => {
+  it('names the real Locations, Personalize and Spending map labels in every language', () => {
     for (const locale of SUPPORTED_LOCALE_FILES) {
       const strings = loadLocale(locale);
-      const news = strings.news.free_scans_locations;
-      expect([locale, news.freeScans.body]).toEqual([
-        locale,
-        expect.stringContaining(strings.add_action.scan_title),
-      ]);
+      const news = strings.news.location_tagging;
       for (const name of [
         strings.locations.settings_title,
         strings.settings.account_settings,

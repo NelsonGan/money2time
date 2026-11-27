@@ -177,12 +177,8 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
-    free_scans_locations: {
-      title: 'Thêm lượt quét miễn phí và vị trí',
-      freeScans: {
-        title: '%{count} lượt quét hóa đơn miễn phí mỗi tháng',
-        body: 'Gói miễn phí nay có %{count} lượt quét hóa đơn mỗi tháng, tự làm mới hằng tháng. Chụp ảnh hoặc chọn hóa đơn từ album trong Quét hóa đơn, Money2Time sẽ điền sẵn cửa hàng, số tiền, ngày và danh mục cho bạn. Gói Pro vẫn không giới hạn.',
-      },
+    location_tagging: {
+      title: 'Gắn địa điểm cho giao dịch',
       locations: {
         title: 'Gắn địa điểm cho giao dịch',
         body: 'Bật Vị trí trong Cài đặt > Cá nhân hóa để gắn nơi phát sinh chi tiêu và thu nhập. Chi tiêu mới có thể tự gắn vị trí hiện tại, hoặc chọn từ tìm kiếm và địa điểm gần đây. Mở Bản đồ chi tiêu từ Lịch để xem tiền của bạn đi đâu.',
@@ -2363,7 +2359,7 @@ const vi = {
   },
   pro: {
     limit_receipt_scans:
-      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét không giới hạn.',
+      'Gói miễn phí bao gồm tổng cộng {{count}} lần quét hóa đơn. Nâng cấp lên Pro để quét không giới hạn.',
     limit_autolog:
       'Bạn đã dùng hết {{count}} lần tự động hóa Apple Pay miễn phí, nên các khoản thanh toán gần đây chưa được ghi lại. Nâng cấp lên Pro để dùng không giới hạn.',
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
@@ -2481,6 +2477,12 @@ const vi = {
     buy_lifetime: 'Mua gói trọn đời',
     maybe_later: 'Có thể để sau',
     trial_terms: 'Miễn phí trong {{duration}}, sau đó {{price}}.',
+    trial_timeline_title: 'Cách dùng thử miễn phí hoạt động',
+    trial_timeline_today_body: 'Mở khóa mọi thứ trong Pro. Hôm nay bạn không phải trả gì.',
+    trial_timeline_reminder_body:
+      'Chúng tôi sẽ nhắc bạn {{count}} ngày trước khi thời gian dùng thử kết thúc.',
+    trial_timeline_end_body:
+      'Thời gian dùng thử kết thúc và {{price}} bắt đầu. Bạn có thể hủy bất cứ lúc nào trước đó.',
     plans_heading: 'Chọn gói của bạn',
     save_percent: 'Tiết kiệm {{percent}}%',
     per_month_short: '/tháng',
@@ -2700,6 +2702,11 @@ const vi = {
         'Lần chạy này không kèm nội dung thông báo, điều này bình thường khi thử nghiệm. Thông báo ngân hàng sẽ hiện trong Money2Time để bạn xem lại.',
       autolog_limit_body:
         'Bạn đã dùng hết {{count}} lần tự động hóa miễn phí. Nâng cấp lên Pro trong Money2Time để dùng không giới hạn.',
+      trial_ending_title: 'Thời gian dùng thử miễn phí kết thúc sau {{count}} ngày',
+      trial_ending_body:
+        'Lần thanh toán đầu tiên của bạn là {{date}}. Nhấn để giữ hoặc hủy gói đăng ký.',
+      trial_ending_body_price:
+        'Lần thanh toán đầu tiên {{price}} của bạn là {{date}}. Nhấn để giữ hoặc hủy gói đăng ký.',
       daily_title: 'Hôm nay của bạn thế nào?',
       daily_body: 'Dành 30 giây ghi lại chi tiêu hôm nay khi còn nhớ rõ.',
       recurring_title: '{{name}} · {{amount}}',

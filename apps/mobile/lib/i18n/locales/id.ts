@@ -176,12 +176,8 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
-    free_scans_locations: {
-      title: 'Lebih banyak pemindaian gratis dan lokasi',
-      freeScans: {
-        title: '%{count} pemindaian struk gratis per bulan',
-        body: 'Pengguna paket gratis kini mendapat %{count} pemindaian struk setiap bulan, yang diperbarui tiap bulan. Ambil foto atau pilih struk dari album lewat Pindai struk, lalu Money2Time mengisi toko, nominal, tanggal, dan kategori untuk Anda. Pro tetap tanpa batas.',
-      },
+    location_tagging: {
+      title: 'Tandai transaksi dengan lokasi',
       locations: {
         title: 'Tandai transaksi dengan lokasi',
         body: 'Aktifkan Lokasi di Pengaturan > Personalisasi untuk menambahkan tempat pada pengeluaran dan pemasukan. Pengeluaran baru dapat otomatis menandai lokasi saat ini, atau pilih tempat dari pencarian maupun lokasi terakhir. Buka Peta pengeluaran dari Kalender untuk melihat ke mana uang Anda pergi.',
@@ -2390,7 +2386,7 @@ const id = {
   },
   pro: {
     limit_receipt_scans:
-      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk pemindaian tanpa batas.',
+      'Paket gratis mencakup total {{count}} pemindaian struk. Tingkatkan ke Pro untuk pemindaian tanpa batas.',
     limit_autolog:
       'Kamu sudah memakai semua {{count}} otomatisasi Apple Pay gratis, jadi pembayaran terakhirmu tidak tercatat. Tingkatkan ke Pro untuk tanpa batas.',
     custom_logos_label: 'Logo akun khusus',
@@ -2508,6 +2504,12 @@ const id = {
     buy_lifetime: 'Beli Seumur Hidup',
     maybe_later: 'Mungkin nanti',
     trial_terms: 'Gratis selama {{duration}}, lalu {{price}}.',
+    trial_timeline_title: 'Cara kerja uji coba gratismu',
+    trial_timeline_today_body: 'Buka semua fitur Pro. Hari ini kamu tidak membayar apa pun.',
+    trial_timeline_reminder_body:
+      'Kami akan mengingatkanmu {{count}} hari sebelum uji cobamu berakhir.',
+    trial_timeline_end_body:
+      'Uji cobamu berakhir dan {{price}} dimulai. Batalkan kapan saja sebelum itu.',
     plans_heading: 'Pilih paketmu',
     save_percent: 'Hemat {{percent}}%',
     per_month_short: '/bln',
@@ -2730,6 +2732,11 @@ const id = {
         'Tidak ada teks notifikasi dalam proses ini, hal yang wajar saat pengujian. Notifikasi bank akan muncul di Money2Time untuk ditinjau.',
       autolog_limit_body:
         'Kamu sudah memakai semua {{count}} otomatisasi gratis. Tingkatkan ke Pro di Money2Time untuk tanpa batas.',
+      trial_ending_title: 'Uji coba gratismu berakhir dalam {{count}} hari',
+      trial_ending_body:
+        'Pembayaran pertamamu pada {{date}}. Ketuk untuk melanjutkan atau membatalkan langgananmu.',
+      trial_ending_body_price:
+        'Pembayaran pertamamu sebesar {{price}} pada {{date}}. Ketuk untuk melanjutkan atau membatalkan langgananmu.',
       daily_title: 'Bagaimana harimu?',
       daily_body: 'Luangkan 30 detik untuk mencatat pengeluaran hari ini selagi masih ingat.',
       recurring_title: '{{name}} · {{amount}}',

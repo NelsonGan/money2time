@@ -178,12 +178,8 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
-    free_scans_locations: {
-      title: 'Daha fazla ücretsiz tarama ve konumlar',
-      freeScans: {
-        title: 'Ayda %{count} ücretsiz fiş taraması',
-        body: 'Ücretsiz plandaki herkes artık her ay yenilenen %{count} fiş taraması hakkına sahip. Fiş tara üzerinden fotoğraf çekin veya albümden fiş seçin, Money2Time işletme, tutar, tarih ve kategoriyi sizin için doldursun. Pro sınırsız kalmaya devam eder.',
-      },
+    location_tagging: {
+      title: 'İşlemleri yerlerle etiketleyin',
       locations: {
         title: 'İşlemleri yerlerle etiketleyin',
         body: 'Harcama ve gelirlere nerede yapıldığını eklemek için Ayarlar > Kişiselleştirme altında Konumlar’ı açın. Yeni harcamalar mevcut konumunuzla otomatik etiketlenebilir ya da aramadan ve son yerlerden seçim yapabilirsiniz. Paranızın nereye gittiğini görmek için Takvim’den Harcama haritası’nı açın.',
@@ -2389,7 +2385,7 @@ const tr = {
   },
   pro: {
     limit_receipt_scans:
-      'Ücretsiz plan ayda {{count}} fiş taraması içerir. Sınırsız tarama için Pro’ya yükseltin.',
+      'Ücretsiz plan toplam {{count}} fiş taraması içerir. Sınırsız tarama için Pro’ya yükseltin.',
     limit_autolog:
       "Ücretsiz {{count}} Apple Pay otomasyonunun hepsini kullandınız, bu yüzden son ödemeleriniz kaydedilmedi. Sınırsız kullanım için Pro'ya yükseltin.",
     custom_logos_label: 'Özel hesap logoları',
@@ -2507,6 +2503,11 @@ const tr = {
     buy_lifetime: 'Ömür boyu erişim satın al',
     maybe_later: 'Belki sonra',
     trial_terms: '{{duration}} ücretsiz, ardından {{price}}.',
+    trial_timeline_title: 'Ücretsiz deneme nasıl işler',
+    trial_timeline_today_body: 'Pro’nun tamamının kilidini aç. Bugün hiçbir şey ödemezsin.',
+    trial_timeline_reminder_body: 'Denemen bitmeden {{count}} gün önce sana hatırlatacağız.',
+    trial_timeline_end_body:
+      'Denemen biter ve {{price}} başlar. O zamana kadar istediğin an iptal edebilirsin.',
     plans_heading: 'Planını seç',
     save_percent: '%{{percent}} tasarruf et',
     per_month_short: '/ay',
@@ -2729,6 +2730,11 @@ const tr = {
         "Bu çalıştırmayla bildirim metni gelmedi, bu bir test için normaldir. Banka bildirimleri incelemeniz için Money2Time'da görünecek.",
       autolog_limit_body:
         "Ücretsiz {{count}} otomasyonun hepsini kullandınız. Sınırsız kullanım için Money2Time'da Pro'ya yükseltin.",
+      trial_ending_title: 'Ücretsiz denemen {{count}} gün içinde bitiyor',
+      trial_ending_body:
+        'İlk ödemen {{date}} tarihinde. Aboneliğini sürdürmek veya iptal etmek için dokun.',
+      trial_ending_body_price:
+        '{{price}} tutarındaki ilk ödemen {{date}} tarihinde. Aboneliğini sürdürmek veya iptal etmek için dokun.',
       daily_title: 'Bugün nasıl geçti?',
       daily_body: 'Hazır tazeyken bugünün harcamalarını kaydetmek için 30 saniye ayırın.',
       recurring_title: '{{name}} · {{amount}}',

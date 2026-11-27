@@ -178,12 +178,8 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
-    free_scans_locations: {
-      title: '無料スキャン増量と場所タグ',
-      freeScans: {
-        title: '無料プランで毎月%{count}回スキャン',
-        body: '無料プランでも毎月%{count}回までレシートをスキャンでき、毎月リセットされます。レシートをスキャンから写真を撮るかアルバムから選ぶだけで、Money2Timeが店名、金額、日付、カテゴリを自動で入力します。Proは引き続き無制限です。',
-      },
+    location_tagging: {
+      title: '取引に場所をタグ付け',
       locations: {
         title: '取引に場所をタグ付け',
         body: '設定 > カスタマイズで場所をオンにすると、支出や収入に場所を記録できます。新しい支出は現在地を自動追加でき、検索や最近の場所からも選べます。カレンダーから支出マップを開いて、どこで使ったか確認できます。',
@@ -2363,7 +2359,7 @@ const ja = {
   },
   pro: {
     limit_receipt_scans:
-      '無料プランには毎月{{count}}回のレシートスキャンが含まれます。無制限にスキャンするにはProにアップグレードしてください。',
+      '無料プランには合計{{count}}回のレシートスキャンが含まれます。無制限にスキャンするにはProにアップグレードしてください。',
     limit_autolog:
       '無料のApple Pay 自動化{{count}}回をすべて使ったため、最近の支払いは記録されませんでした。Proにアップグレードすると無制限に使えます。',
     custom_logos_label: 'カスタム口座ロゴ',
@@ -2481,6 +2477,11 @@ const ja = {
     buy_lifetime: '買い切りを購入',
     maybe_later: 'あとで',
     trial_terms: '{{duration}}無料、その後{{price}}。',
+    trial_timeline_title: '無料トライアルの流れ',
+    trial_timeline_today_body: 'Proのすべてを解放。今日のお支払いはありません。',
+    trial_timeline_reminder_body: 'トライアル終了の{{count}}日前にお知らせします。',
+    trial_timeline_end_body:
+      'トライアルが終わり、{{price}}が始まります。それまでならいつでも解約できます。',
     plans_heading: 'プランを選択',
     save_percent: '{{percent}}%お得',
     per_month_short: '/月',
@@ -2700,6 +2701,11 @@ const ja = {
         '今回の実行には通知の本文がありませんでした。テストでは正常な動作です。銀行の通知は Money2Time に表示され、確認できます。',
       autolog_limit_body:
         '無料の自動化{{count}}回をすべて使いました。Money2TimeでProにアップグレードすると無制限に使えます。',
+      trial_ending_title: '無料トライアルはあと{{count}}日で終了します',
+      trial_ending_body:
+        '最初のお支払いは{{date}}です。タップしてサブスクリプションを継続または解約できます。',
+      trial_ending_body_price:
+        '{{price}}の最初のお支払いは{{date}}です。タップしてサブスクリプションを継続または解約できます。',
       daily_title: '今日はどんな一日でしたか？',
       daily_body: '記憶が新しいうちに、30秒だけ今日の支出を記録しましょう。',
       recurring_title: '{{name}} · {{amount}}',

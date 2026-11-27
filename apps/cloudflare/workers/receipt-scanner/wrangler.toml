@@ -88,11 +88,11 @@ CLAUDE_BLOCKED_COUNTRIES = "CN,HK,MO"
 ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year
 # with an optional count prefix ("100year" ≈ lifetime); change it to re-meter a
-# tier without any code/schema change. Free is 20 a calendar month (UTC; it was
-# a lifetime 20 until 2026-11); the Pro monthly cap is fair-use only — the app's
-# paywall advertises Pro as unlimited.
+# tier without any code/schema change. Free is a lifetime 20 (it was 20 a
+# calendar month from 2026-11-20 to 2026-11-27); the Pro monthly cap is
+# fair-use only — the app's paywall advertises Pro as unlimited.
 FREE_LIMIT = "20"
-FREE_INTERVAL = "month"
+FREE_INTERVAL = "100year"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
 # AI notification review (POST /notifications), metered apart from scans and

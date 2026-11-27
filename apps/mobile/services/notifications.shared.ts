@@ -32,6 +32,10 @@ export type PermissionStatus = 'granted' | 'denied' | 'undetermined';
 export const DAILY_CHECKIN_ID = 'm2t-daily-checkin';
 export const WEEKLY_REVIEW_ID = 'm2t-weekly-review';
 export const MONTHLY_REVIEW_ID = 'm2t-monthly-review';
+/** The one reminder before a free trial's first charge (features/settings/trialReminder). */
+export const TRIAL_REMINDER_ID = 'm2t-pro-trial-reminder';
+/** Where tapping the trial reminder goes: Pro management, to keep or cancel. */
+export const PRO_MANAGEMENT_URL = 'money2time://pro-management';
 /**
  * Retired identifier of the old "weekly summary" reminder, which the weekly
  * review replaced. Still cancelled on every sync so an install that scheduled

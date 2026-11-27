@@ -74,7 +74,7 @@ describe('receipt scanner falling back to Workers AI', () => {
     OPENROUTER_API_KEY: 'test',
     MONEY2TIME_REQUEST_SIGNING_KEY: SECRET,
     FREE_LIMIT: '20',
-    FREE_INTERVAL: 'month',
+    FREE_INTERVAL: '100year',
     PRO_LIMIT: '500',
     PRO_INTERVAL: 'month',
     POSTHOG_PROJECT_TOKEN: 'phc_test',

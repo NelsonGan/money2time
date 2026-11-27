@@ -178,12 +178,8 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
-    free_scans_locations: {
-      title: 'Flere gratis scanninger og steder',
-      freeScans: {
-        title: '%{count} gratis kvitteringsscanninger om måneden',
-        body: 'Alle på den gratis plan får nu %{count} kvitteringsscanninger hver måned, som nulstilles hver måned. Tag et billede eller vælg kvitteringer fra dit album under Scan kvittering, så udfylder Money2Time forretning, beløb, dato og kategori for dig. Pro er fortsat ubegrænset.',
-      },
+    location_tagging: {
+      title: 'Mærk transaktioner med steder',
       locations: {
         title: 'Mærk transaktioner med steder',
         body: 'Slå Steder til under Indstillinger > Personalisering for at mærke udgifter og indtægter med, hvor de fandt sted. Nye udgifter kan automatisk bruge din aktuelle placering, eller du kan søge eller vælge seneste steder. Åbn Forbrugskort fra Kalender for at se, hvor dine penge går hen.',
@@ -2383,7 +2379,7 @@ const da = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer {{count}} kvitteringsscanninger om måneden. Opgrader til Pro for ubegrænset scanning.',
+      'Gratisplanen inkluderer {{count}} kvitteringsscanninger i alt. Opgrader til Pro for ubegrænset scanning.',
     limit_autolog:
       'Du har brugt alle {{count}} gratis Apple Pay-automatiseringer, så dine seneste betalinger blev ikke registreret. Opgrader til Pro for ubegrænset.',
     custom_logos_label: 'Tilpassede kontologoer',
@@ -2501,6 +2497,12 @@ const da = {
     buy_lifetime: 'Køb livstidsadgang',
     maybe_later: 'Måske senere',
     trial_terms: 'Gratis i {{duration}}, derefter {{price}}.',
+    trial_timeline_title: 'Sådan fungerer din gratis prøveperiode',
+    trial_timeline_today_body: 'Lås op for alt i Pro. Du betaler intet i dag.',
+    trial_timeline_reminder_body:
+      'Vi minder dig om det {{count}} dage før din prøveperiode slutter.',
+    trial_timeline_end_body:
+      'Din prøveperiode slutter, og {{price}} begynder. Annuller når som helst inden da.',
     plans_heading: 'Vælg din plan',
     save_percent: 'Spar {{percent}}%',
     per_month_short: '/md.',
@@ -2722,6 +2724,11 @@ const da = {
         'Der fulgte ingen notifikationstekst med denne kørsel, hvilket er normalt ved en test. Banknotifikationer vises i Money2Time til gennemgang.',
       autolog_limit_body:
         'Du har brugt alle {{count}} gratis automatiseringer. Opgrader til Pro i Money2Time for ubegrænset.',
+      trial_ending_title: 'Din gratis prøveperiode slutter om {{count}} dage',
+      trial_ending_body:
+        'Din første betaling er den {{date}}. Tryk for at beholde eller annullere dit abonnement.',
+      trial_ending_body_price:
+        'Din første betaling på {{price}} er den {{date}}. Tryk for at beholde eller annullere dit abonnement.',
       daily_title: 'Hvordan gik dagen?',
       daily_body: 'Brug 30 sekunder på at registrere dagens forbrug, mens du husker det.',
       recurring_title: '{{name}} · {{amount}}',

@@ -545,6 +545,23 @@ function getShortDateFormatter(locale: string) {
   return formatter;
 }
 
+const weekdayMonthDayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
+
+/** Weekday, month and day, e.g. "Wed, Dec 2". Used for upcoming dates. */
+export function formatWeekdayMonthDay(date: Date, locale?: string): string {
+  const resolvedLocale = resolveLocale(locale);
+  let formatter = weekdayMonthDayFormatterByLocale.get(resolvedLocale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(resolvedLocale, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+    weekdayMonthDayFormatterByLocale.set(resolvedLocale, formatter);
+  }
+  return formatter.format(date);
+}
+
 /** Absolute day/month/year, e.g. "9 Jun 2026". Used on shareable receipts. */
 export function formatShortDate(dateString: string, locale?: string): string {
   return getShortDateFormatter(resolveLocale(locale)).format(new Date(dateString));

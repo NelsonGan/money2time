@@ -5,6 +5,7 @@ import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { consumePendingLiveEarningsStart } from '~/services/liveEarningsNavigation';
 import { requestReviewZoom } from '~/services/reviewNavigation';
+import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 
 jest.mock('react-native', () => ({
@@ -30,6 +31,10 @@ jest.mock('~/services/addActionNavigation', () => ({
 
 jest.mock('~/services/tabNavigation', () => ({
   requestOpenTab: jest.fn(),
+}));
+
+jest.mock('~/services/settingsNavigation', () => ({
+  requestOpenSettingsScreen: jest.fn(),
 }));
 
 jest.mock('~/services/insightsNavigation', () => ({
@@ -223,6 +228,17 @@ describe('handleMoney2TimeDeepLink', () => {
       index: 0,
       routes: [{ name: 'Main', key: 'main-1', params: undefined }],
     });
+  });
+
+  it('opens Pro management from the trial reminder', () => {
+    const ref = makeNavigationRef(true);
+    expect(handleMoney2TimeDeepLink('money2time://pro-management', ref)).toBe(true);
+    expect(resetMock(ref)).toHaveBeenCalledWith({
+      index: 0,
+      routes: [{ name: 'Main', key: 'main-1', params: undefined }],
+    });
+    expect(requestOpenTab).toHaveBeenCalledWith('settings');
+    expect(requestOpenSettingsScreen).toHaveBeenCalledWith('ProManagement');
   });
 
   it('still routes quick-add and pro deep links', () => {

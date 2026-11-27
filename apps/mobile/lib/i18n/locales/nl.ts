@@ -179,12 +179,8 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
-    free_scans_locations: {
-      title: 'Meer gratis scans en locaties',
-      freeScans: {
-        title: '%{count} gratis bonscans per maand',
-        body: 'Met het gratis abonnement krijg je nu %{count} bonscans per maand, die elke maand worden vernieuwd. Maak een foto of kies bonnen uit je album via Bon scannen, en Money2Time vult winkel, bedrag, datum en categorie voor je in. Pro blijft onbeperkt.',
-      },
+    location_tagging: {
+      title: 'Tag transacties met plaatsen',
       locations: {
         title: 'Tag transacties met plaatsen',
         body: 'Zet Locaties aan via Instellingen > Personalisatie om een plaats aan uitgaven en inkomsten toe te voegen. Nieuwe uitgaven kunnen automatisch je huidige locatie krijgen, of kies een plek via zoeken of recente plaatsen. Open de Uitgavenkaart vanuit Agenda om te zien waar je geld naartoe gaat.',
@@ -2401,7 +2397,7 @@ const nl = {
   },
   pro: {
     limit_receipt_scans:
-      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro voor onbeperkt scannen.',
+      'Het gratis abonnement bevat in totaal {{count}} bonscans. Upgrade naar Pro voor onbeperkt scannen.',
     limit_autolog:
       'Je hebt alle {{count}} gratis Apple Pay-automatiseringen gebruikt, dus je laatste betalingen zijn niet vastgelegd. Upgrade naar Pro voor onbeperkt gebruik.',
     custom_logos_label: 'Aangepaste rekeninglogo’s',
@@ -2520,6 +2516,12 @@ const nl = {
     buy_lifetime: 'Levenslang kopen',
     maybe_later: 'Misschien later',
     trial_terms: '{{duration}} gratis, daarna {{price}}.',
+    trial_timeline_title: 'Zo werkt je gratis proefperiode',
+    trial_timeline_today_body: 'Ontgrendel alles in Pro. Vandaag betaal je niets.',
+    trial_timeline_reminder_body:
+      'We herinneren je {{count}} dagen voordat je proefperiode afloopt.',
+    trial_timeline_end_body:
+      'Je proefperiode loopt af en {{price}} gaat in. Je kunt daarvoor altijd opzeggen.',
     plans_heading: 'Kies je abonnement',
     save_percent: 'Bespaar {{percent}}%',
     per_month_short: '/mnd',
@@ -2748,6 +2750,11 @@ const nl = {
         'Er kwam geen meldingstekst mee met deze uitvoering, wat normaal is bij een test. Bankmeldingen verschijnen in Money2Time om na te kijken.',
       autolog_limit_body:
         'Je hebt alle {{count}} gratis automatiseringen gebruikt. Upgrade in Money2Time naar Pro voor onbeperkt gebruik.',
+      trial_ending_title: 'Je gratis proefperiode loopt over {{count}} dagen af',
+      trial_ending_body:
+        'Je eerste betaling is op {{date}}. Tik om je abonnement te houden of op te zeggen.',
+      trial_ending_body_price:
+        'Je eerste betaling van {{price}} is op {{date}}. Tik om je abonnement te houden of op te zeggen.',
       daily_title: 'Hoe was je dag?',
       daily_body: 'Neem 30 seconden om de uitgaven van vandaag vast te leggen nu ze nog vers zijn.',
       recurring_title: '{{name}} · {{amount}}',

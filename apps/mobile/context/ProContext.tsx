@@ -11,6 +11,7 @@ import React, {
 import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
+import { syncTrialReminder } from '~/features/settings/trialReminder';
 import { isAccountPro, isAccountProLoaded, subscribeAccountPro } from '~/services/accountPro';
 import {
   buildProAnalyticsProfile,
@@ -240,6 +241,17 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, [customerState, refreshAfterExpiration]);
+
+  // Keep the reminder before a free trial's first charge in step with the
+  // store: scheduled while a trial is set to renew, cancelled once it is not.
+  // Waits for a settled status, so the empty placeholder state cannot cancel a
+  // reminder a trial still needs.
+  useEffect(() => {
+    if (!isStatusKnown) return;
+    void syncTrialReminder(customerState).catch((error: unknown) =>
+      reportError(error, { scope: 'trial_reminder' }),
+    );
+  }, [customerState, isStatusKnown]);
 
   // Mirror Pro state onto the PostHog person profile and super-properties, so
   // "is this user Pro" is answerable both per-user and per-event.
